@@ -23,7 +23,7 @@ The source packages were staged in an ignored cache, checked for expected file f
 - Remaining procedural textures and synthesized WAVs come from `tools/generate_assets.py`. `tools/mix_capture_audio.py` combines the licensed male vocal with original synthesized layers. Running the original generator alone does not reproduce the separately generated face/panorama or licensed downloads.
 - School layout, built-in props, shaders and gameplay code were created in this project.
 
-Godot Engine is MIT licensed: https://godotengine.org/license/. Include the engine's required notices when exporting a distributable build. The repository owner has not selected an overall license for the game's original code and artwork.
+Godot Engine is MIT licensed: https://godotengine.org/license/. Include the engine's required notices when exporting a distributable build. Original material owned by medissl is proprietary under LICENSE.txt, only to the extent protected by applicable law. Third-party components remain under their respective licenses; see THIRD_PARTY_NOTICES.md.
 
 ## Recorded vocal roles and new story assets
 
@@ -33,3 +33,9 @@ Godot Engine is MIT licensed: https://godotengine.org/license/. Include the engi
 - `quiet_knocks.wav` and `ending_morning.wav`: original synthesized effects. The morning bed is a quiet suggestion of air and birds, not a licensed field recording.
 - Festival preparation, ordinary Sakiko, enlarged head and class photographs: original OpenAI-generated in-game evidence, documented in `docs/GENERATED_ART.md`. Notes use authored SVG paper textures with readable transcriptions. The supplied revised ending and exact evidence quotations are preserved in `assets/story/`.
 - The current creature uses a continuous face annulus matched to a concave mouth and a closed rear skull, with curved dental arches carrying the original photographed enamel detail. It has a fixed open mouth for the camera dive. The previous detached jaw/lip construction is no longer used.
+
+## Ownership and clearance qualifications
+
+Copyright © 2026 medissl. All rights reserved, solely for original material owned by medissl and legally protected. This notice does not relicense third-party assets or claim ownership of general mechanics, themes, public-domain material or unverified material. AI-generated artwork is covered only to the extent rights exist under applicable law.
+
+The Microsoft Zira synthesized festival_recording.wav has unresolved redistribution clearance. Preserve its provenance and obtain the applicable permission or replace it with cleared audio before release. System fonts are not automatically cleared for bundling. See THIRD_PARTY_NOTICES.md for details, prior-license preservation, the engine dependency-notice requirement and export verification status.
