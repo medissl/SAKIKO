@@ -1,0 +1,6 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+.local-user/
+tests/artifacts/
+*.log

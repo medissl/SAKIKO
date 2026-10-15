@@ -1,0 +1,67 @@
+{
+  "ambience": {
+    "seconds": 8.0,
+    "peak": 0.28,
+    "rms": 0.0713
+  },
+  "hum": {
+    "seconds": 4.0,
+    "peak": 0.18,
+    "rms": 0.1029
+  },
+  "creak": {
+    "seconds": 2.4,
+    "peak": 0.4,
+    "rms": 0.1204
+  },
+  "step": {
+    "seconds": 0.28,
+    "peak": 0.226,
+    "rms": 0.028
+  },
+  "hover": {
+    "seconds": 0.07,
+    "peak": 0.4,
+    "rms": 0.1379
+  },
+  "press": {
+    "seconds": 0.13,
+    "peak": 0.4,
+    "rms": 0.1268
+  },
+  "key": {
+    "seconds": 0.65,
+    "peak": 0.389,
+    "rms": 0.0622
+  },
+  "unlock": {
+    "seconds": 1.1,
+    "peak": 0.394,
+    "rms": 0.0526
+  },
+  "locked": {
+    "seconds": 0.3,
+    "peak": 0.348,
+    "rms": 0.0932
+  },
+  "door": {
+    "seconds": 0.9,
+    "peak": 0.48,
+    "rms": 0.1056
+  },
+  "breath": {
+    "seconds": 4.0,
+    "peak": 0.3,
+    "rms": 0.0523
+  },
+  "chase": {
+    "seconds": 1.5,
+    "peak": 0.55,
+    "rms": 0.0765
+  },
+  "capture": {
+    "seconds": 1.75,
+    "peak": 0.676,
+    "rms": 0.0446
+  }
+}
