@@ -1,5 +1,7 @@
 # SAKIKO / さきこ
 
+SAKIKO is a proprietary game by medissl. Copyright © 2026 medissl. All rights reserved. Original material owned by medissl is governed by the [SAKIKO Proprietary Game License](LICENSE.txt), only to the extent protected by applicable law. Third-party and unverified material are excluded; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [asset credits](ASSET_SOURCES.md). This project is not offered under a project-wide MIT or open-source license.
+
 A playable first-person Japanese school horror game for Godot 4.7.2. A present-day male student falls asleep in class and wakes after dark. Follow the festival evidence, uncover Sakiko's history, collect four entrance keys and escape.
 
 ## Play
@@ -43,3 +45,9 @@ godot --path . -- --presentation-audit
 ```
 
 The integration suite runs real scene/physics and UI code. Render audits save actual views to ignored `tests/artifacts/`, including the head from four directions, jumpscare, evidence, ending at 960x540 / 1280x720 / 1920x1080, credits and menu return. See `tests/VERIFICATION.md` for the latest result and limitations. Subjective fear, sustained balance, full headphone listening and hardware coverage still need human playtesting.
+
+## License and distribution
+
+Lawful recipients of authorized builds may install and play for personal, non-commercial entertainment and make necessary personal backups. Redistribution of the game or source, resale, bundles, mirrors, reuploads, sublicensing, modified-build distribution, rebranding, and reuse of original protected material in another distributed product require separate written permission from medissl, except where a third-party license or applicable law permits the use. Similar mechanics and themes in independently created games are not restricted. Mandatory legal exceptions and earlier valid license grants remain intact. See LICENSE.txt for the full terms, warranty disclaimer, and legally qualified liability limits.
+
+Keep LICENSE.txt, THIRD_PARTY_NOTICES.md, ASSET_SOURCES.md, GODOT_ENGINE_LICENSE.txt, and every required component notice with each distributed build. The Windows export preset includes legal documents and provenance records in the pack. Also place readable copies beside the executable in the release archive. Godot templates contain additional libraries: include the exact template version's copyright and license notices before release. See THIRD_PARTY_NOTICES.md for the release checks and unresolved clearance items. A configured filter is not proof of a verified exported archive.
