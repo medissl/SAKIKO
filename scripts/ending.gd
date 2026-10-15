@@ -1,3 +1,5 @@
+# Copyright © 2026 medissl. All rights reserved.
+# Original material only; see LICENSE.txt and THIRD_PARTY_NOTICES.md.
 extends Control
 const Reveal = preload("res://scripts/prose_reveal.gd")
 var game: Node
@@ -211,7 +213,10 @@ func build_credits() -> void:
 		credit_label(pair[1],false)
 		credit_space(34)
 	credit_label("SOURCE AND LICENSE NOTICES",true)
-	credit_label("ASSET_SOURCES.md  |  GODOT_ENGINE_LICENSE.txt",false)
+	credit_label("Copyright © 2026 medissl. All rights reserved.",true)
+	credit_label("Original material: LICENSE.txt",true)
+	credit_label("Third parties: THIRD_PARTY_NOTICES.md",true)
+	credit_label("Godot Engine: https://godotengine.org/license/",true)
 	credit_space(100)
 	credit_label("THANK YOU FOR PLAYING",true)
 	credit_label("SAKIKO",false)
