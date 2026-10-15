@@ -4,7 +4,7 @@ SAKIKO original material owned by medissl is proprietary under LICENSE.txt. Thir
 
 ## Godot Engine
 
-Godot Engine is MIT licensed. GODOT_ENGINE_LICENSE.txt contains its existing copyright and full MIT text, preserved unchanged. Official license: https://godotengine.org/license/ . This engine license does not license SAKIKO original material under MIT. Export templates also incorporate libraries under separate licenses. Include the copyright and full license notices matching the exact export-template version and build configuration. The engine license alone is not the full dependency inventory. See https://docs.godotengine.org/en/stable/about/complying_with_licenses.html .
+Godot Engine is MIT licensed. licenses/GODOT_ENGINE_LICENSE.txt contains its existing copyright and full MIT text, preserved unchanged. Official license: https://godotengine.org/license/ . This engine license does not license SAKIKO original material under MIT. Export templates also incorporate libraries under separate licenses. Include the copyright and full license notices matching the exact export-template version and build configuration. The engine license alone is not the full dependency inventory. See https://docs.godotengine.org/en/stable/about/complying_with_licenses.html .
 
 ## Asset acknowledgments
 
@@ -39,8 +39,8 @@ On 2026-10-15 the public history before this update contained two commits, fa3e2
 
 ## Release packaging and verification
 
-Each release archive must contain readable LICENSE.txt, THIRD_PARTY_NOTICES.md, ASSET_SOURCES.md, GODOT_ENGINE_LICENSE.txt and all applicable component licenses and attribution. Preserve asset receipt JSON files. Add the exact export-template dependency notices; obtain additional notices for custom native modules, plugins or bundled fonts.
+Each release archive must contain readable LICENSE.txt, THIRD_PARTY_NOTICES.md, ASSET_SOURCES.md, licenses/GODOT_ENGINE_LICENSE.txt and all applicable component licenses and attribution. Preserve asset receipt JSON files. Add the exact export-template dependency notices; obtain additional notices for custom native modules, plugins or bundled fonts.
 
 The Windows export preset includes legal text and JSON records inside the pack. Also copy the legal documents and required dependency notices beside the executable so recipients can read them without extracting game assets. In Godot GUI, verify export Resources includes these non-resource files. Inspect the finished release archive, compare the included license texts with the repository, and open the credits to confirm the ownership notice. Repeat for every platform or custom preset.
 
-Status: repository notices were updated through GitHub GUI. No standalone export or release archive was produced or inspected during this browser-only update. Template-specific notices and Microsoft Zira clearance remain release requirements.
+Status: initial edits were saved through GitHub GUI, then synchronized and verified locally after medissl authorized normal tools. licenses/GODOT_THIRD_PARTY_NOTICES.txt preserves full copyright and license text reported by installed Godot 4.7.2.stable.official.ed1daf0bf. Verify it against the exact export templates, especially custom builds. Exported pack contents and readable legal sidecars are checked by tools/license_manifest.gd and tools/package_legal.ps1. No Windows executable has been verified because export templates are not installed. Microsoft Zira clearance remains unresolved.
