@@ -1,10 +1,35 @@
 # Asset provenance
 
-- School geometry, furniture, original creature meshes, shaders and procedural material setup: created in this project.
-- `assets/textures/*.png`: generated locally by `tools/generate_assets.py` using seeded noise, line work and stains.
-- `assets/audio/*.wav`: original synthesized mono 22,050 Hz 16-bit PCM. The same script creates layered filtered noise, modulation, pitch envelopes and soft distortion. `analysis.json` records peak/RMS measurements. Signals have short endpoint fades and are normalized below digital clipping.
-- The two supplied reference images are visual references only. They are neither bundled nor pasted onto the creature. Their copyright ownership was not established, so no redistribution license is claimed for them.
-- Typography uses system fonts through Godot SystemFont (`Yu Gothic`, `MS Gothic`, `Georgia`, `Times New Roman`, fallback `Arial`). Font files are not redistributed. Japanese glyph appearance depends on installed font support. Windows development rendering confirmed the Japanese characters display.
-- Godot Engine: MIT license, https://godotengine.org/license/. Include Godot's required license information when distributing exported builds, as described on that page.
+All third-party runtime files are included locally. No paid asset purchases were made. CC0 permits commercial reuse and redistribution. Package receipts list source URLs and hashes.
 
-No stock audio, third-party creature model, face photo texture or externally downloaded game artwork is included. No project-wide redistribution license has been selected by the repository owner.
+| Asset | Author and source | License / receipt |
+| --- | --- | --- |
+| Textured seated readers and standing teacher | [Innerscene, adapted from MakeHuman](https://www.innerscene.com/tools/library/3d-parts/seated-reading-3d-person-seated-a5ebe9b3), [standing reader](https://www.innerscene.com/tools/library/3d-parts/reading-a-book-3d-person-everyday-tasks-c6444d5b) | CC0; `assets/characters/realistic-people-lock.json` |
+| Earlier rigged student/businessman models, retained as unused source assets | [Quaternius via Poly Pizza](https://poly.pizza/m/kZ3DmIoGip), [businessman](https://poly.pizza/m/JFrLIKqvCH) | CC0 on individual source pages; `assets/characters/asset-lock.json` |
+| Phototextured school desk and chair | Ethan Place / Poly Haven: [desk](https://polyhaven.com/a/SchoolDesk_01), [chair](https://polyhaven.com/a/SchoolChair_01) | [CC0](https://polyhaven.com/license); `assets/furniture/asset-lock.json` |
+| Plaster wall and worn wood floor PBR maps | Poly Haven: [wall](https://polyhaven.com/a/plastered_wall), [floor](https://polyhaven.com/a/wood_floor_worn) | CC0; `assets/surfaces/asset-lock.json` |
+| Male pain vocal, used in `player_pain.wav` and `capture_v2.wav` | [HaelDB, Male Grunt/Yelling Sounds](https://opengameart.org/content/male-gruntyelling-sounds), entry `3grunt2.wav` | CC0 option selected from offered dual license; `assets/audio/capture-provenance.json` |
+| Menu music `menu_theme.ogg` | [brandon75689, Tragic Ambient Main Menu](https://opengameart.org/content/tragic-ambient-main-menu), submitted by HaelDB | CC0 option selected; SHA256 `9dbe685e40d6cc8876ff08938b011424b802c2757ac4052e3eb93f8634208969` |
+
+The source packages were staged in an ignored cache, checked for expected file formats, closed dependencies, and source checksums where provided, then copied into the project. SHA256 receipts record admitted files. The game-dev CLI was unavailable; these are local validation receipts, not CLI admission certificates.
+
+## Original project assets
+
+- The continuous face, shaped skull profile, concave mouth, dental arches and strand hair are actual 3D geometry built by `scripts/creature.gd`.
+- `sakiko_face.png` is an original AI-generated surface texture, projected onto that geometry. It is not a flat ghost sprite. The user's supplied images guided its appearance and are not redistributed.
+- `window_courtyard_atlas.png` is an original AI-generated matched day/night environment panorama. The window shader adds slight foliage motion, parallax and grime behind solid frames. It is an exterior illusion, not a playable outdoor map.
+- Image generation used OpenAI's image generation tool. Prompts and output identifiers are in `docs/GENERATED_ART.md`.
+- `SakikoThorn.ttf` is an original locally generated horror font from `tools/generate_font.py`. Godot system font fallbacks supply Japanese characters; system fonts are not bundled.
+- Remaining procedural textures and synthesized WAVs come from `tools/generate_assets.py`. `tools/mix_capture_audio.py` combines the licensed male vocal with original synthesized layers. Running the original generator alone does not reproduce the separately generated face/panorama or licensed downloads.
+- School layout, built-in props, shaders and gameplay code were created in this project.
+
+Godot Engine is MIT licensed: https://godotengine.org/license/. Include the engine's required notices when exporting a distributable build. The repository owner has not selected an overall license for the game's original code and artwork.
+
+## Recorded vocal roles and new story assets
+
+- Female ghost humming, laugh and scream: [AuraVoice / Nocturnal_Vanguard](https://opengameart.org/content/ghostly-humming), [laugh](https://opengameart.org/content/evil-cackle-laugh-2), [scream](https://opengameart.org/content/female-scream-1), CC0. Source URLs and SHA256s: `assets/audio/sakiko-voice-lock.json`.
+- Male player breathing: [Nox_Sound, Male_Breath_Fast_Loop_Stereo.wav](https://freesound.org/people/Nox_Sound/sounds/554907/), CC0. The publicly available MP3 preview is bundled as `player_breath_male.mp3`; receipt: `assets/audio/player-voice-lock.json`. Male pain remains HaelDB's recording described above.
+- `festival_recording.wav`: synthesized Microsoft Zira archival dialogue, filtered and mixed with original tape noise and knocking. It is not a performance by the player or Sakiko. Runtime captions and the journal provide the full clue.
+- `quiet_knocks.wav` and `ending_morning.wav`: original synthesized effects. The morning bed is a quiet suggestion of air and birds, not a licensed field recording.
+- Festival preparation, ordinary Sakiko, enlarged head and class photographs: original OpenAI-generated in-game evidence, documented in `docs/GENERATED_ART.md`. Notes use authored SVG paper textures with readable transcriptions. The supplied revised ending and exact evidence quotations are preserved in `assets/story/`.
+- The current creature uses a continuous face annulus matched to a concave mouth and a closed rear skull, with curved dental arches carrying the original photographed enamel detail. It has a fixed open mouth for the camera dive. The previous detached jaw/lip construction is no longer used.

@@ -1,0 +1,36 @@
+{
+  "license": "CC0-1.0",
+  "license_url": "https://polyhaven.com/license",
+  "files": {
+    "plastered_wall_diff.jpg": {
+      "sha256": "73312ebb6eabc8e0a55addd8a82a8924bcd1e717b9488a887cc77f14b6ea554e",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/plastered_wall/plastered_wall_diff_1k.jpg",
+      "asset_page": "https://polyhaven.com/a/plastered_wall"
+    },
+    "plastered_wall_nor_gl.jpg": {
+      "sha256": "504e1f7baf4b68714c64b6670e7954bebe99efe31c49f7ce5a2089e4b76023b5",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/plastered_wall/plastered_wall_nor_gl_1k.jpg",
+      "asset_page": "https://polyhaven.com/a/plastered_wall"
+    },
+    "plastered_wall_rough.jpg": {
+      "sha256": "844aaa32fda1130262ad8a50084aec7bd5ebce272c8af5e6ba076734beedcd66",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/plastered_wall/plastered_wall_rough_1k.jpg",
+      "asset_page": "https://polyhaven.com/a/plastered_wall"
+    },
+    "wood_floor_worn_diff.jpg": {
+      "sha256": "db386853009b92b9edd7255b35c9f7b0d4b7de16837a7a9da8422148754bc758",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_floor_worn/wood_floor_worn_diff_1k.jpg",
+      "asset_page": "https://polyhaven.com/a/wood_floor_worn"
+    },
+    "wood_floor_worn_nor_gl.jpg": {
+      "sha256": "f428496e5d6c726d17d9ecea29c0acd8660348630acf791cea7bdd7f3c6e262b",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_floor_worn/wood_floor_worn_nor_gl_1k.jpg",
+      "asset_page": "https://polyhaven.com/a/wood_floor_worn"
+    },
+    "wood_floor_worn_rough.jpg": {
+      "sha256": "9d7492db1197f1386466dfd7dd43f692446166c1433ddeebf66c10e8b226a6d0",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_floor_worn/wood_floor_worn_rough_1k.jpg",
+      "asset_page": "https://polyhaven.com/a/wood_floor_worn"
+    }
+  }
+}

@@ -1,39 +1,31 @@
 # Verification record
 
-Tested 15 October 2026 with Godot **4.7.2.stable.official.ed1daf0bf**, Windows, Compatibility/OpenGL 3.3, Intel Iris Xe graphics, 1280 × 720.
+Tested 15 October 2026 with Godot 4.7.2.stable.official.ed1daf0bf, Windows, Forward Mobile / Vulkan 1.4.323, Intel Iris Xe. The renderer changed because Compatibility does not support projector textures.
 
-## Engine integration suite
+## Integration suite
 
-The rendered `--verify --quit-after-verify` run completed all assertions and exited without runtime errors or shutdown resource warnings:
+The latest rendered `--verify --quit-after-verify` run completed **74 checks, zero failures**, with no runtime errors or shutdown resource warnings.
 
-- All candidate key positions have a path from the entrance in the retained clearance-aware navigation component (1,453 points).
-- WASD action input moves the physical player; flashlight action toggles the actual light.
-- Settings survive save/reload, and the SFX bus receives the expected decibel value.
-- Collecting all three spawned keys through the actual interaction/line-of-sight function updates the count.
-- Entrance unlocking and the subsequent escape interaction reach victory.
-- Starting again clears keys and restores locked doors and entrance state.
-- Doors' collision shapes disable when opened; pause/resume updates game state.
-- Detection works down a clear corridor, respects field of view and fails across the central wall.
-- Losing sight transitions chase → investigate → search → roam.
-- A moving enemy follows the graph into a room and automatically opens a closed door.
-- Capture advances through the timed sequence into death; menu return succeeds.
+Coverage includes four keys/four visible locks, intro skip and natural completion, actual clue inspection and photograph reverse, the marked desk's note/original portrait/key, unique physical decoration pickup and placement, display reward and photograph, AV switch/tape/captions/B2 case/account, maintenance plan, shelf brake and physical shelf movement, actual walking into the storeroom, letter and caretaker evidence, four reachable key pickups, duplicate prevention, journal reopening, checkpoint retention, entrance/ending trigger exactly once, first-input reveal versus separate advancement, instant text, final silence, credits scrolling/Space acceleration/skip/natural completion, third-party acknowledgments, menu mouse state, clean replay reset, stamina/exhaustion/recovery, wall-blocked footsteps, normal/FOV/flashlight/occlusion detection, AI pursuit/search/door traversal, pause/settings/volume and capture/death/menu return. Male player breathing and female ghost scream assignments are checked separately.
 
-Earlier headless runs also completed the assertions, but the Godot dummy audio driver reported active WAV playback references at shutdown. The rendered run did not report those warnings.
+One earlier automated inspection attempt missed the letter target; the subsequent complete run passed. Human aiming, interaction tolerances and a sustained normal-speed playthrough remain worth checking.
 
-## Render inspection
+## Visual audit
 
-Generated and visually inspected actual viewport images of the main menu, options, corridor, classroom, creature and capture. Death was rendered as part of the audit. Revised the initial head geometry after inspection, replacing convex mouth shapes with an open sculpted skull and recessed cavity. Revised doorway placement and desk spacing after navigation checks exposed disconnected pockets. The final captures show readable lighting, supported Japanese glyphs, visible keys, clear teeth and eyes, and a framed close-up without the camera entering the head.
+Actual game captures in ignored `tests/artifacts/` cover menus, daytime figures, window day/night, lamp on/off, the flashlight on a nearby wall, photographs and reverses, journal, physical display, AV room, scenery store, creature front/profile/rear/three-quarter, attack/mouth dive/death, ending at 960x540, 1280x720 and 1920x1080, credits, attribution and menu return. Credits were checked after their fade-in, rather than mistaking the intentional black lead-in for missing text.
 
-## Audio inspection
+The head was rebuilt after the earlier screenshots exposed triangle-cut mouth edges, independently hinged lips/jaw, and a scalloped procedural hair edge. It now has a continuous face annulus, matching concave mouth boundary, closed rear skull and curved textured dental arches. There is no independently animated jaw to stretch or separate during capture. The original damaged skin/fringe/enamel texture remains, with a restrained black-eye treatment. Brighter studio views inspect side/rear coverage. Frame-by-frame motion and subjective fear still need human review.
 
-Generated all 13 real WAV assets and inspected sample peaks, RMS levels, duration and endpoint fades. The capture combines a noise transient, distorted formant-like harmonics and a decaying low impact. Playback streams and buses were exercised in a rendered run. No subjective listening claim is made.
+Ending prose uses a readable serif, natural wrapping and scroll panels with generous margins. The three screens have page numbers, not chapter titles. Both skipping and natural credits completion return to a working main menu. The final story has no post-story jumpscare.
 
-## Remaining human checks
+## Content and asset checks
 
-- A complete unassisted successful run and confirmation of the intended 5–10 minute pacing.
-- Sustained chase balance, evasive room loops and recovery under extended play.
-- Mouse/keyboard feel, every menu navigation path, fullscreen and several aspect ratios.
-- Subjective audio mix and jumpscare intensity with headphones.
-- Exported-build behavior and performance on other PCs; no export templates were installed here.
+- Joining `ending.json` screen bodies reproduces the supplied revised story exactly, apart from its enclosing quotation marks.
+- No em dash or en dash characters remain in runtime scripts/shaders or final story prose.
+- Vendored model and texture receipts were hash-checked. Models have closed embedded/local dependencies; source/license URLs are recorded.
+- Male breathing: Nox_Sound. Male pain: HaelDB. Female Sakiko vocals: AuraVoice / Nocturnal_Vanguard. The archival student tape uses synthesized Zira dialogue with captions.
+- `git diff --check` passed.
 
-These are limits of the verification performed, not claims that these behaviors have failed.
+## Remaining practical verification
+
+Subjective fear, headphone mix and perceived vocal performance are not established by PCM analysis or engine playback. The archival tape is synthesized dialogue, and the morning ambience is synthesized, not field-recorded. No claim of AAA fidelity or guaranteed frame rate is made. Some built-in fixtures remain procedural; classroom figures are static textured adult source models scaled for the intro. Exterior views are distant panorama illusions with obscured variants, not a playable courtyard. Checkpoints are in memory. A standalone Windows executable and export templates are not bundled. GPU/driver coverage beyond this machine and a complete human playthrough remain unverified.

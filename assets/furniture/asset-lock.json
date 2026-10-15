@@ -1,0 +1,47 @@
+{
+  "author": "Ethan Place / Poly Haven",
+  "license": "CC0-1.0",
+  "license_url": "https://polyhaven.com/license",
+  "files": {
+    "desk/desk.gltf": {
+      "sha256": "9d840b58a9e66ce9dc3d8d5396fb97cf954b12dc27adaf41b8cc78ae1a6404eb",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/SchoolDesk_01/SchoolDesk_01_1k.gltf"
+    },
+    "desk/textures/SchoolDesk_01_diff_1k.jpg": {
+      "sha256": "4fed6d98265c6be27b9e6c9b010a5bba55a9aca4edfcc3fae9a12309ca6a5b94",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/SchoolDesk_01/SchoolDesk_01_diff_1k.jpg"
+    },
+    "desk/textures/SchoolDesk_01_nor_gl_1k.jpg": {
+      "sha256": "64de8791fec46894945136190504127d194c1fc8d999e15c639dc94d053581be",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/SchoolDesk_01/SchoolDesk_01_nor_gl_1k.jpg"
+    },
+    "desk/textures/SchoolDesk_01_arm_1k.jpg": {
+      "sha256": "ee1e2ea17ca21471b8a4822400ddc6bd3a4d441822a7eb429bef8cb1ab6dd43d",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/SchoolDesk_01/SchoolDesk_01_arm_1k.jpg"
+    },
+    "desk/SchoolDesk_01.bin": {
+      "sha256": "80d0ece097fde9b1efe15a9babfb6bb1573d228bab6e02e3806cb5eca39c2c0c",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/SchoolDesk_01/SchoolDesk_01.bin"
+    },
+    "chair/chair.gltf": {
+      "sha256": "1db6aca4bf379c2d568b2068492dcfcda15d764c0c3d98a970055af25b46281e",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/SchoolChair_01/SchoolChair_01_1k.gltf"
+    },
+    "chair/textures/SchoolChair_01_nor_gl_1k.jpg": {
+      "sha256": "4ee930562ad26e8c98af75e8aa6577d01cb56f6d22628f4e95c385e5364f0623",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/SchoolChair_01/SchoolChair_01_nor_gl_1k.jpg"
+    },
+    "chair/textures/SchoolChair_01_diff_1k.jpg": {
+      "sha256": "f10ae4dbddfb056ef716770ebd96e0eff0aa6f0b5ad0f263ff51c5cade6e1d8f",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/SchoolChair_01/SchoolChair_01_diff_1k.jpg"
+    },
+    "chair/textures/SchoolChair_01_arm_1k.jpg": {
+      "sha256": "ff773eb01c9d59130dc3cc0274951ac626d73fa1b2f7eee519af4ca80835568b",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/SchoolChair_01/SchoolChair_01_arm_1k.jpg"
+    },
+    "chair/SchoolChair_01.bin": {
+      "sha256": "7d64d556ba88d3962778085b9a190f1adb0d84e667bca8ef032c0ae34b31a9fe",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/SchoolChair_01/SchoolChair_01.bin"
+    }
+  }
+}

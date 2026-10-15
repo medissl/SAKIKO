@@ -1,0 +1,4 @@
+Seated reading and Reading a book: Innerscene, adapted from MakeHuman CC0 assets.
+Released under CC0 1.0 Universal.
+https://creativecommons.org/publicdomain/zero/1.0/legalcode
+Source URLs and SHA256 receipts: realistic-people-lock.json

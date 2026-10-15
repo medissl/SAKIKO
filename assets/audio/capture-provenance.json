@@ -1,0 +1,21 @@
+{
+  "author": "HaelDB",
+  "source": "https://opengameart.org/content/male-gruntyelling-sounds",
+  "license": "CC0-1.0 (selected from offered CC0 / OGA-BY alternatives)",
+  "archive_sha256": "e9100a4e3b9dcd146993089970dc6097dcf9935fa4683b196040012bad65d67a",
+  "source_file": "yelling sounds/3grunt2.wav",
+  "source_sha256": "a377c43f2151000713a45c18223c94e1de2e2393ad10569a391c1b9f96898544",
+  "processing": "Stereo to mono, resampled 22.05 kHz, gain-normalized and endpoint fades. Mixed at 0.66s with original capture layers.",
+  "outputs": {
+    "player_pain.wav": {
+      "peak": 0.5,
+      "rms": 0.044789967009365765,
+      "seconds": 1.0
+    },
+    "capture_v2.wav": {
+      "peak": 0.8,
+      "rms": 0.1278771439951039,
+      "seconds": 1.8499773242630386
+    }
+  }
+}

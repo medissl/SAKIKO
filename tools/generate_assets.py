@@ -63,5 +63,53 @@ voice=np.tanh(3*(np.sin(phase)+.35*np.sin(phase*2.03)+.2*np.sin(phase*3.01)))
 impact=np.sin(2*np.pi*(64*t-15*t*t))*np.exp(-t*10)
 attack=(n*.35+low(n,4)) * np.exp(-t*38)
 save('capture',attack+voice*.33*np.exp(-t*2.8)*(1+.2*np.sin(t*51))+impact*.8,.83)
+# Expanded original sound palette: soft inharmonic music, chime and human-like textures.
+t,n=base(28)
+track=low(n,300)*.06
+for f in [55,82.41,110.7,164.81]:
+    track+=np.sin(2*np.pi*f*t+.08*np.sin(t*.7))*.018*(.65+.35*np.sin(t*.22+f)**2)
+for when,f in [(2,440),(7,523.25),(12,415.3),(19,659.25),(23,392)]:
+    q=np.maximum(t-when,0); env=np.exp(-q*1.25)*(t>=when)
+    track+=(np.sin(2*np.pi*f*q)+.3*np.sin(2*np.pi*f*2.006*q))*.07*env
+save('menu_music',track,.35)
+t,n=base(4.8); ch=np.zeros_like(t)
+for i,f in enumerate([659.25,523.25,587.33,392,392,587.33,659.25,523.25]):
+    q=np.maximum(t-i*.48,0); env=np.exp(-q*4)*(t>=i*.48)
+    ch+=(np.sin(2*np.pi*f*q)+.3*np.sin(2*np.pi*f*2.01*q)+.1*np.sin(2*np.pi*f*3.98*q))*env*.13
+save('chime',ch,.48)
+t,n=base(6)
+save('classroom',low(n,70)*(.4+.12*np.sin(t*3))+.02*np.sin(2*np.pi*170*t+np.sin(t*12)),.25)
+t,n=base(.28)
+save('run_step',(low(n,11)*.5+n*.09)*np.exp(-t*19)+np.sin(2*np.pi*(65*t-40*t*t))*.18*np.exp(-t*23),.5)
+t,n=base(2.6)
+env=(.3+.7*np.maximum(0,np.sin(t*2*np.pi/1.3)))
+save('pant',low(n,7)*env*.5+np.sin(2*np.pi*125*t+np.sin(t*28))*.015*env,.3)
+t,n=base(2.5)
+env=np.zeros_like(t)
+for when in [.12,.48,.82,1.4,1.73]:
+    env+=np.exp(-((t-when)/.105)**2)
+f0=260+45*np.sin(t*5)+25*np.sin(t*21)
+phase=2*np.pi*np.cumsum(f0)/SR
+voice=sum(np.sin(phase*k)/k for k in range(1,7))
+save('giggle',(voice*.11+low(n,9)*.14)*env,.35)
+t,n=base(1.5)
+phase=2*np.pi*(360*t-60*t*t+1.2*np.sin(t*38))
+save('scream',(np.tanh(np.sin(phase)*2+.5*np.sin(phase*2.01))*.25+low(n,4)*.19)*np.sin(np.pi*t/1.5)**.6,.58)
+t,n=base(.16)
+save('latch',(low(n,6)*.3+np.sin(2*np.pi*210*t)*.13)*np.exp(-t*33),.38)
+t,n=base(.5)
+save('close',(low(n,15)*.6+np.sin(2*np.pi*75*t)*.12)*np.exp(-t*17),.45)
+# A textured flashlight cookie with feathered edge and no hard circular boundary.
+y,x=np.mgrid[-1:1:256j,-1:1:256j]; r=np.sqrt(x*x+y*y)
+beam=np.exp(-r*r*3.4)*np.clip((1-r)*5,0,1)
+beam*=.94+.04*np.sin(x*33+y*11)+.02*rng.random(r.shape)
+Image.fromarray(np.uint8(np.clip(beam,0,1)*255)).save(tex/'beam.png')
+# Worn window panes, grime and irregular runoff, designed as one consistent palette.
+a=np.clip(rng.normal(60,4,(512,512)),0,255).astype('uint8')
+im=Image.fromarray(np.stack([a*.43,a*.70,a],axis=-1).astype('uint8'))
+d=ImageDraw.Draw(im,'RGBA')
+for i in range(85):
+    x=int(rng.integers(512)); y=int(rng.integers(512)); d.line((x,y,x+int(rng.integers(-5,6)),min(512,y+int(rng.integers(15,170)))),fill=(8,17,14,50),width=int(rng.integers(1,5)))
+im.save(tex/'window.png')
 (audio/'analysis.json').write_text(json.dumps(stats,indent=2))
 print(json.dumps(stats,indent=2))

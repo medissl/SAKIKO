@@ -4,3 +4,4 @@
 .local-user/
 tests/artifacts/
 *.log
+.asset-cache/

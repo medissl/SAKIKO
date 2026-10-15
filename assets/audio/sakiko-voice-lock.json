@@ -1,0 +1,22 @@
+{
+  "author": "AuraVoice / Nocturnal_Vanguard",
+  "license": "CC0-1.0",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "files": {
+    "sakiko_humming.ogg": {
+      "source": "https://opengameart.org/content/ghostly-humming",
+      "download": "https://opengameart.org/sites/default/files/ghostly_humming.ogg",
+      "sha256": "270954cff9f076c81e0a16fac391cfcd1cedf6786fcb05cfa813a955ae539678"
+    },
+    "sakiko_scream.ogg": {
+      "source": "https://opengameart.org/content/female-scream-1",
+      "download": "https://opengameart.org/sites/default/files/female_scream_1.ogg",
+      "sha256": "87b1a695b0106f9af6ca83b1f9f362b0d201663878aff231d634af69cd8ab516"
+    },
+    "sakiko_laugh.ogg": {
+      "source": "https://opengameart.org/content/evil-cackle-laugh-2",
+      "download": "https://opengameart.org/sites/default/files/evil_cackle_laugh_2.ogg",
+      "sha256": "215caebb11ca96d22eea36a68e16ffcfa7479c835e3927a21fe90a7880c8bc9c"
+    }
+  }
+}

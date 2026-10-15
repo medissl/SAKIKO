@@ -1,0 +1,13 @@
+{
+  "author": "Quaternius",
+  "license": "CC0-1.0",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sources": {
+    "student.glb": "https://poly.pizza/m/kZ3DmIoGip",
+    "teacher.glb": "https://poly.pizza/m/JFrLIKqvCH"
+  },
+  "files": {
+    "student.glb": "fea7e71271203e7073f1a073fa1208de7402df276f87f80e149bf7589b5d46b4",
+    "teacher.glb": "82b81257c1e94cd9ee48cb1dcbe5ff506e81c9ce67cd0c5af542d8712dca546e"
+  }
+}

@@ -1,193 +1,173 @@
 extends CharacterBody3D
-## Sculpted parametric skull with real mouth opening, concave cavity and hinged teeth.
+## A continuous face annulus, matching concave mouth and closed rear skull.
 var rig: Node3D
-var jaw: Node3D
-var locks: Array[Node3D] = []
 var age := 0.0
 var scare := 0.0
 
-func material(c: Color, rough := .95) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.albedo_color = c
-	m.roughness = rough
-	m.cull_mode = BaseMaterial3D.CULL_DISABLED
-	return m
-
-func ellipsoid(parent: Node3D, pos: Vector3, size: Vector3, mat: Material) -> MeshInstance3D:
-	var mesh := SphereMesh.new()
-	mesh.radial_segments = 24
-	mesh.rings = 16
-	var n := MeshInstance3D.new()
-	n.mesh = mesh
-	n.scale = size
-	n.position = pos
-	n.material_override = mat
-	parent.add_child(n)
-	return n
-
-func surface(parent: Node3D, vertices: PackedVector3Array, mat: Material) -> MeshInstance3D:
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for p in vertices: st.add_vertex(p)
-	st.generate_normals()
-	var n := MeshInstance3D.new()
-	n.mesh = st.commit()
-	n.material_override = mat
-	parent.add_child(n)
-	return n
+func profile(y: float) -> Vector3:
+	var sections := [Vector4(1.34,.01,.02,.02),Vector4(1.22,.54,.32,.43),Vector4(1.02,.83,.47,.64),Vector4(.75,.98,.62,.77),Vector4(.40,1.00,.65,.76),Vector4(.15,1.04,.74,.70),Vector4(-.12,.99,.77,.62),Vector4(-.40,.92,.70,.52),Vector4(-.68,.81,.62,.41),Vector4(-.92,.65,.59,.28),Vector4(-1.08,.36,.48,.13),Vector4(-1.13,.01,.19,.04)]
+	for i in range(sections.size()-1):
+		var a: Vector4 = sections[i]
+		var b: Vector4 = sections[i+1]
+		if y<=a.x and y>=b.x:
+			var t := smoothstep(a.x,b.x,y)
+			return Vector3(lerpf(a.y,b.y,t),lerpf(a.z,b.z,t),lerpf(a.w,b.w,t))
+	return Vector3(.01,.02,.02)
 
 func face_z(x: float,y: float) -> float:
-	var z := -.78*sqrt(maxf(.015,1-pow(x/1.02,2)-pow((y-.12)/1.19,2)))
-	# Brow, cheeks and a tapered projecting bridge are sculpted into the skull.
-	z -= .14*exp(-pow((absf(x)-.55)/.31,2)-pow((y+.05)/.33,2))
-	z -= .10*exp(-pow((absf(x)-.45)/.38,2)-pow((y-.62)/.12,2))
-	z += .15*exp(-pow((absf(x)-.43)/.25,2)-pow((y-.39)/.19,2))
-	z -= .15*exp(-pow(x/.14,2)-pow((y-.23)/.33,2))
-	z -= .17*exp(-pow(x/.19,2)-pow((y-.03)/.13,2))
+	var p := profile(y)
+	var z := -p.y*sqrt(maxf(0.0,1-pow(x/maxf(.01,p.x),2)))
+	z -= .045*exp(-pow((absf(x)-.57)/.28,2)-pow((y+.06)/.28,2))
+	z += .055*exp(-pow((absf(x)-.43)/.25,2)-pow((y-.39)/.17,2))
+	z -= .075*exp(-pow(x/.15,2)-pow((y-.20)/.30,2))
+	z -= .13*exp(-pow(x/.19,2)-pow((y+.10)/.13,2))
 	return z
 
-func mouth_point(a: float,r: float,depth := 0.0) -> Vector3:
-	var x := cos(a)*.82*r
-	# Corners turn up into the unnatural grin.
-	var y := -.43+sin(a)*.37*r+.16*pow(absf(cos(a)),3)*r
-	return Vector3(x,y,face_z(x,y)-.012+depth)
+func mouth(a: float) -> Vector3:
+	var x := cos(a)*.70
+	var y := -.62+sin(a)*.28+.35*pow(absf(cos(a)),3)
+	return Vector3(x,y,face_z(x,y))
+
+func contour(a: float) -> Vector3:
+	var y := clampf(.105+1.235*sin(a),-1.13,1.34)
+	var x := profile(y).x*(1 if cos(a)>=0 else -1)
+	if absf(cos(a))<.0001: x=0
+	return Vector3(x,y,0)
+
+func mesh_from_grid(parent: Node3D,columns: int,rows: int,point: Callable,mat: Material) -> MeshInstance3D:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for row in range(rows):
+		for column in range(columns):
+			var quad: Array[Vector3] = []
+			for uv in [Vector2(column,row),Vector2(column+1,row),Vector2(column+1,row+1),Vector2(column,row+1)]: quad.append(point.call(uv.x/columns,uv.y/rows))
+			for index in [0,1,2,0,2,3]:
+				var p: Vector3 = quad[index]
+				st.set_uv(Vector2(.5+p.x/2.5,.5-p.y/2.8))
+				st.add_vertex(p)
+	st.index()
+	st.generate_normals()
+	var instance := MeshInstance3D.new()
+	instance.mesh = st.commit()
+	instance.material_override = mat
+	parent.add_child(instance)
+	return instance
+
+func material(color: Color) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = color
+	m.roughness = 1
+	m.metallic_specular = 0
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return m
 
 func _ready() -> void:
 	collision_layer = 2
 	collision_mask = 1
-	var shape := CollisionShape3D.new()
-	var sphere := SphereShape3D.new()
-	sphere.radius = .8
-	shape.shape = sphere
-	add_child(shape)
+	var collision := CollisionShape3D.new()
+	var shape := SphereShape3D.new()
+	shape.radius = .8
+	collision.shape = shape
+	add_child(collision)
 	rig = Node3D.new()
 	add_child(rig)
-	var skin := material(Color("b4b6ac"))
-	var skin_shader := Shader.new()
-	skin_shader.code = "shader_type spatial; render_mode cull_disabled; void fragment(){float n=fract(sin(dot(floor(VERTEX*110.0),vec3(12.9,78.2,36.1)))*43758.5); ALBEDO=vec3(.62,.64,.60)*(0.86+n*.14); ROUGHNESS=.97;}"
+	var shader := Shader.new()
+	shader.code = """shader_type spatial;
+render_mode cull_disabled;
+uniform sampler2D face_image:source_color,filter_linear_mipmap;
+void fragment(){
+ vec3 c=texture(face_image,UV).rgb;
+ vec2 iris=vec2((abs(UV.x-.5)-.17)/.061,(UV.y-.35)/.047);
+ if(length(iris)<.88)c=vec3(.00035,.00045,.00045)+min(c,vec3(.025))*.20;
+ ALBEDO=c*vec3(.93,.96,.94); ROUGHNESS=1.0; SPECULAR=0.0;
+}"""
 	var flesh := ShaderMaterial.new()
-	flesh.shader = skin_shader
-	var black := material(Color("040506"))
-	var eye := material(Color("040406"),.75)
-	var lip := material(Color("453033"))
-	var teeth := material(Color("b8b2a0"))
-	var vertices := PackedVector3Array()
-	var cols := 112
-	var rows := 72
-	for row in range(rows):
-		for col in range(cols):
-			var quad: Array[Vector3] = []
-			var omit := false
-			for uv in [Vector2(col,row),Vector2(col+1,row),Vector2(col+1,row+1),Vector2(col,row+1)]:
-				var lat: float = .015+(uv.y/rows)*(PI-.03)
-				var lon: float = uv.x/cols*TAU
-				var x := 1.02*sin(lat)*sin(lon)
-				var y := .12+1.19*cos(lat)
-				var z := -.78*sin(lat)*cos(lon)
-				if cos(lon)>0:
-					z = face_z(x,y)
-					var my := (y+.43-.16*pow(absf(x/.82),3))/.37
-					if pow(x/.82,2)+my*my<.99: omit = true
-				quad.append(Vector3(x,y,z))
-			if not omit:
-				for i in [0,2,1,0,3,2]: vertices.append(quad[i])
-	surface(rig,vertices,flesh)
-	# Concave black mouth bowl goes INTO the head. A rim hides the skull opening.
-	vertices.clear()
-	for i in range(96):
-		var a := float(i)/96*TAU
-		var b := float(i+1)/96*TAU
-		for ring in range(6):
-			var r1 := 1.04-float(ring)/6*1.04
-			var r2 := 1.04-float(ring+1)/6*1.04
-			var p1 := mouth_point(a,r1,.64*(1-r1*r1))
-			var p2 := mouth_point(b,r1,.64*(1-r1*r1))
-			var p3 := mouth_point(b,r2,.64*(1-r2*r2))
-			var p4 := mouth_point(a,r2,.64*(1-r2*r2))
-			for p in [p1,p2,p3,p1,p3,p4]: vertices.append(p)
-	surface(rig,vertices,black)
-	vertices.clear()
-	for i in range(96):
-		var a := float(i)/96*TAU
-		var b := float(i+1)/96*TAU
-		for p in [mouth_point(a,1.11,-.008),mouth_point(b,1.11,-.008),mouth_point(b,.98,-.02),mouth_point(a,1.11,-.008),mouth_point(b,.98,-.02),mouth_point(a,.98,-.02)]: vertices.append(p)
-	surface(rig,vertices,lip)
-	# Deep dark eyes with small wet highlights, sunk into the sculpted brow.
-	for side in [-1.0,1.0]:
-		var x: float = side*.43
-		ellipsoid(rig,Vector3(x,.39,face_z(x,.39)-.015),Vector3(.58,.44,.12),lip)
-		ellipsoid(rig,Vector3(x,.39,face_z(x,.39)-.046),Vector3(.49,.36,.07),eye)
-		ellipsoid(rig,Vector3(x-.045,.44,face_z(x,.39)-.085),Vector3(.023,.018,.008),skin)
-		ellipsoid(rig,Vector3(side*.085,-.018,-1.075),Vector3(.052,.028,.018),black)
-	jaw = Node3D.new()
-	jaw.position = Vector3(0,-.48,-.10)
-	rig.add_child(jaw)
-	# Lower lip and chin travel with the teeth, preserving a solid jaw silhouette.
-	vertices.clear()
-	for i in range(48):
-		var a := PI+float(i)/48*PI
-		var b := PI+float(i+1)/48*PI
-		var p1 := mouth_point(a,1.02,-.01)
-		var p2 := mouth_point(b,1.02,-.01)
-		var p3 := mouth_point(b,1.14,.06)+Vector3(0,-.12,0)
-		var p4 := mouth_point(a,1.14,.06)+Vector3(0,-.12,0)
-		for p in [p1,p2,p3,p1,p3,p4]: vertices.append(p-jaw.position)
-	surface(jaw,vertices,flesh)
-	for i in range(13):
-		var x := float(i-6)*.116
-		var t := x/.82
-		var top_y := -.43+.37*sqrt(maxf(0,1-t*t))+.16*pow(absf(t),3)
-		var bottom_y := -.43-.37*sqrt(maxf(0,1-t*t))+.16*pow(absf(t),3)
-		var height := .105+fmod(i*.047,.065)
-		for upper in [true,false]:
-			var tooth := MeshInstance3D.new()
-			var mesh := BoxMesh.new()
-			mesh.size = Vector3(.083+fmod(i*.017,.015),height,.085)
-			tooth.mesh = mesh
-			tooth.material_override = teeth
-			var y := top_y-height*.42 if upper else bottom_y+height*.42
-			tooth.position = Vector3(x,y,face_z(x,y)-.025)
-			tooth.rotation.z = sin(i*13.0)*.12
-			if upper: rig.add_child(tooth)
-			else:
-				tooth.position -= jaw.position
-				jaw.add_child(tooth)
-	# Hair cap: irregular scalp shell, followed by thin tapered, curved mesh locks.
-	ellipsoid(rig,Vector3(0,.65,.21),Vector3(2.16,1.44,1.72),black)
-	for i in range(112):
-		var a := float(i)/112*TAU
-		var front := cos(a)>.5
-		var root := Node3D.new()
-		root.position = Vector3(sin(a)*1.01,.94,-cos(a)*.76)
-		rig.add_child(root)
-		var length := .23+fmod(i*.137,.33) if front else 1.65+fmod(i*.213,.55)
-		var width := .055+fmod(i*.034,.045)
-		vertices.clear()
-		for seg in range(9):
-			var f1 := float(seg)/9
-			var f2 := float(seg+1)/9
-			var pts: Array[Vector3] = []
-			for pair in [Vector2(-1,f1),Vector2(1,f1),Vector2(1,f2),Vector2(-1,f2)]:
-				var f: float = pair.y
-				var center := Vector3(sin(a)*(.04+sin(f*PI)*.06),-length*f,cos(a)*(.015-f*.04))
-				center.x += sin(f*4+i)*.018
-				pts.append(center+Vector3(cos(a),0,sin(a))*pair.x*width*(1-f*.92))
-			for idx in [0,1,2,0,2,3]: vertices.append(pts[idx])
-		surface(root,vertices,black)
-		locks.append(root)
-	var fill := OmniLight3D.new()
-	fill.position = Vector3(0,.25,-1.5)
-	fill.light_color = Color("879d9e")
-	fill.light_energy = .13
-	fill.omni_range = 2.8
-	rig.add_child(fill)
+	flesh.shader = shader
+	flesh.set_shader_parameter("face_image",load("res://assets/textures/sakiko_face.png"))
+	# Both boundaries use the identical mouth() curve. There are no removed cells.
+	mesh_from_grid(rig,160,42,func(u: float,v: float) -> Vector3:
+		var a := u*TAU
+		var inside := mouth(a)
+		var outside := contour(a)
+		var p := inside.lerp(outside,v)
+		p.z = face_z(p.x,p.y)
+		return p,flesh)
+	mesh_from_grid(rig,160,24,func(u: float,v: float) -> Vector3:
+		var outside := contour(u*TAU)
+		outside.z = face_z(outside.x,outside.y)
+		var p := outside.lerp(Vector3(0,.1,.73),v)
+		p.z = lerpf(outside.z,.73,sin(v*PI/2))
+		return p,material(Color("0a0b0b")))
+	mesh_from_grid(rig,160,20,func(u: float,v: float) -> Vector3:
+		var rim := mouth(u*TAU)
+		var p := rim.lerp(Vector3(0,-.62,.12),v)
+		p.z = lerpf(rim.z,.10,sin(v*PI/2))
+		return p,material(Color("080405")))
+	# Curved dental arches preserve the original enamel/gum detail and tooth silhouettes.
+	var dental_shader := Shader.new()
+	dental_shader.code = """shader_type spatial;
+render_mode cull_disabled;
+uniform sampler2D enamel:source_color,filter_linear_mipmap;
+void fragment(){vec3 c=texture(enamel,UV).rgb; if(max(c.r,max(c.g,c.b))<.027)discard; ALBEDO=c*vec3(.85,.83,.74); ROUGHNESS=.96; SPECULAR=0.0;}
+"""
+	var dental := ShaderMaterial.new()
+	dental.shader = dental_shader
+	dental.set_shader_parameter("enamel",load("res://assets/textures/sakiko_face.png"))
+	for upper in [true,false]:
+		mesh_from_grid(rig,140,12,func(u: float,v: float) -> Vector3:
+			var x := lerpf(-.68,.68,u)
+			var t := x/.70
+			var root_y := -.62+(.28 if upper else -.28)*sqrt(maxf(0,1-t*t))+.35*pow(absf(t),3)
+			var y: float = root_y+(-1 if upper else 1)*(.012+v*.145)
+			return Vector3(x,y,face_z(x,root_y)-.012-sin(v*PI)*.035),dental)
+	build_hair()
+
+func hair_point(angle: float,t: float) -> Vector3:
+	if t<.43:
+		var lat := .035+t/.43*1.43
+		return Vector3(sin(angle)*1.20*sin(lat),.13+1.30*cos(lat),-cos(angle)*.90*sin(lat))
+	var f := (t-.43)/.57
+	return Vector3(sin(angle)*1.20,.267-f*2.02,-cos(angle)*(.90+f*.025))
+
+func build_hair() -> void:
+	var shader := Shader.new()
+	shader.code = """shader_type spatial;
+render_mode cull_disabled;
+uniform sampler2D hair_image:source_color,filter_linear_mipmap;
+varying vec3 p;
+void vertex(){p=VERTEX;}
+void fragment(){float a=atan(p.x,-p.z);vec2 uv=vec2(.055+fract(a/6.28318*3.0)*.075,clamp((1.45-p.y)/3.8,.05,.94));ALBEDO=texture(hair_image,uv).rgb*.36;ROUGHNESS=1.0;SPECULAR=0.0;}
+"""
+	var mat := ShaderMaterial.new()
+	mat.shader = shader
+	mat.set_shader_parameter("hair_image",load("res://assets/textures/sakiko_face.png"))
+	# Back and side coat only. The photograph supplies the irregular front fringe.
+	var start := acos(.59)
+	mesh_from_grid(rig,144,38,func(u: float,v: float) -> Vector3:
+		return hair_point(lerpf(start,TAU-start,u),v*.96),mat)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for strand in range(720):
+		var angle := lerpf(start,TAU-start,float(strand)/719)
+		var end := .965+fmod(strand*.037,.035)
+		for segment in range(22):
+			var t1 := float(segment)/22*end
+			var t2 := float(segment+1)/22*end
+			var p1 := hair_point(angle,t1)
+			var p2 := hair_point(angle,t2)
+			var width := .0015*(1-t1*.8)
+			var side := Vector3(cos(angle),0,sin(angle))*width
+			for p in [p1-side,p1+side,p2+side,p1-side,p2+side,p2-side]:
+				st.set_normal(Vector3(sin(angle),.1,-cos(angle)).normalized())
+				st.add_vertex(p)
+	var fibres := MeshInstance3D.new()
+	fibres.mesh = st.commit()
+	fibres.material_override = material(Color("080a0b"))
+	rig.add_child(fibres)
 
 func _process(delta: float) -> void:
 	age += delta
-	if not is_instance_valid(rig): return
-	rig.position.y = sin(age*1.4)*.065
-	rig.rotation.z = sin(age*.79)*.04+scare*.17
-	rig.rotation.x = sin(age*.53)*.02
-	jaw.rotation.x = -.02-scare*.20
-	jaw.position.y = -.48-scare*.10
-	for i in range(locks.size()): locks[i].rotation.x = sin(age*1.8+i)*.024
+	if not rig: return
+	rig.position.y = sin(age*1.4)*.035
+	rig.rotation.z = sin(age*.79)*.022+scare*.11
+	rig.rotation.x = sin(age*.53)*.012

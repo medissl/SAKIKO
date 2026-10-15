@@ -63,5 +63,50 @@
     "seconds": 1.75,
     "peak": 0.676,
     "rms": 0.0446
+  },
+  "menu_music": {
+    "seconds": 28.0,
+    "peak": 0.35,
+    "rms": 0.0667
+  },
+  "chime": {
+    "seconds": 4.8,
+    "peak": 0.48,
+    "rms": 0.1184
+  },
+  "classroom": {
+    "seconds": 6.0,
+    "peak": 0.25,
+    "rms": 0.0573
+  },
+  "run_step": {
+    "seconds": 0.28,
+    "peak": 0.342,
+    "rms": 0.0465
+  },
+  "pant": {
+    "seconds": 2.6,
+    "peak": 0.3,
+    "rms": 0.0499
+  },
+  "giggle": {
+    "seconds": 2.5,
+    "peak": 0.35,
+    "rms": 0.0656
+  },
+  "scream": {
+    "seconds": 1.5,
+    "peak": 0.58,
+    "rms": 0.1685
+  },
+  "latch": {
+    "seconds": 0.16,
+    "peak": 0.238,
+    "rms": 0.0364
+  },
+  "close": {
+    "seconds": 0.5,
+    "peak": 0.405,
+    "rms": 0.052
   }
 }

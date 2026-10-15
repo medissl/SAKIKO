@@ -1,0 +1,20 @@
+{
+  "author": "Innerscene, adapted from MakeHuman CC0 assets",
+  "license": "CC0-1.0",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "terms": "https://www.innerscene.com/tools/library/terms",
+  "files": {
+    "seated_reading.glb": {
+      "sha256": "a56fd27a0eb0d4511bcaf5a471607004788711223e980a59a1bb39ec838c7f52",
+      "source": "https://www.innerscene.com/tools/library/3d-parts/seated-reading-3d-person-seated-a5ebe9b3",
+      "download": "https://www.innerscene.com/api/library/seated-reading-3d-person-seated-a5ebe9b3/download",
+      "validation": "GLB v2 length matched; all buffers and textures embedded; no external URIs"
+    },
+    "teacher_reading.glb": {
+      "sha256": "3d6367c0da0ed35f6c88a707f389e916d326a5651df6622d473e75a4127612be",
+      "source": "https://www.innerscene.com/tools/library/3d-parts/reading-a-book-3d-person-everyday-tasks-c6444d5b",
+      "download": "https://www.innerscene.com/api/library/reading-a-book-3d-person-everyday-tasks-c6444d5b/download",
+      "validation": "GLB v2 length matched; all buffers and textures embedded; no external URIs"
+    }
+  }
+}
