@@ -1,0 +1,32 @@
+SAKIKO Proprietary Game License
+
+Copyright © 2026 medissl. All rights reserved.
+
+1. Scope and ownership
+SAKIKO is a proprietary game by medissl. This license applies only to original material owned by medissl in the version supplied with this license, including original game code, story, characters, artwork, audio, levels, and interface design, and only to the extent protected by applicable law. It does not claim ownership of third-party material, material whose ownership is unverified, public-domain material, or general ideas, mechanics, themes, methods, or concepts. No exclusive rights are asserted over AI-generated output beyond rights, if any, recognized by applicable law.
+
+2. Personal play and backups
+A lawful recipient of an authorized game build may install and play that build for personal, non-commercial entertainment and make copies reasonably necessary for personal backup. These permissions do not transfer ownership and do not authorize distributing a backup, game build, source code, or original asset to anyone else. Public availability of source code does not itself grant an open-source license or redistribution permission.
+
+3. Reserved rights and restrictions
+Except for the permissions above, separate written permission from medissl, rights granted under a third-party license, or uses permitted by applicable law, you may not:
+(a) redistribute the game or its source code, including through unauthorized reuploads, mirrors, sharing services, or paid or unpaid bundles;
+(b) resell, sublicense, or otherwise commercially distribute the game, or distribute modified builds;
+(c) rebrand the game or present it or its original protected material as another person's work;
+(d) extract and redistribute original protected assets, or incorporate original protected code, story, characters, artwork, audio, level content, or interface material into another distributed product.
+Uses outside the permissions granted by this license require separate written permission from medissl. Rights not expressly granted are reserved, subject to the exclusions and legal exceptions below.
+
+4. Independent games and mandatory legal rights
+This license does not restrict anyone from creating, distributing, or selling their own lawfully created games merely because they use similar mechanics, themes, or general ideas. Nothing in this license limits rights, exceptions, or remedies that applicable law does not allow a license to restrict, including any applicable rights of fair use or fair dealing, interoperability, accessibility, or other statutory exceptions. The restrictions above apply only to the extent legally enforceable.
+
+5. Third-party components
+Godot Engine, dependencies, shaders, plugins, fonts, and third-party assets remain governed by their respective licenses. This license does not replace or override their copyright notices, attribution requirements, or permissions to use, modify, copy, or redistribute those components. See THIRD_PARTY_NOTICES.md, ASSET_SOURCES.md, and the accompanying component license files. Do not interpret a project-wide ownership notice as a claim over those components or over material with unverified ownership.
+
+6. Earlier versions and contributions
+This license applies prospectively to material lawfully offered under it. It does not revoke or retroactively cancel permissions already validly granted under MIT or any other license for an earlier version or contribution. Earlier copies remain subject to their applicable grants. Third-party and contributor notices must be preserved. medissl grants rights only in material medissl owns or is authorized to license.
+
+7. Warranty disclaimer
+To the extent permitted by applicable law, the game and original material are provided "AS IS" and "AS AVAILABLE", without warranties of any kind, express or implied, including merchantability, fitness for a particular purpose, and noninfringement. Mandatory warranties and consumer rights remain unaffected.
+
+8. Limitation of liability
+To the extent permitted by applicable law, medissl is not liable for loss or damage arising from use of, or inability to use, the game or original material, including indirect, incidental, special, or consequential damage or loss of data or profits. This limitation does not exclude or limit liability that applicable law does not permit to be excluded or limited. Third-party components have their own applicable warranty and liability terms.
