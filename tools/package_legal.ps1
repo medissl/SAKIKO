@@ -8,7 +8,7 @@ foreach ($name in @('LICENSE.txt','THIRD_PARTY_NOTICES.md','ASSET_SOURCES.md')) 
     Copy-Item -LiteralPath (Join-Path $projectRoot $name) -Destination $buildRoot -Force
 }
 $noticeFiles = @(Get-ChildItem -LiteralPath (Join-Path $projectRoot 'licenses') -File -Recurse)
-$noticeFiles += @(Get-ChildItem -LiteralPath (Join-Path $projectRoot 'assets') -File -Recurse | Where-Object { $_.Extension -in @('.txt','.json') })
+$noticeFiles += @(Get-ChildItem -LiteralPath (Join-Path $projectRoot 'assets') -File -Recurse | Where-Object { ($_.Extension -in @('.txt','.json')) -and $_.FullName -notmatch '[\\/]assets[\\/]story[\\/](evidence|ending)\.json$' -and $_.Name -ne 'player_lines.json' })
 foreach ($file in $noticeFiles) {
     $relative = $file.FullName.Substring($projectRoot.Length + 1)
     $destination = Join-Path $buildRoot $relative
@@ -18,4 +18,4 @@ foreach ($file in $noticeFiles) {
         throw "Legal sidecar verification failed: $relative"
     }
 }
-Write-Output 'Legal documents, component notices and asset provenance copied and hash-verified. Review unresolved clearance in THIRD_PARTY_NOTICES.md before publishing.'
+Write-Output 'Legal documents, component notices and asset provenance copied and hash-verified. Retired speech exclusion is checked in the exported build.'

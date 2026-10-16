@@ -1,25 +1,39 @@
-# Layout and four-key route
+# Final two-floor school
 
-Two 4 m corridors at z=-5/+5 run through the west and old wings. Cross halls at x=-25,+25,+81 connect them. Twelve primary rooms have two 3 m sliding entrances each, at room centre x +/-4.5. The scenery store is an added non-public recess east of the archive.
+The authoritative contract is `SAKIKO_TWO_FLOOR_REVAMP.md`, amended by `SAKIKO_IMPLEMENTATION_CORRECTIONS.md` and later direct user feedback. `scripts/school_layout.gd` is the only architecture generator. The previous west/old-wing map and portrait-fragment route are no longer spawned.
 
-| Centre x | North | South |
-| --- | --- | --- |
-| -16 | 1-A / starting classroom | Staff office / accident notice |
-| 0 | 2-B classroom | 3-C / class photograph |
-| 16 | Infirmary | Audiovisual room / tape and B2 case |
-| 40 | Library / festival inventory | Toilets |
-| 56 | Art room / mounting display | Cleaning storage / later message |
-| 72 | Old science / maintenance plan | Archive / shelf concealing scenery store |
+Both floors use Y=0/4.2 m, four connected 4 m corridors around an inaccessible courtyard, and opposite dogleg stairs. Seventeen rooms have 26 sliding entrances. The ground lobby exits west onto a real exterior floor; the ending starts after walking outside.
 
-## Four entrance keys
+## Furniture clearance adjustment
 
-1. Inspect the preparation photograph at (-18.6,1.35,-15.2). It shows the red crane and white ribbon at desk 17. The matching starting-room desk is (-19.9,.85,-13.4). Open it, then collect the key on the desk. Its folded warning and original portrait enter the journal.
-2. Read the art room sketch at (52.8,1.45,-15.4). Carry the three loose decorations and place red fan / white lantern / blue star at mounts 1 / 2 / 3. E picks up, places or exchanges one piece. Correct assembly opens the shallow compartment at x=56,z=-14.3 and makes the enlarged portrait inspectable. Pieces remain unique; there is no sliding-tile puzzle.
-3. In the AV room, use the labeled switch (12,1.5,15.2), then the tape deck (16,1.15,15.1). The spoken line and permanent captions identify equipment shelf B2 at (21,1.2,15.1). Open it for the key and handwritten account. The tape can be replayed.
-4. Inspect the maintenance plan (72,1.5,-15.35). In the south archive, release the floor brake at (78.2,1,12), then use E again to slide the shelf aside. The physical opening leads into the scenery store, x=79..83,z=7..17. The fourth key is beside discarded belongings at (81,.45,15.3). The bag, undelivered letter, damaged head, door scratches and caretaker's sheet are inside.
+The imported desk measures approximately .712 m wide, .883 m high, .546 m deep. The chair measures .566 m wide, 1.006 m high, .675 m deep. At their existing scales and .83 m seat offset, the pair is about 1.40 m deep. G01, U01 and U02 use twelve seats: three teaching rows of four columns, facing the west board. This preserves the teaching area, approximately .75 m access between teaching rows, .73 m rear clearance and a 1.88 m southern chase route. A forced twenty-seat arrangement would compromise these routes. G01 has eleven classmates and the player's seat.
 
-The route has no circular key dependencies. Keys remain available until collected and cannot be duplicated. Required documents and optional evidence can be reopened with J. Four visible nightmare locks secure the west entrance. With four keys, E unlocks it and E again leaves, triggering the dedicated ending once.
+Door openings are 2 m clear. Stair flights are 2.2 m wide, with twelve .175 m rises and .28 m treads per flight, a middle landing and an open upper slab. Invisible ramps follow the visible stair flights. Enemy navigation connects both floors through these routes and moves in three dimensions.
 
-Each key stores a safe corridor checkpoint. RETURN TO CHECKPOINT preserves keys, evidence, physical puzzle progress and carried decoration, restores stamina and separates Sakiko from the player. RESTART RUN resets all four puzzles, evidence, shelf, tape state and ending. Checkpoints are in memory only.
+## Physical progression
 
-Exterior windows occur in selected rooms; corridor walls are solid. Most views are obscured by frosted glass or partly lowered blinds. Only selected clear panes reveal the distant courtyard, projected with its original aspect ratio rather than stretched to fit a pane.
+1. G03 staff service drawer contains the ordinary cabinet key. The side-wall cabinet holds entrance I, the upper-wing gate key and festival storage key. The upper-wing key opens both stair gates; festival storage opens G05/G09.
+2. G08 art drawer contains a packing envelope, original photograph and archive collection key. This key opens U06/U07. Inspect and flip F-12 in U07; take the existing compartment key from its physical rear sleeve. That key opens U06 B3-12, holding entrance II, tape, media key, classmates note and dated program.
+3. The media key opens U05. Manually insert/play the actual 24-second festival tape. Its date clue and program solve G05 case 1015. The case holds entrance III and a separate U08 utility key. The tape encounter is lethal; no invincibility is enabled for the tested escape.
+4. G09 brake and tracked shelf expose the report about U08. The utility key opens U08 without a report-reading permission flag. Its student bag holds entrance IV and the letter. Each entrance key removes one actual metal padlock; then slide the entrance open and walk outside.
+
+Keys and documents physically preexist. Reading does not spawn keys. Ordinary utility keys are separate from four entrance keys. Inspection supports front/back, zoom, optional transcription and journal reopening. Safe checkpoint snapshots after each entrance key and the tape retain all inventory, containers, doors, released locks/open entrance, evidence, tape and one-shot voice/encounter state. Retry restores stamina and an occluded enemy with eight seconds of reorientation grace.
+
+## Intro, windows and encounters
+
+The lesson lasts 145 seconds including shared sleep/bell/wake. Skip enters that transition at 125 seconds. A connected Japanese literature explanation replaces repeated textbook orders; translated English captions match actual clips. Sparse player comments and the two-student tape are Japanese too. Voice volume/subtitles are configurable. Existing male exhaustion panting is unchanged. Stamina is a thin muted red bar at the screen bottom.
+
+Windows are ordinary framed glazing. The courtyard, drainage, two planters, tree, immediate ground, walls and neighboring school volumes are 3D. A complete 2:1 spherical day/night panorama supplies distant scenery and sky, so up/down views cannot reveal a landscape card edge in an aperture. No runtime viewport windows or fixed window cards are used. Generated student paintings and photographic foliage/facade textures have provenance under assets/environment/generated/manifest.json.
+
+The first upper-hall sighting is separate from pursuit: opposite end, over 23 m away, dark face, one texture-assisted blink after noticed, physical withdrawal behind the corner, no hunt. Tape playback is followed by silence/breath and an actual lethal pursuit. Later autonomous hunting remains active with pressure cooldown. Slabs/corners block sight; stairs connect both floors. Capture has Sakiko's hum/scream on approach, a black cut, then separate dry male pain.
+
+## Current verification
+
+Final automated checks: 96 physical progression checks, 26 furnished route/door safety checks, 23 audio/queue/exhaustion checks, 11 exit/checkpoint/ending checks. Seven focused capture checks pass for the latest vocal separation. Inspected renders include doors from both sides, window pitch changes, courtyard/exterior, supported props and papers, front/side/rear/blink/mouth-open head and capture. See HANDOFF.md for exact logs and commands.
+
+No manual full playthrough, native Japanese performance/pronunciation review, first-player duration study, or exported-build performance measurement was performed. Hair is a real Blender curve groom converted to an embedded GLB; its editable source and build receipt are retained. Original menu, ending and credits remain intact.
+
+
+## Latest audio/lighting override
+
+SAKIKO_BUGFIX_AUDIO_LIGHTING.md and later user feedback now govern input/UI/audio. Night ceiling fixtures are off: only moonlight through glazing, faint reflected light and the real flashlight illuminate gameplay. Day intro remains separate. Rejected player/teacher speech and synthetic classroom chatter are disabled pending a credible Japanese performance; translated timed captions and the Japanese tape/transcript remain. Three stock-Japanese auditions are retained without another full-library generation. Recorded CC0 surface footsteps/material foley, held left/right Shift, single responsive menu indicator, generic aimed door prompts and temporary locked feedback are implemented. See HANDOFF.md and assets/audio/runtime_manifest.json for current focused evidence and explicit listening limitations.

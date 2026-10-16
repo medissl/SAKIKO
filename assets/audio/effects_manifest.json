@@ -1,0 +1,182 @@
+[
+  {
+    "id": "foot_wood_walk_0",
+    "file": "res://assets/audio/foot_wood_walk_0.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.2857142857142857
+  },
+  {
+    "id": "foot_wood_walk_1",
+    "file": "res://assets/audio/foot_wood_walk_1.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.28
+  },
+  {
+    "id": "foot_wood_walk_2",
+    "file": "res://assets/audio/foot_wood_walk_2.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.27319727891156464
+  },
+  {
+    "id": "foot_wood_run_0",
+    "file": "res://assets/audio/foot_wood_run_0.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.2857142857142857
+  },
+  {
+    "id": "foot_wood_run_1",
+    "file": "res://assets/audio/foot_wood_run_1.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.28
+  },
+  {
+    "id": "foot_wood_run_2",
+    "file": "res://assets/audio/foot_wood_run_2.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.27319727891156464
+  },
+  {
+    "id": "foot_tile_walk_0",
+    "file": "res://assets/audio/foot_tile_walk_0.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.2857142857142857
+  },
+  {
+    "id": "foot_tile_walk_1",
+    "file": "res://assets/audio/foot_tile_walk_1.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.28
+  },
+  {
+    "id": "foot_tile_walk_2",
+    "file": "res://assets/audio/foot_tile_walk_2.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.27319727891156464
+  },
+  {
+    "id": "foot_tile_run_0",
+    "file": "res://assets/audio/foot_tile_run_0.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.2857142857142857
+  },
+  {
+    "id": "foot_tile_run_1",
+    "file": "res://assets/audio/foot_tile_run_1.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.28
+  },
+  {
+    "id": "foot_tile_run_2",
+    "file": "res://assets/audio/foot_tile_run_2.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.27319727891156464
+  },
+  {
+    "id": "foot_stair_walk_0",
+    "file": "res://assets/audio/foot_stair_walk_0.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.2857142857142857
+  },
+  {
+    "id": "foot_stair_walk_1",
+    "file": "res://assets/audio/foot_stair_walk_1.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.28
+  },
+  {
+    "id": "foot_stair_walk_2",
+    "file": "res://assets/audio/foot_stair_walk_2.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.27319727891156464
+  },
+  {
+    "id": "foot_stair_run_0",
+    "file": "res://assets/audio/foot_stair_run_0.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.2857142857142857
+  },
+  {
+    "id": "foot_stair_run_1",
+    "file": "res://assets/audio/foot_stair_run_1.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.28
+  },
+  {
+    "id": "foot_stair_run_2",
+    "file": "res://assets/audio/foot_stair_run_2.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.27319727891156464
+  },
+  {
+    "id": "door_track",
+    "file": "res://assets/audio/door_track.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.6499773242630386
+  },
+  {
+    "id": "drawer_slide",
+    "file": "res://assets/audio/drawer_slide.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.6499773242630386
+  },
+  {
+    "id": "cabinet_hinge",
+    "file": "res://assets/audio/cabinet_hinge.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.6999546485260771
+  },
+  {
+    "id": "bag_fabric",
+    "file": "res://assets/audio/bag_fabric.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.6999546485260771
+  },
+  {
+    "id": "paper_flip",
+    "file": "res://assets/audio/paper_flip.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.44997732426303855
+  },
+  {
+    "id": "paper_lift",
+    "file": "res://assets/audio/paper_lift.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.24997732426303854
+  },
+  {
+    "id": "photo_handle",
+    "file": "res://assets/audio/photo_handle.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.12
+  },
+  {
+    "id": "case_latch",
+    "file": "res://assets/audio/case_latch.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.5499773242630386
+  },
+  {
+    "id": "code_tick",
+    "file": "res://assets/audio/code_tick.wav",
+    "source": "Recorded CC0 lock transient; grounded_feedback_provenance.json",
+    "duration": 0.055
+  },
+  {
+    "id": "shelf_track",
+    "file": "res://assets/audio/shelf_track.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 1.2
+  },
+  {
+    "id": "lock_turn",
+    "file": "res://assets/audio/lock_turn.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.22
+  },
+  {
+    "id": "shackle_release",
+    "file": "res://assets/audio/shackle_release.wav",
+    "source": "Original non-vocal procedural foley; footsteps adapted from existing original step/run_step masters.",
+    "duration": 0.2
+  }
+]

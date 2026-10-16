@@ -5,3 +5,25 @@
 tests/artifacts/
 *.log
 .asset-cache/
+
+builds/
+
+# Local briefs, backups, generated caches and retired speech work.
+/SAKIKO_*.md
+/HANDOFF.md
+/tests/backups/
+__pycache__/
+*.py[cod]
+/assets/audio/production/*.wav
+/assets/audio/production/*.wav.import
+/assets/audio/teacher_lesson.wav
+/assets/audio/teacher_lesson.wav.import
+/assets/audio/classroom_chatter.wav
+/assets/audio/classroom_chatter.wav.import
+/assets/audio/festival_custodian.wav
+/assets/audio/festival_custodian.wav.import
+/assets/audio/festival_date_recording.wav
+/assets/audio/festival_date_recording.wav.import
+/assets/audio/festival_students.wav
+/assets/audio/festival_students.wav.import
+/assets/fonts/NotoSansJP.ttf.import

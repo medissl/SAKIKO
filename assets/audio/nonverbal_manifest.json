@@ -1,0 +1,40 @@
+{
+  "method": "Original filtered noise beds; existing recorded CC0 paper/transport; existing authored knocks. No intelligible voice. Physical listening unverified.",
+  "clips": [
+    {
+      "file": "building_roomtone.wav",
+      "duration": 37.0,
+      "peak": 0.12,
+      "rms": 0.02394251166495441,
+      "sha256": "401be5f3aed229275911c299e4d2f94c9b06263154628dd8514425356bc28240"
+    },
+    {
+      "file": "window_air.wav",
+      "duration": 31.0,
+      "peak": 0.13020574399842064,
+      "rms": 0.022452328529342553,
+      "sha256": "3d728dc3b31fe276f68292c3ecfecfc13f9f9693457de7c4c041ad52835a9cc8"
+    },
+    {
+      "file": "suspense_texture.wav",
+      "duration": 6.0,
+      "peak": 0.09518169812558615,
+      "rms": 0.025786453367274028,
+      "sha256": "ed71854cf0bdb60d46599a6f74ae02ace7f4280a971dd4026190c1937144c0e3"
+    },
+    {
+      "file": "classroom_murmur.wav",
+      "duration": 31.099833333333333,
+      "peak": 0.16,
+      "rms": 0.017128024663244857,
+      "sha256": "69ecabea6a6098cea2644581cb85210163edf6b5d28ce3478da1a6ae2717456f"
+    },
+    {
+      "file": "festival_nonverbal.wav",
+      "duration": 24.0,
+      "peak": 0.30856045283481165,
+      "rms": 0.0075153027118996345,
+      "sha256": "781042f04f9f43affad3863aeb167fbc3c18f34e505572bc6636860abc1b1f95"
+    }
+  ]
+}

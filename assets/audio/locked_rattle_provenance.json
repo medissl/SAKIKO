@@ -1,0 +1,17 @@
+{
+  "file": "res://assets/audio/locked_rattle.wav",
+  "sources": [
+    {
+      "file": "lock_turn.wav",
+      "sha256": "096f477aee0dd20dc9738cfdba717654828c64843a8afb3749ada934e1f456b4"
+    },
+    {
+      "file": "latch.wav",
+      "sha256": "8463574f7a6e939d701dc668800dd32ac643703347bf8d3655a2baba506e1af5"
+    }
+  ],
+  "license": "CC0-1.0; source authors and original URLs in recorded_foley.json",
+  "processing": "Two recorded lock turns and two restrained handle catches; mono, no pitch shift, endpoint fades, 0.60 peak.",
+  "duration": 0.68,
+  "sha256": "3442c77b5b10781a42ef69270fc437470817728f3e7ac2604f9a99c0e6f77235"
+}

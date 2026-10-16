@@ -104,7 +104,7 @@ func _ready() -> void:
 	audio = AudioStreamPlayer.new()
 	audio.bus = "Ambience"
 	audio.stream = load("res://assets/audio/ending_morning.wav")
-	audio.volume_db = -33
+	audio.volume_db = -24
 	add_child(audio)
 	audio.play()
 	tone = AudioStreamPlayer.new()
@@ -212,6 +212,16 @@ func build_credits() -> void:
 		credit_label(pair[0],true)
 		credit_label(pair[1],false)
 		credit_space(34)
+	credit_label("RECORDED SCHOOL AMBIENCE",true)
+	credit_label("piermic, CC0",false)
+	credit_space(34)
+	credit_label("JAPANESE FONT",true)
+	credit_label("Noto Sans JP / The Noto Project, SIL OFL 1.1",true)
+	credit_space(34)
+	credit_label("RECORDED MOVEMENT AND OBJECT FOLEY",true)
+	for names in ["Noted451 / ChloePieterse / Anthousai","Rudmer_Rotteveel / bdunis4 / FOSSarts","ani_music / OwlStorm / SpliceSound"]:
+		credit_label(names+", CC0",true)
+	credit_space(34)
 	credit_label("SOURCE AND LICENSE NOTICES",true)
 	credit_label("Copyright © 2026 medissl. All rights reserved.",true)
 	credit_label("Original material: LICENSE.txt",true)
@@ -282,7 +292,7 @@ func _process(delta: float) -> void:
 				silence += delta
 			next.disabled = is_last and silence<1.2
 		var quiet := is_last and (near_end or page_complete())
-		audio.volume_db = move_toward(audio.volume_db,-70 if quiet else -48,delta*2)
+		audio.volume_db = move_toward(audio.volume_db,-70 if quiet else -24,delta*2)
 		tone.volume_db = move_toward(tone.volume_db,-70 if quiet else -39-page*5,delta*8)
 	elif stage=="credits":
 		var fast := Input.is_physical_key_pressed(KEY_SPACE) or Input.is_physical_key_pressed(KEY_SHIFT)

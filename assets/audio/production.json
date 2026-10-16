@@ -1,0 +1,120 @@
+{
+  "teacher_language": "Japanese; English translated captions.",
+  "voices": {
+    "teacher": "jm_kumo",
+    "player": "80% jm_kumo / 20% am_michael",
+    "student_a": "same student male style",
+    "student_b": "jf_alpha"
+  },
+  "tape_captions": [
+    {
+      "start": 0.8,
+      "end": 6.2439583333333335,
+      "text": "Student A: F-12 is packed. Leave the equipment case in the AV room.",
+      "spoken_text": "エフ十二は梱包した。機材ケースは視聴覚室に置いておいて。"
+    },
+    {
+      "start": 6.7439583333333335,
+      "end": 8.532625,
+      "text": "Student B: What's the combination?",
+      "spoken_text": "暗証番号は？"
+    },
+    {
+      "start": 9.032625,
+      "end": 14.389916666666664,
+      "text": "Student A: The festival date. Month, then day. Same as the program.",
+      "spoken_text": "文化祭の日付。月、それから日。プログラムと同じ。"
+    },
+    {
+      "start": 14.739916666666666,
+      "end": 15.839916666666666,
+      "text": "[Two faint knocks.]"
+    },
+    {
+      "start": 16.889916666666664,
+      "end": 19.31858333333333,
+      "text": "Student B: Did someone stay behind?",
+      "spoken_text": "誰か、まだ残ってなかった？"
+    },
+    {
+      "start": 19.81858333333333,
+      "end": 22.278541666666662,
+      "text": "Student A: I thought you checked.",
+      "spoken_text": "確認したんじゃなかったの？"
+    }
+  ],
+  "teacher_captions": [
+    {
+      "start": 2,
+      "end": 18.991958333333333,
+      "text": "Teacher: Today we're looking at how actions reveal a character's feelings. It's easy when the writer says someone is happy. But sometimes the writer only shows us what they do. Let's look at how that works.",
+      "spoken_text": "今日は、登場人物の気持ちを、行動から読み取る話をします。うれしい、と書いてあれば簡単ですよね。でも、作者がそう書かずに、人物の動きだけを見せることもあります。そこを少し、見ていきましょう。"
+    },
+    {
+      "start": 26,
+      "end": 42.55191666666667,
+      "text": "Teacher: Imagine someone waiting to meet a friend. They check the clock, look down the street, then check the clock again. Even that tells us something. It feels different from someone simply standing there.",
+      "spoken_text": "たとえば、待ち合わせの場面です。ある人が、時計を見て、また道の向こうを見る。しばらくして、もう一度、時計を見る。これだけでも、何かが伝わってきますね。ただ立っている人とは、少し違う。"
+    },
+    {
+      "start": 50,
+      "end": 67.16529166666666,
+      "text": "Teacher: Are they annoyed, or too excited to keep still? Checking the clock doesn't give us enough to decide. The sentences before and after it can change what the same action means.",
+      "spoken_text": "さて、その人は怒っているんでしょうか。それとも、楽しみで落ち着かないんでしょうか。時計を見た、という一文だけでは、まだ決められません。前と後の文章も読むと、同じ動作の意味が変わることがあります。"
+    },
+    {
+      "start": 74,
+      "end": 91.07333333333334,
+      "text": "Teacher: If they wave and run over when their friend arrives, perhaps they were looking forward to the meeting. What if they turn away instead? Connecting the actions helps us understand the person.",
+      "spoken_text": "友達が来たときに、手を振って走り出すなら、会えるのを楽しみにしていたのかもしれません。反対に、顔をそむけてしまったら、どうでしょう。動作を一つずつつなげて考えると、人物の気持ちが見えてきます。"
+    },
+    {
+      "start": 98,
+      "end": 116.69995833333334,
+      "text": "Teacher: What matters is explaining which words led you to your reading. It's fine to disagree with the person beside you. Look for evidence in the passage. That's the habit I want you to remember.",
+      "spoken_text": "大事なのは、答えを一つに決めることより、どの言葉からそう考えたのか、説明できることです。隣の人と意見が違っても、それで構いません。文章の中に根拠を探す。その読み方を、覚えておいてください。"
+    }
+  ],
+  "files": [
+    {
+      "file": "teacher_lesson.wav",
+      "duration": 125.0,
+      "peak": 0.6327833709716797
+    },
+    {
+      "file": "classroom_chatter.wav",
+      "duration": 125.0,
+      "peak": 0.06762826244556837
+    },
+    {
+      "file": "classroom_foley.wav",
+      "duration": 125.0,
+      "peak": 0.07837295851664057
+    },
+    {
+      "file": "festival_students.wav",
+      "duration": 24,
+      "peak": 0.4135501630404945
+    }
+  ],
+  "sources": [
+    {
+      "title": "Children Playing .mp3",
+      "author": "piermic",
+      "license": "CC0-1.0",
+      "page": "https://freesound.org/people/piermic/sounds/396118/",
+      "download": "https://cdn.freesound.org/previews/396/396118_3874114-hq.mp3",
+      "changes": "Public high-quality preview used, spatial playback and low-pass filtering in game.",
+      "sha256": "1354a8b38d0a726966fe5a5c8249861e4ae928cf740c43f130f11747c2ba2c03"
+    },
+    {
+      "title": "Original teacher/student speech",
+      "source": "Installed Microsoft Windows OneCore SAPI voices; no engine files redistributed. Original generic script; not an imitation.",
+      "release_clearance": "Preserve the existing Microsoft synthesized-output clearance qualification in ASSET_SOURCES.md; development audio is not represented as cleared third-party voice-engine content."
+    },
+    {
+      "title": "Original paper/pencil/book/handling and knock foley",
+      "source": "Original deterministic noise envelopes and filtering in tools/produce_audio.py. Non-vocal effects only."
+    }
+  ]
+}

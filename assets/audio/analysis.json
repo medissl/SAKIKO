@@ -20,14 +20,14 @@
     "rms": 0.028
   },
   "hover": {
-    "seconds": 0.07,
-    "peak": 0.4,
-    "rms": 0.1379
+    "seconds": 0.08,
+    "peak": 0.16,
+    "rms": 0.0122
   },
   "press": {
-    "seconds": 0.13,
-    "peak": 0.4,
-    "rms": 0.1268
+    "seconds": 0.12,
+    "peak": 0.25,
+    "rms": 0.0228
   },
   "key": {
     "seconds": 0.65,
@@ -60,9 +60,9 @@
     "rms": 0.0765
   },
   "capture": {
-    "seconds": 1.75,
-    "peak": 0.676,
-    "rms": 0.0446
+    "seconds": 0.34,
+    "peak": 0.65,
+    "rms": 0.0908
   },
   "menu_music": {
     "seconds": 28.0,
@@ -108,5 +108,10 @@
     "seconds": 0.5,
     "peak": 0.405,
     "rms": 0.052
+  },
+  "code_tick": {
+    "seconds": 0.055,
+    "peak": 0.2,
+    "rms": 0.0542
   }
 }

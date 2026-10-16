@@ -1,0 +1,9 @@
+{
+  "source": "https://github.com/google/fonts/tree/main/ofl/notosansjp",
+  "license": "SIL OFL 1.1; original copyright and license preserved in NotoSansJP-OFL.txt",
+  "modification": "Static weight 400, current game character subset, overlapping contours unioned for TextMesh; renamed Sakiko School Sans",
+  "source_sha256": "c2f3b4d463500a2ddcd3849cded1fceeb9fd6d1c32e6cbecd568453ba50fc68f",
+  "file": "SakikoSchoolSans.ttf",
+  "sha256": "ac9c36b012455bb492ca1c27ea01041657ea215be0a5901330d71585b94fc0c3",
+  "glyphs": 468
+}

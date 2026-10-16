@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dk4ev5d7lntp0"
-path="res://.godot/imported/teacher_reading_59de45cb944ecdc7.png-494676b5024e84454c438b61280cf477.ctex"
+path.s3tc="res://.godot/imported/teacher_reading_59de45cb944ecdc7.png-494676b5024e84454c438b61280cf477.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "84f4fcf0bd74a26fe9f2867a6be34333"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/characters/teacher_reading_59de45cb944ecdc7.png"
-dest_files=["res://.godot/imported/teacher_reading_59de45cb944ecdc7.png-494676b5024e84454c438b61280cf477.ctex"]
+dest_files=["res://.godot/imported/teacher_reading_59de45cb944ecdc7.png-494676b5024e84454c438b61280cf477.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

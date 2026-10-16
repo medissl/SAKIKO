@@ -1,0 +1,268 @@
+{
+  "language": "ja-JP",
+  "model": "hexgrad/Kokoro-82M v1.0",
+  "model_page": "https://huggingface.co/hexgrad/Kokoro-82M",
+  "runtime": "kokoro-onnx 0.6.1 / Misaki Japanese",
+  "mode": "local CPU; stock voices; no cloning",
+  "model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+  "cast": {
+    "teacher": "jm_kumo",
+    "player": "80% jm_kumo / 20% am_michael",
+    "student_a": "same student male style",
+    "student_b": "jf_alpha"
+  },
+  "clips": [
+    {
+      "file": "assets/audio/production/ja_P01.wav",
+      "spoken_text": "あれ……みんな、どこに行ったんだ？",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 2.4579583333333335,
+      "sha256": "d534e5585b99f7043c8fe17dadb885cb6d0173e58ac615c931e0fca856cacb94",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_P02.wav",
+      "spoken_text": "錠前が四つ……鍵を探さないと。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 3.1233333333333335,
+      "sha256": "f677676ad53bf19c49f027ef84754e7a01a7bd7384f88bdf806647a1a6317dce",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_P03.wav",
+      "spoken_text": "上は閉まってる。職員室に鍵があるかな。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 3.9865833333333334,
+      "sha256": "65c53a6bdc83a5c3af7a36b94b0b7ba20f0e2c971d7c9dbdd5799488f7e6a769",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_P04.wav",
+      "spoken_text": "これ、二階の鍵だ。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 1.9986666666666666,
+      "sha256": "3ed8cb55773d7a592240212328964e033e08547de47b7577e8e4460c2f5107ba",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_P05.wav",
+      "spoken_text": "元の写真じゃ、笑ってない。",
+      "role": "player",
+      "speed": 0.94,
+      "duration": 2.378,
+      "sha256": "1d82ebf03529b87aa2eacc00981ae118ba44895f4a90e848b07000aa0aa2e39a",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_P06.wav",
+      "spoken_text": "文化祭の展示……二階か。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 2.977333333333333,
+      "sha256": "1ccc57b6b5585260c4fdb31e2b161e5c711d7996204410a25eecda10ce7adb58",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_P07.wav",
+      "spoken_text": "この笑顔、あとから描き足したんだ。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 3.0919583333333334,
+      "sha256": "30524ea974d0701ad3de2d4fbff7851eff87ca213293f634e67bf7e9f14e7f22",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_P08.wav",
+      "spoken_text": "テープだ。どこかで再生できないかな。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 3.7306666666666666,
+      "sha256": "27b95802bc5d97b93b16e14bdc40c660514f91f440111327e53a21b20bb5c54a",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_P09.wav",
+      "spoken_text": "月、それから日。文化祭のプログラムに載ってた。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 4.339333333333333,
+      "sha256": "bac0d72f3fd959fc26ba2e64490d311af8b6d012d2fca1f646c909fa96f48bea",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_P10.wav",
+      "spoken_text": "練習室……二階の古い部屋か。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 3.1959583333333335,
+      "sha256": "d8948956aa604bbb7560111f72d633e02faa5c2c1b6e69d04a6268930306ee10",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_P11.wav",
+      "spoken_text": "ここに、置き去りにしたのか……。",
+      "role": "player",
+      "speed": 0.94,
+      "duration": 3.5726666666666667,
+      "sha256": "bb5293d522b4324c526e440400822058d0399264c46afbf09b0e5cabac502b5b",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_P12.wav",
+      "spoken_text": "玄関に戻ろう。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 1.726625,
+      "sha256": "bed3112481065f76c24a20378bd1b1ab6f7a6090028cc499ba2bdaae7d884ec6",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_H01.wav",
+      "spoken_text": "職員室を調べてみよう。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 2.366625,
+      "sha256": "1b78086cd8e542e704525bd4228ebec1aa56e05276dc6d87aeca55a78cac59d2",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_H02.wav",
+      "spoken_text": "この番号、資料室の何かと合うはず。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 3.2412916666666667,
+      "sha256": "8e87ae5b807342c4a4cb87121b333510433118aa38ffaf7dd1e4c311f670b686",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_H03.wav",
+      "spoken_text": "二階に放送室があったな。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 2.3452916666666668,
+      "sha256": "c0f87e16bd682f6c04453d1621dad5714e5b354640d94308926117b3910b6e65",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_H04.wav",
+      "spoken_text": "玄関は下だ。下駄箱のところ。",
+      "role": "player",
+      "speed": 0.99,
+      "duration": 3.422,
+      "sha256": "ceee9274bbfb428a38b7222761f9085aa661a1b5f6105e0797c2808bc4001b80",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_teacher_0.wav",
+      "spoken_text": "今日は、登場人物の気持ちを、行動から読み取る話をします。うれしい、と書いてあれば簡単ですよね。でも、作者がそう書かずに、人物の動きだけを見せることもあります。そこを少し、見ていきましょう。",
+      "role": "teacher",
+      "speed": 1.02,
+      "duration": 16.991958333333333,
+      "sha256": "b3acf9815d255fb303006b734b5e56972b0e690d1a0688fb0d43fae3b9c42598",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_teacher_1.wav",
+      "spoken_text": "たとえば、待ち合わせの場面です。ある人が、時計を見て、また道の向こうを見る。しばらくして、もう一度、時計を見る。これだけでも、何かが伝わってきますね。ただ立っている人とは、少し違う。",
+      "role": "teacher",
+      "speed": 1.02,
+      "duration": 16.551916666666667,
+      "sha256": "ba539a5da185bf2364c7fdfd2c6903a2f7f6011f9e8578f54b65f7a3899a8f04",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_teacher_2.wav",
+      "spoken_text": "さて、その人は怒っているんでしょうか。それとも、楽しみで落ち着かないんでしょうか。時計を見た、という一文だけでは、まだ決められません。前と後の文章も読むと、同じ動作の意味が変わることがあります。",
+      "role": "teacher",
+      "speed": 1.02,
+      "duration": 17.16529166666667,
+      "sha256": "27ab79ab1717e8aa3b719a05872d9bedb9ab8fbd083005444ed1eac77b4e67c3",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_teacher_3.wav",
+      "spoken_text": "友達が来たときに、手を振って走り出すなら、会えるのを楽しみにしていたのかもしれません。反対に、顔をそむけてしまったら、どうでしょう。動作を一つずつつなげて考えると、人物の気持ちが見えてきます。",
+      "role": "teacher",
+      "speed": 1.02,
+      "duration": 17.073333333333334,
+      "sha256": "94cbc954e2fa62ddeac6f66fc5affd886658c5a4f7764199875fa16c47935495",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_teacher_4.wav",
+      "spoken_text": "大事なのは、答えを一つに決めることより、どの言葉からそう考えたのか、説明できることです。隣の人と意見が違っても、それで構いません。文章の中に根拠を探す。その読み方を、覚えておいてください。",
+      "role": "teacher",
+      "speed": 1.02,
+      "duration": 18.699958333333335,
+      "sha256": "81192bdfc9bc7779b3d8f354cb282edf885603271697326a4d51f7d4b11295dd",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_student_a_0.wav",
+      "spoken_text": "エフ十二は梱包した。機材ケースは視聴覚室に置いておいて。",
+      "role": "student_a",
+      "speed": 1.0,
+      "duration": 5.2439583333333335,
+      "sha256": "f3ad29c47b7047a271566f30663d3dd89059789d5d44630162f18a8fe6f252bd",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_student_b_0.wav",
+      "spoken_text": "暗証番号は？",
+      "role": "student_b",
+      "speed": 1.0,
+      "duration": 1.5886666666666667,
+      "sha256": "da91e781678f292610e731a3fcf037c1abfd5da58f626f5f794dff46235d4b1e",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_student_a_1.wav",
+      "spoken_text": "文化祭の日付。月、それから日。プログラムと同じ。",
+      "role": "student_a",
+      "speed": 1.0,
+      "duration": 5.157291666666667,
+      "sha256": "427a5bbc7faf789b1fe7a5e64a98714b1d102a3dc02fd5444034b39feddf6221",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_student_b_1.wav",
+      "spoken_text": "誰か、まだ残ってなかった？",
+      "role": "student_b",
+      "speed": 1.0,
+      "duration": 2.228666666666667,
+      "sha256": "dc95baec44856f1a24b5f7a475caf753b36057a4be87ec771d9fbe7c6bbb5e5c",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_student_a_2.wav",
+      "spoken_text": "確認したんじゃなかったの？",
+      "role": "student_a",
+      "speed": 1.0,
+      "duration": 2.2599583333333335,
+      "sha256": "f0f9d51aa473d6b9e81bd76dfc351682d6ead11b68cd4b53146771e2c40441ab",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_chatter_a.wav",
+      "spoken_text": "ここ、どう思う？",
+      "role": "student_a",
+      "speed": 1.03,
+      "duration": 1.418,
+      "sha256": "1b95a145a3b05b1f6a88c781fe8eef4a67c7acbff054cf7bdce7925f11ce75eb",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_chatter_b.wav",
+      "spoken_text": "うん、そうかも。",
+      "role": "student_b",
+      "speed": 1.03,
+      "duration": 1.4279583333333334,
+      "sha256": "0db4b0a767a89f3ef0da02e979e92a022dae78aed67753a36a3bbbb9082d0a65",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "language": "ja-JP",
+  "model": "hexgrad/Kokoro-82M v1.0",
+  "model_page": "https://huggingface.co/hexgrad/Kokoro-82M",
+  "runtime": "kokoro-onnx 0.6.1 / Misaki Japanese",
+  "mode": "local CPU; stock voices; no cloning",
+  "model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+  "cast": {
+    "teacher": "jm_kumo",
+    "player": "jm_kumo only; no English style blend",
+    "student_a": "same student male style",
+    "student_b": "jf_alpha"
+  },
+  "clips": [
+    {
+      "file": "assets/audio/production/ja_audition_confused.wav",
+      "spoken_text": "みんな、どこに行ったんだ？",
+      "role": "player",
+      "speed": 1.04,
+      "duration": 2.0312916666666667,
+      "sha256": "3a98a8745ba913128c8200c0864a5166c5e277e658dc14b422973b809f86c956",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_audition_realization.wav",
+      "spoken_text": "文化祭の展示……二階か。",
+      "role": "player",
+      "speed": 1.02,
+      "duration": 3.1046666666666667,
+      "sha256": "89bad7bc0575051c04fe88faf674fa9e131ecc73a21c74f44d23d4792fb423e0",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    },
+    {
+      "file": "assets/audio/production/ja_audition_teacher.wav",
+      "spoken_text": "教科書の四十二ページを開いてください。",
+      "role": "teacher",
+      "speed": 0.98,
+      "duration": 3.518,
+      "sha256": "0cc07901f21bc6bfbaa326a8f7c8d4bed966eafa83020bf21a13a8c936c02d63",
+      "review": "Generated and measured; native-speaker acting/pronunciation review pending."
+    }
+  ],
+  "purpose": "Three short candidate auditions only. Native pronunciation/acting and youthful register not approved. Gameplay player/teacher disabled pending acceptable delivery."
+}

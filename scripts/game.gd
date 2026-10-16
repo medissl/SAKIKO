@@ -6,20 +6,41 @@ const Expansion = preload("res://scripts/school_expansion.gd")
 const Progression = preload("res://scripts/progression.gd")
 const Player = preload("res://scripts/player.gd")
 const ROOMS = ["1年 A組", "2年 B組", "保健室", "職員室", "3年 C組", "視聴覚室"]
+# Balance against recorded footsteps; avoid amplifying already-loud scare vocals.
+const INTERACTION_GAIN := {"locked":9.0,"door_track":7.0,"latch":6.0,"close":7.0,"drawer_slide":7.0,"cabinet_hinge":7.0,"bag_fabric":7.0,"case_latch":7.0,"paper_lift":8.0,"paper_flip":8.0,"photo_handle":8.0,"shelf_track":6.0,"lock_turn":7.0,"shackle_release":7.0,"key":5.0,"unlock":5.0,"code_tick":10.0,"creak":5.0,"quiet_knocks":5.0}
 var ending: Control
 var ending_started := false
-var entrance_locks: Array[MeshInstance3D] = []
+var hardware=preload("res://scripts/school_hardware.gd").new()
+var entrance_locks: Array[Node3D] = []
+var props=preload("res://scripts/school_props.gd").new()
+var finishing=preload("res://scripts/school_finishing.gd").new()
+var audio_trace: Array[Dictionary]=[]
+var input_focused:=true
+var studio_intro: CanvasLayer
+var menu_indicator: ColorRect
+var menu_selection: Button
+var main_menu_return:="PLAY"
+var nav_buttons: Array[Button]=[]
+var moving_sounds: Array[WeakRef]=[]
+var last_step_sample: Dictionary={}
+var player_steps: Array[WeakRef]=[]
+var audio_production: Dictionary={"tape_captions":[]}
+var voice_quality: Dictionary={"player_enabled":false,"teacher_enabled":false,"tape_enabled":false}
+var layout: Node3D
 var expansion: Node
 var progression: Node
 var music: AudioStreamPlayer
 var nav_blocked := {}
 var mode := "menu"
 var world: Node3D
+var player_voice: Node
+var chase_layer: AudioStreamPlayer
 var player: CharacterBody3D
 var enemy: CharacterBody3D
 var menu_camera: Camera3D
 var scare_camera: Camera3D
 var scare_head: CharacterBody3D
+var interaction_hints: Control
 var gui: Control
 var menu: Control
 var hud: Label
@@ -31,10 +52,17 @@ var keys: Array[Node3D] = []
 var doors: Array[Dictionary] = []
 var obstacles: Array[AABB] = []
 var materials := {}
+var static_boxes: Array[MeshInstance3D]=[]
+var compare_static_geometry:="--profile-compare" in OS.get_cmdline_user_args()
+var box_meshes: Dictionary={}
+var static_optimizer: RefCounted
 var sounds := {}
 var lights: Array[OmniLight3D] = []
 var nav := AStar3D.new()
 var nav_lookup := {}
+var aimed_frame:=-1
+var aimed_cache: Dictionary={}
+var interaction_cache_enabled:=true
 var path := PackedVector3Array()
 var waypoint := Vector3.ZERO
 var target := Vector3.ZERO
@@ -47,8 +75,12 @@ var previous_enemy := Vector3.ZERO
 var grace := 0.0
 var collected := 0
 var exit_open := false
-var checkpoint := Vector3(-20.5,0,-5)
+var checkpoint_state: Dictionary={}
+var checkpoint_id:="start"
+var checkpoint := Vector3(15.46,0,2.7)
 var pain_triggered := false
+var capture_ghost: AudioStreamPlayer
+var capture_scream_started:=false
 var exit_panels: Array[MeshInstance3D] = []
 var clock := 0.0
 var breath: AudioStreamPlayer3D
@@ -57,14 +89,14 @@ var hum: AudioStreamPlayer
 var creak_clock := 11.0
 var capture_time := 0.0
 var message_time := 0.0
-var settings := {"master": .8,"ambience": .65,"sfx": .8,"sensitivity": 2.0,"fullscreen": false,"shake": true,"reduced":false}
+var settings := {"master": .8,"ambience": .65,"sfx": .8,"voice":.8,"subtitles":true,"sensitivity": 2.0,"fullscreen": false,"shake": true,"reduced":false,"msaa":2}
 var options_return := "menu"
-var font: SystemFont
+var font: Font
 var serif: SystemFont
 var horror_font: Font
 var desk_asset: PackedScene
 var chair_asset: PackedScene
-var exit_point := Vector3(-24,0,0)
+var exit_point := Vector3(.19,0,12)
 var room_key_points: Array[Array] = []
 
 func _ready() -> void:
@@ -73,16 +105,46 @@ func _ready() -> void:
 	setup_input()
 	load_settings()
 	setup_audio()
-	font = SystemFont.new()
-	font.font_names = PackedStringArray(["Yu Gothic","MS Gothic","Arial"])
+	# Keep startup loading and the developer splash silent, including warm-up frames.
+	AudioServer.set_bus_mute(AudioServer.get_bus_index("Master"),true)
+	font = load("res://assets/fonts/SakikoSchoolSans.ttf")
 	serif = SystemFont.new()
 	serif.font_names = PackedStringArray(["Georgia","Times New Roman"])
 	horror_font = load("res://assets/fonts/SakikoThorn.ttf")
 	horror_font.fallbacks = [font]
+	# Cover warm-up render frames as well as the timed splash; no school flash.
+	studio_intro = preload("res://scripts/studio_intro.gd").new()
+	add_child(studio_intro)
+	studio_intro.setup(self)
+	studio_intro.active=false
 	desk_asset = load("res://assets/furniture/desk/desk.gltf")
 	chair_asset = load("res://assets/furniture/chair/chair.gltf")
+	hardware.game=self
+	props.game=self
+	if FileAccess.file_exists("res://assets/audio/production.json"): audio_production=JSON.parse_string(FileAccess.get_file_as_string("res://assets/audio/production.json"))
 	make_materials()
+	finishing.setup(self)
 	build_school()
+	if "--layout-shell" in OS.get_cmdline_user_args():
+		studio_intro.queue_free()
+		studio_intro=null
+		set_process(false)
+		set_physics_process(false)
+		mode="playing"
+		player=Player.new()
+		player.game=self
+		add_child(player)
+		player.position=Vector3(10,0,10)
+		call_deferred("verify_layout_shell")
+		return
+	layout.build_furniture()
+	props.dress(layout)
+	finishing.representatives(layout)
+	finishing.complete_rooms(layout)
+	if "--profile-compare" in OS.get_cmdline_user_args():
+		static_optimizer=preload("res://scripts/static_geometry.gd").new()
+		static_optimizer.build(self,static_boxes)
+	static_boxes.clear()
 	expansion = Expansion.new()
 	add_child(expansion)
 	expansion.build(self)
@@ -97,18 +159,19 @@ func _ready() -> void:
 	add_child(enemy)
 	breath = AudioStreamPlayer3D.new()
 	breath.stream = sounds.sakiko_humming
-	breath.pitch_scale = .84
+	breath.pitch_scale = .96
 	breath.bus = "Ghost"
 	breath.volume_db = -13
 	breath.max_distance = 23
 	breath.unit_size = 3
 	enemy.add_child(breath)
-	breath.finished.connect(breath.play)
+	breath.finished.connect(func():
+		if mode=="playing" and ai_state=="chase": breath.play())
 	breath.play()
 	menu_camera = Camera3D.new()
-	menu_camera.position = Vector3(-21,1.65,-5)
+	menu_camera.position = Vector3(10,1.65,10)
 	add_child(menu_camera)
-	menu_camera.look_at(Vector3(20,1.5,-5.3))
+	menu_camera.look_at(Vector3(46,1.5,10))
 	menu_camera.fov = 68
 	scare_camera = Camera3D.new()
 	scare_camera.position = Vector3(0,-40,0)
@@ -131,12 +194,58 @@ func _ready() -> void:
 	add_child(light)
 	build_gui()
 	progression.setup_ui()
+	player_voice=preload("res://scripts/school_voice.gd").new()
+	add_child(player_voice)
+	player_voice.build(self)
+	var environment_audio:=preload("res://scripts/environment_audio.gd").new()
+	add_child(environment_audio)
+	environment_audio.build(self)
+	await warm_capture_assets()
 	show_main_menu()
+	# Startup only: returning from OPTIONS / CREATOR never replays the branding.
+	mode = "studio_intro"
+	menu.process_mode = Node.PROCESS_MODE_DISABLED
+	menu.release_focus()
+	var master_bus := AudioServer.get_bus_index("Master")
+	AudioServer.set_bus_mute(master_bus,true)
+	studio_intro.active=true
+	await studio_intro.finished
+	studio_intro = null
+	mode = "menu"
+	menu.process_mode = Node.PROCESS_MODE_INHERIT
+	AudioServer.set_bus_mute(master_bus,settings.master<=0)
+	if is_instance_valid(menu_selection): menu_selection.grab_focus()
+	# An external local driver can exercise the exact export without shipping QA files.
+	var launch_args:=OS.get_cmdline_user_args()
+	if "--release-qa" in launch_args:
+		var driver_path: String=launch_args[launch_args.find("--release-qa")+1]
+		await load(driver_path).new().run(self)
+		return
+	if not OS.has_feature("editor"): return
 	if "--verify" in OS.get_cmdline_user_args(): call_deferred("verify_game")
 	if "--render-audit" in OS.get_cmdline_user_args(): call_deferred("render_audit")
+	if "--interaction-audit" in OS.get_cmdline_user_args(): call_deferred("interaction_audit")
 	if "--presentation-audit" in OS.get_cmdline_user_args(): call_deferred("presentation_audit")
+	if "--bake-courtyard" in OS.get_cmdline_user_args(): call_deferred("bake_courtyard")
+	if "--scenery-render" in OS.get_cmdline_user_args(): call_deferred("scenery_render")
+	if "--corrections-render" in OS.get_cmdline_user_args(): call_deferred("corrections_render")
+	if "--bugfix-lighting-render" in OS.get_cmdline_user_args(): call_deferred("bugfix_lighting_render")
+	if "--bugfix-check" in OS.get_cmdline_user_args(): call_deferred("bugfix_check")
+	if "--profile-route" in OS.get_cmdline_user_args(): call_deferred("profile_route")
+	if "--placement-audit" in OS.get_cmdline_user_args(): call_deferred("placement_audit")
+	if "--nonverbal-check" in OS.get_cmdline_user_args(): call_deferred("nonverbal_check")
+	if "--master-ui-check" in OS.get_cmdline_user_args(): call_deferred("master_ui_check")
+	if "--bugfix-menu-render" in OS.get_cmdline_user_args(): call_deferred("bugfix_menu_render")
+	if "--revamp-render" in OS.get_cmdline_user_args(): call_deferred("polish_render_audit")
+	if "--polish-render" in OS.get_cmdline_user_args(): call_deferred("polish_render_audit")
 
 func setup_input() -> void:
+	for side in [["sprint_left",KEY_LOCATION_LEFT],["sprint_right",KEY_LOCATION_RIGHT]]:
+		if not InputMap.has_action(side[0]): InputMap.add_action(side[0])
+		var shift:=InputEventKey.new()
+		shift.physical_keycode=KEY_SHIFT
+		shift.location=side[1]
+		InputMap.action_add_event(side[0],shift)
 	var bindings := {"forward":KEY_W,"back":KEY_S,"left":KEY_A,"right":KEY_D,"sprint":KEY_SHIFT,"interact":KEY_E,"flashlight":KEY_F,"pause":KEY_ESCAPE,"journal":KEY_J}
 	for action in bindings:
 		if not InputMap.has_action(action): InputMap.add_action(action)
@@ -156,17 +265,30 @@ func save_settings() -> void:
 	apply_settings()
 
 func apply_settings() -> void:
-	for pair in [["Master","master"],["Ambience","ambience"],["SFX","sfx"]]:
+	get_viewport().msaa_3d=clampi(int(settings.msaa),0,2)
+	for pair in [["Master","master"],["Ambience","ambience"],["SFX","sfx"],["Voice","voice"],["Ghost","voice"],["CreatureDry","voice"]]:
 		AudioServer.set_bus_volume_db(AudioServer.get_bus_index(pair[0]),linear_to_db(maxf(.0001,settings[pair[1]])))
+		AudioServer.set_bus_mute(AudioServer.get_bus_index(pair[0]),settings[pair[1]]<=0)
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if settings.fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 
 func setup_audio() -> void:
-	for bus in ["Ambience","SFX","Ghost"]:
+	voice_quality=JSON.parse_string(FileAccess.get_file_as_string("res://assets/audio/voice_quality.json"))
+	for bus in ["Ambience","SFX","PlayerSFX","WorldSFX","Ghost","CreatureDry","Voice","TeacherVoice","Classroom"]:
 		if AudioServer.get_bus_index(bus) < 0:
 			AudioServer.add_bus()
 			AudioServer.set_bus_name(AudioServer.bus_count-1,bus)
 			AudioServer.set_bus_send(AudioServer.bus_count-1,"Master")
 	AudioServer.set_bus_send(AudioServer.get_bus_index("Ghost"),"SFX")
+	for bus in ["PlayerSFX","WorldSFX","CreatureDry"]: AudioServer.set_bus_send(AudioServer.get_bus_index(bus),"SFX")
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("PlayerSFX"),-1)
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("WorldSFX"),0)
+	if AudioServer.get_bus_effect_count(0)==0:
+		var limiter:=AudioEffectHardLimiter.new()
+		limiter.ceiling_db=-1.0
+		limiter.pre_gain_db=0
+		AudioServer.add_bus_effect(0,limiter)
+	AudioServer.set_bus_send(AudioServer.get_bus_index("TeacherVoice"),"Voice")
+	AudioServer.set_bus_send(AudioServer.get_bus_index("Classroom"),"Ambience")
 	if AudioServer.get_bus_effect_count(AudioServer.get_bus_index("Ghost"))==0:
 		var room := AudioEffectReverb.new()
 		room.room_size = .38
@@ -174,25 +296,36 @@ func setup_audio() -> void:
 		room.wet = .16
 		room.dry = .92
 		AudioServer.add_bus_effect(AudioServer.get_bus_index("Ghost"),room)
-	for clip_name in ["ambience","hum","creak","step","hover","press","key","unlock","locked","door","breath","chase","capture","menu_music","chime","classroom","run_step","pant","giggle","scream","latch","close","capture_v2","player_pain","quiet_knocks"]:
+	for clip_name in ["ambience","hum","creak","step","hover","press","key","unlock","locked","door","breath","chase","capture","menu_music","chime","school_bell","classroom","run_step","pant","giggle","scream","latch","close","capture_v2","player_pain","quiet_knocks"]:
 		sounds[clip_name] = load("res://assets/audio/%s.wav" % clip_name)
+	# Warm short interaction resources once, outside movement and puzzle input.
+	for clip_name in ["door_track","shelf_track","drawer_slide","cabinet_hinge","bag_fabric","case_latch","paper_lift","paper_flip","photo_handle","lock_turn","shackle_release","code_tick"]:
+		sounds[clip_name]=load("res://assets/audio/%s.wav" % clip_name)
+	sounds.locked=load("res://assets/audio/locked_rattle.wav")
+	for surface in ["wood","tile","stair"]:
+		for gait in ["walk","run"]:
+			for index in range(3):
+				var clip_name:="foot_%s_%s_%d" % [surface,gait,index]
+				sounds[clip_name]=load("res://assets/audio/%s.wav" % clip_name)
 	sounds.sakiko_humming = load("res://assets/audio/sakiko_humming.ogg")
 	sounds.sakiko_scream = load("res://assets/audio/sakiko_scream.ogg")
 	sounds.sakiko_laugh = load("res://assets/audio/sakiko_laugh.ogg")
+	capture_ghost=AudioStreamPlayer.new()
+	capture_ghost.bus="CreatureDry"
+	add_child(capture_ghost)
 	ambient = AudioStreamPlayer.new()
-	ambient.stream = sounds.ambience
+	ambient.stream = load("res://assets/audio/building_roomtone.wav")
 	ambient.bus = "Ambience"
 	ambient.volume_db = -12
 	add_child(ambient)
 	ambient.finished.connect(ambient.play)
 	ambient.play()
 	hum = AudioStreamPlayer.new()
-	hum.stream = sounds.hum
+	hum.stream = load("res://assets/audio/suspense_texture.wav")
 	hum.volume_db = -24
 	hum.bus = "Ambience"
 	add_child(hum)
-	hum.finished.connect(hum.play)
-	hum.play()
+	# A finite authored texture; ordinary room tone carries the quiet sections.
 	music = AudioStreamPlayer.new()
 	music.stream = load("res://assets/audio/menu_theme.ogg")
 	music.bus = "Ambience"
@@ -206,12 +339,84 @@ func sound(clip_name: String, db := -10.0, pitch := 1.0) -> void:
 	if mode=="quitting" or not sounds.has(clip_name): return
 	var p := AudioStreamPlayer.new()
 	p.stream = sounds[clip_name]
-	p.volume_db = db
+	p.volume_db = db + float(INTERACTION_GAIN.get(clip_name,0.0))
 	p.pitch_scale = pitch
 	p.bus = "Ghost" if clip_name.begins_with("sakiko_") else "SFX"
 	add_child(p)
 	p.finished.connect(p.queue_free)
 	p.play()
+
+func world_sound(clip: String,point: Vector3,db: float,duration: float=0.0) -> AudioStreamPlayer3D:
+	audio_trace.append({"clip":clip,"point":point})
+	if audio_trace.size()>32: audio_trace.pop_front()
+	var audio:=AudioStreamPlayer3D.new()
+	audio.stream=sounds.get(clip,sounds.latch)
+	audio.position=point
+	audio.volume_db=db + float(INTERACTION_GAIN.get(clip,0.0))
+	if player and absf(point.y-player.camera.global_position.y)>2.5: audio.volume_db-=10
+	elif player:
+		var q:=PhysicsRayQueryParameters3D.create(player.camera.global_position,point,1)
+		q.exclude=[player.get_rid()]
+		var hit: Dictionary=get_world_3d().direct_space_state.intersect_ray(q)
+		# A latch inside its own panel is not a distant sound behind a room wall.
+		if not hit.is_empty() and hit.position.distance_to(point)>.4: audio.volume_db-=6
+	audio.bus="WorldSFX"
+	audio.unit_size=3
+	audio.max_distance=20
+	world.add_child(audio)
+	audio.finished.connect(audio.queue_free)
+	audio.play()
+	if duration>0:
+		var weak: WeakRef=weakref(audio)
+		moving_sounds.append(weak)
+		get_tree().create_timer(duration).timeout.connect(func():
+			var live: AudioStreamPlayer3D=weak.get_ref()
+			if live: live.stop(); live.queue_free())
+	return audio
+
+func footstep(running: bool) -> void:
+	var surface: String=contact_surface()
+	var family: String="foot_"+surface+("_run_" if running else "_walk_")
+	var index: int=randi_range(0,2)
+	if index==int(last_step_sample.get(family,-1)): index=(index+1+randi_range(0,1))%3
+	last_step_sample[family]=index
+	var sample: String=family+str(index)
+	var audio:=world_sound(sample,player.position+Vector3(0,.08,0),-13 if running else -16)
+	audio.bus="PlayerSFX"
+	player_steps=player_steps.filter(func(weak): return weak.get_ref()!=null)
+	player_steps.append(weakref(audio))
+	if progression.hunt_enabled and grace<=0 and ai_state!="chase" and progression.encounters_controller.pressure_cooldown<=0:
+		var reach: float=8.0 if running else 3.2
+		var origin: Vector3=player.position+Vector3(0,1.2,0)
+		if not clear_line(enemy.position,origin): reach*=.4
+		if absf(enemy.position.y-origin.y)<1.8 and enemy.position.distance_to(origin)<reach:
+			last_seen=player.position+Vector3(0,1.5,0)
+			ai_state="investigate"
+			state_time=0
+			navigate(last_seen)
+
+func stop_player_steps() -> void:
+	for weak in player_steps:
+		var audio: AudioStreamPlayer3D=weak.get_ref()
+		if audio: audio.stop(); audio.queue_free()
+	player_steps.clear()
+
+func contact_surface() -> String:
+	var q:=PhysicsRayQueryParameters3D.create(player.global_position+Vector3(0,.22,0),player.global_position-Vector3(0,.42,0),1)
+	q.exclude=[player.get_rid()]
+	var hit: Dictionary=get_world_3d().direct_space_state.intersect_ray(q)
+	if not hit.is_empty():
+		var node: Node=hit.collider
+		while node and node!=world:
+			if node.has_meta("step_surface"): return node.get_meta("step_surface")
+			node=node.get_parent()
+	return "wood"
+
+func persist_voice_flags() -> void:
+	if checkpoint_state.is_empty(): return
+	checkpoint_state.voice=player_voice.snapshot()
+	var saved:=FileAccess.open("user://checkpoint.save",FileAccess.WRITE)
+	if saved: saved.store_var(checkpoint_state); saved.close()
 
 func make_materials() -> void:
 	for item in [["wall","a1aaa1","plaster"],["floor","adb1a4","floor"],["wood","b7a38b","wood"],["ceiling","93998f","ceiling"],["dark","171e1c",""],["metal","64716b",""],["chalk","203e37",""],["paper","b2b1a0",""],["red","5f2325",""],["glass","263f45",""],["gold","c8a454",""]]:
@@ -272,9 +477,13 @@ func make_exterior_window(cx: float,side: int,dx: float,room: int) -> void:
 func box(pos: Vector3, size: Vector3, mat: String, solid := true, parent: Node3D = null) -> MeshInstance3D:
 	if parent == null: parent = world
 	var mi := MeshInstance3D.new()
-	var mesh := BoxMesh.new()
-	mesh.size = size
+	if not box_meshes.has(size):
+		var shared:=BoxMesh.new()
+		shared.size=size
+		box_meshes[size]=shared
+	var mesh: BoxMesh=box_meshes[size]
 	mi.mesh = mesh
+	if compare_static_geometry: static_boxes.append(mi)
 	mi.material_override = materials[mat]
 	mi.position = pos
 	parent.add_child(mi)
@@ -286,7 +495,12 @@ func box(pos: Vector3, size: Vector3, mat: String, solid := true, parent: Node3D
 		c.shape = s
 		b.add_child(c)
 		mi.add_child(b)
-		obstacles.append(mi.global_transform*AABB(-size*.5,size))
+		var dynamic:=false
+		var ancestor: Node=parent
+		while ancestor and ancestor!=world:
+			if ancestor.get_meta("dynamic_nav",false): dynamic=true; break
+			ancestor=ancestor.get_parent()
+		if not dynamic: obstacles.append(mi.global_transform*AABB(-size*.5,size))
 	return mi
 
 func label3(text: String, pos: Vector3, yaw := 0.0, scale_factor := .009, color := Color("c3c7b2")) -> Label3D:
@@ -299,6 +513,8 @@ func label3(text: String, pos: Vector3, yaw := 0.0, scale_factor := .009, color 
 	l.position = pos
 	l.rotation.y = yaw
 	l.no_depth_test = false
+	l.shaded=true
+	l.billboard=BaseMaterial3D.BILLBOARD_DISABLED
 	world.add_child(l)
 	return l
 
@@ -310,7 +526,19 @@ func lamp(pos: Vector3, energy: float, tint: Color, shadows := false) -> void:
 	l.omni_range = 10
 	l.omni_attenuation = 1.5
 	l.shadow_enabled = shadows
+	l.set_meta("day_energy",energy*.38)
+	l.set_meta("night_energy",0.0)
 	world.add_child(l)
+	var fixture:=Node3D.new()
+	fixture.position=pos
+	fixture.set_meta("placement_category","CEILING_FIXTURE")
+	world.add_child(fixture)
+	box(Vector3(0,.12,0),Vector3(1.15,.075,.24),"metal",false,fixture)
+	box(Vector3(0,.073,0),Vector3(1.06,.025,.18),"paper",false,fixture)
+	var floor_y: float=4.2 if pos.y>4.2 else 0.0
+	var ceiling_y: float=floor_y+3.2
+	if (pos.x<8 or pos.x>48) and pos.z>=16 and pos.z<=24: ceiling_y=4.0 if floor_y==0 else 7.4
+	for x in [-.45,.45]: box(Vector3(x,(ceiling_y-pos.y+.16)/2,0),Vector3(.014,maxf(.02,ceiling_y-pos.y-.16),.014),"metal",false,fixture)
 	lights.append(l)
 
 func build_school() -> void:
@@ -324,6 +552,8 @@ func build_school() -> void:
 	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	e.ambient_light_color = Color("72878b")
 	e.ambient_light_energy = .075
+	e.ambient_light_sky_contribution=0
+	e.reflected_light_source=Environment.REFLECTION_SOURCE_DISABLED
 	e.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	e.fog_enabled = true
 	e.fog_light_color = Color("142226")
@@ -331,212 +561,105 @@ func build_school() -> void:
 	e.fog_sky_affect = 0
 	env.environment = e
 	world.add_child(env)
-	# Continuous floors and ceilings; walls form a deliberately legible rectangular loop.
-	for z in [-5.0,5.0]:
-		box(Vector3(0,-.15,z),Vector3(54,.3,4),"floor")
-		box(Vector3(0,3.5,z),Vector3(54,.2,4),"ceiling")
-		box(Vector3(0,1.7,z-signf(z)*2),Vector3(46,3.4,.18),"wall")
-		for x in range(-20,24,8):
-			box(Vector3(x,3.24,z),Vector3(1.8,.10,.25),"metal",false)
-			box(Vector3(x,3.16,z),Vector3(1.56,.045,.14),"light",false)
-			lamp(Vector3(x,2.95,z),.58 if x%16 == 0 else .22,Color("b3c7ad"))
-		for x in range(-24,25,4):
-			box(Vector3(x,3.27,z),Vector3(.12,.25,4),"dark",false)
-			box(Vector3(x,.12,z-signf(z)*1.87),Vector3(3.9,.2,.08),"wood",false)
-	for x in [-25.0,25.0]:
-		box(Vector3(x,-.15,0),Vector3(4,.3,14),"floor")
-		box(Vector3(x,3.5,0),Vector3(4,.2,14),"ceiling")
-		if x<0: box(Vector3(x+signf(x)*2,1.7,0),Vector3(.2,3.4,14),"wall")
-		lamp(Vector3(x,2.7,0),.5,Color("8aabbc"))
-	# The entrance is a short vestibule facing the west connector.
-	box(Vector3(-26.84,1.7,0),Vector3(.1,3.1,3.2),"dark",false)
-	for z in [-.78,.78]:
-		exit_panels.append(box(Vector3(-26.70,1.5,z),Vector3(.12,2.9,1.48),"metal",false))
-		box(Vector3(-26.60,1.95,z),Vector3(.08,1.25,1.18),"glass",false)
-	for i in range(4):
-		var body := box(Vector3(-26.48,.62+i*.49,0),Vector3(.12,.25,.24),"red",false)
-		entrance_locks.append(body)
-		var ring := MeshInstance3D.new()
-		var torus := TorusMesh.new()
-		torus.inner_radius = .075
-		torus.outer_radius = .095
-		ring.mesh = torus
-		ring.rotation.z = PI/2
-		ring.position = Vector3(-26.48,.80+i*.49,0)
-		ring.material_override = materials.metal
-		world.add_child(ring)
-	label3("非常口  /  ENTRANCE\n4 KEYS REQUIRED",Vector3(-26.47,3.06,0),PI/2,.007)
-	for i in range(8):
-		for y in range(3):
-			var p := Vector3(-25.7,.4+y*.58,3.1+i*.38)
-			box(p,Vector3(.65,.53,.34),"metal")
-			box(p+Vector3(.34,0,0),Vector3(.03,.35,.22),"dark",false)
-	# Six rooms, each with TWO wide sliding doors so players can break sight and loop.
-	for side in [-1,1]:
-		for ri in range(3):
-			var cx := float(ri-1)*16
-			var cz := float(side)*12
-			var idx := ri+(3 if side>0 else 0)
-			box(Vector3(cx,-.15,cz),Vector3(14,.3,10),"floor")
-			box(Vector3(cx,3.5,cz),Vector3(14,.2,10),"ceiling")
-			box(Vector3(cx,1.7,side*17),Vector3(14,3.4,.2),"wall")
-			for dx in [-7,7]: box(Vector3(cx+dx,1.7,cz),Vector3(.2,3.4,10),"wall")
-			var door_z: float = side*7.0
-			for seg in [[-6.5,1.0],[0.0,6.0],[6.5,1.0]]:
-				box(Vector3(cx+seg[0],1.7,door_z),Vector3(seg[1],3.4,.18),"wall")
-			for dx in [-4.5,4.5]:
-				box(Vector3(cx+dx,3.06,door_z),Vector3(3.4,.68,.24),"wood")
-				make_door(Vector3(cx+dx,0,door_z),side)
-				label3(ROOMS[idx],Vector3(cx+dx,2.92,door_z-side*.16),0.0 if side<0 else PI,.0055)
-			for dx in [-3.8,3.8]:
-				make_exterior_window(cx,side,dx,ri)
-			# Chalkboard on the side wall leaves the exterior windows unobstructed.
-			box(Vector3(cx-6.82,2.0,cz),Vector3(.08,1.5,4.3),"chalk",false)
-			box(Vector3(cx-6.70,1.20,cz),Vector3(.23,.08,4.5),"wood",false)
-			label3("日直   10月15日\n\n 帰りましょう。",Vector3(cx-6.72,2.05,cz),PI/2,.005)
-			var spawn_points: Array = []
-			if idx == 2: # Infirmary: recognizable beds and red medicine cabinet.
-				for dx in [-4,0,4]:
-					box(Vector3(cx+dx,.52,cz+side*1.4),Vector3(1.7,.6,3),"metal")
-					box(Vector3(cx+dx,.88,cz+side*1.4),Vector3(1.65,.15,2.9),"paper",false)
-					box(Vector3(cx+dx,1,cz+side*2.3),Vector3(1.3,.15,.6),"wall",false)
-				box(Vector3(cx+5,.9,cz-1),Vector3(1.5,1.8,.65),"paper")
-				box(Vector3(cx+5,1.3,cz-1.34),Vector3(.65,.16,.02),"red",false)
-				box(Vector3(cx+5,1.3,cz-1.35),Vector3(.16,.65,.02),"red",false)
-				desk(Vector3(cx-4,0,cz-2.8))
-				spawn_points.append(Vector3(cx-4,.91,cz-2.8))
-			else:
-				for dx in [-3.9,0.0,3.9]:
-					for dz in [-1.4,1.3]:
-						desk(Vector3(cx+dx,0,cz+dz),PI/2 if idx==0 else 0.0)
-						spawn_points.append(Vector3(cx+dx,.91,cz+dz))
-				desk(Vector3(cx+3,0,cz+side*3.5))
-				if idx==3:
-					for dx in [-5.7,5.7]: box(Vector3(cx+dx,.85,cz+2.8),Vector3(1.5,1.7,2.2),"metal")
-				if idx==5:
-					box(Vector3(cx-3,.7,cz+3.6),Vector3(3.2,1.4,.8),"dark")
-					box(Vector3(cx-3,.95,cz+3.08),Vector3(3,.12,.36),"paper",false)
-					for k in range(22):
-						box(Vector3(cx-4.4+k*.13,1.03,cz+3.18),Vector3(.055,.05,.19),"dark",false)
-			room_key_points.append(spawn_points)
-			# Noticeboard with layered papers, clock and a room-specific landmark.
-			box(Vector3(cx,2.05,door_z+side*.14),Vector3(2.8,1.25,.12),"wood",false)
-			for i in range(6):
-				box(Vector3(cx-.95+i*.38,2.0+sin(i*4.0)*.12,door_z+side*.22),Vector3(.32,.64,.012),"paper",false)
-			var clock_face := MeshInstance3D.new()
-			var disk := CylinderMesh.new()
-			disk.top_radius = .28
-			disk.bottom_radius = .28
-			disk.height = .035
-			clock_face.mesh = disk
-			clock_face.material_override = materials.paper
-			clock_face.position = Vector3(cx+6.84,2.75,cz)
-			clock_face.rotation.z = PI/2
-			world.add_child(clock_face)
-			box(Vector3(cx+6.81,2.82,cz),Vector3(.035,.18,.025),"dark",false)
-			box(Vector3(cx+6.80,2.75,cz+.09),Vector3(.035,.025,.2),"dark",false)
-			lamp(Vector3(cx,3.1,cz),.34,Color("b8c2aa"))
-			box(Vector3(cx,3.25,cz),Vector3(2,.1,.3),"light",false)
-	# Dust uses tiny unlit quads, distributed sparingly in the lit corridors.
-	var dustmat := StandardMaterial3D.new()
-	dustmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	dustmat.albedo_color = Color(.46,.58,.6,.20)
-	dustmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	var particles := GPUParticles3D.new()
-	particles.amount = 110
-	particles.lifetime = 16
-	particles.visibility_aabb = AABB(Vector3(-28,0,-18),Vector3(56,4,36))
-	var process := ParticleProcessMaterial.new()
-	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	process.emission_box_extents = Vector3(26,1.5,16)
-	process.gravity = Vector3(0,.014,0)
-	process.initial_velocity_min = .015
-	process.initial_velocity_max = .045
-	process.scale_min = .008
-	process.scale_max = .022
-	particles.process_material = process
-	var quad := SphereMesh.new()
-	quad.material = dustmat
-	particles.draw_pass_1 = quad
-	particles.position.y = 1.5
-	world.add_child(particles)
+	layout=preload("res://scripts/school_layout.gd").new()
+	world.add_child(layout)
+	layout.build_geometry(self)
+	for door in doors: fit_door_tracks(door)
 
-func desk(pos: Vector3,yaw := 0.0) -> void:
+func desk(pos: Vector3,yaw := 0.0) -> Node3D:
 	var group := Node3D.new()
 	group.position = pos
 	group.rotation.y = yaw
 	world.add_child(group)
-	var model := desk_asset.instantiate() as Node3D
-	model.scale = Vector3.ONE*.95
-	group.add_child(model)
-	var chair := chair_asset.instantiate() as Node3D
-	chair.position = Vector3(0,0,.83)
-	chair.scale = Vector3.ONE*.91
-	group.add_child(chair)
+	layout.placement.grounded_asset(desk_asset,group,Vector3.ZERO,0,.95)
+	layout.placement.grounded_asset(chair_asset,group,Vector3(0,0,.83),PI,.91)
 	# Simple invisible collision volumes preserve the detailed imported silhouette.
 	var table_collision := box(Vector3(0,.80,0),Vector3(.70,.1,.56),"wood",true,group)
 	table_collision.visible = false
 	var chair_collision := box(Vector3(0,.43,.83),Vector3(.50,.10,.50),"wood",true,group)
 	chair_collision.visible = false
-	var back_collision := box(Vector3(0,.70,1.09),Vector3(.5,.50,.07),"wood",true,group)
-	back_collision.visible = false
-	var paper := box(Vector3(.12,.85,-.04),Vector3(.23,.004,.32),"paper",false,group)
-	paper.rotation.y = sin(pos.x)*.08
+	return group
 
 func make_door(pos: Vector3, side: int) -> void:
-	var root := Node3D.new()
-	root.position = pos
+	var root:=Node3D.new()
+	root.position=pos
+	root.set_meta("placement_category","DOORWAY_ASSEMBLY")
+	root.set_meta("dynamic_nav",true)
 	world.add_child(root)
-	box(Vector3(0,1.34,0),Vector3(2.95,2.65,.11),"wood",false,root)
-	box(Vector3(0,1.85,-side*.065),Vector3(2.5,1.05,.025),"glass",false,root)
-	for dx in [-1.33,0.0,1.33]: box(Vector3(dx,1.85,-side*.09),Vector3(.06,1.2,.05),"metal",false,root)
-	box(Vector3(1.12,1.12,-side*.10),Vector3(.07,.26,.06),"metal",false,root)
-	var body := StaticBody3D.new()
-	root.add_child(body)
-	var cs := CollisionShape3D.new()
-	var shape := BoxShape3D.new()
-	shape.size = Vector3(2.95,2.65,.15)
-	cs.shape = shape
-	cs.position.y = 1.34
-	body.add_child(cs)
-	doors.append({"node":root,"shape":cs,"origin":pos,"open":false,"busy":false})
+	var panels: Array[Node3D]=[]
+	var shapes: Array[CollisionShape3D]=[]
+	# Jambs occupy the architectural reveal, not the wall's end faces.
+	for x in [-1.045,1.045]: box(Vector3(x,1.36,0),Vector3(.07,2.72,.19),"wood",false,root)
+	for y in [.025,2.72]: box(Vector3(0,y,0),Vector3(2.16,.05,.20),"metal",false,root)
+	# Two surface tracks stack the full-size leaves over one metre of solid wall.
+	for i in range(2):
+		var leaf:=Node3D.new()
+		leaf.position=Vector3(-.5 if i==0 else .5,0,side*(.20+i*.14))
+		root.add_child(leaf)
+		panels.append(leaf)
+		box(Vector3(0,.54,0),Vector3(1.02,1.04,.055),"wood",false,leaf)
+		for x in [-.49,.49]: box(Vector3(x,1.86,0),Vector3(.045,1.60,.055),"wood",false,leaf)
+		for y in [1.10,2.66]: box(Vector3(0,y,0),Vector3(1.02,.06,.055),"wood",false,leaf)
+		box(Vector3(0,1.88,0),Vector3(.93,1.48,.018),"glass",false,leaf)
+		box(Vector3(0,1.88,0),Vector3(.93,.03,.055),"wood",false,leaf)
+		for face in [-1,1]: box(Vector3(.38 if i==0 else -.38,1.02,face*.041),Vector3(.035,.18,.02),"dark",false,leaf)
+		var body:=StaticBody3D.new()
+		leaf.add_child(body)
+		var cs:=CollisionShape3D.new()
+		var shape:=BoxShape3D.new()
+		shape.size=Vector3(1.02,2.68,.06)
+		cs.shape=shape
+		cs.position.y=1.34
+		body.add_child(cs)
+		shapes.append(cs)
+	doors.append({"node":root,"shape":shapes[0],"shapes":shapes,"panels":panels,"origin":pos,"open":false,"busy":false,"slide_direction":1.0,"track_side":side,"requirement":"","locked":false})
+
+func fit_door_tracks(d: Dictionary) -> void:
+	var track:=box(Vector3(float(d.slide_direction)*.55,2.75,float(d.track_side)*.27),Vector3(3.26,.07,.27),"metal",false,d.node)
+	track.set_meta("track",true)
+	for z in [.20,.34]:
+		box(Vector3(float(d.slide_direction)*.55,.035,float(d.track_side)*z),Vector3(3.26,.015,.025),"metal",false,d.node)
+	for x in [-float(d.slide_direction)*1.06,float(d.slide_direction)*2.10]: box(Vector3(x,2.68,float(d.track_side)*.27),Vector3(.035,.10,.27),"metal",false,d.node)
 
 func walkable(p: Vector3) -> bool:
-	var valid := (absf(p.z-5)<1.5 or absf(p.z+5)<1.5) and p.x>-26 and p.x<82
-	valid = valid or (absf(p.x-25)<1.3 or absf(p.x+25)<1.3 or absf(p.x-81)<1.3) and absf(p.z)<6.2
-	for cx in Tuning.ROOM_CENTRES:
-		for side in [-1,1]:
-			if absf(p.x-cx)<6.3 and absf(p.z-side*12)<4.3: valid = true
-			if (absf(p.x-cx-4.5)<1.0 or absf(p.x-cx+4.5)<1.0) and absf(p.z-side*7)<1.7: valid = true
-	return valid and not nav_blocked.has(Vector2i(roundi(p.x*2),roundi(p.z*2)))
+	return layout.allowed_position(p)
 
 func build_navigation() -> void:
-	for obstacle in obstacles:
-		if obstacle.position.y>2.5 or obstacle.end.y<.35: continue
-		var a: AABB = obstacle.grow(.92)
-		for x in range(ceili(a.position.x*2),floori(a.end.x*2)+1):
-			for z in range(ceili(a.position.z*2),floori(a.end.z*2)+1): nav_blocked[Vector2i(x,z)] = true
-	for x in range(-52,165):
-		for z in range(-34,35):
-			var p := Vector3(x*.5,1.5,z*.5)
-			if walkable(p):
-				var id := nav.get_available_point_id()
-				nav.add_point(id,p)
-				nav_lookup[Vector2i(x,z)] = id
+	nav.clear()
+	nav_lookup.clear()
+	nav_blocked.clear()
+	var bounds: Array[AABB]=obstacles.duplicate()
+	for dynamic in get_tree().get_nodes_in_group("moving_obstruction"):
+		for mesh in dynamic.find_children("*","MeshInstance3D",true,false):
+			if mesh.get_child_count()>0: bounds.append(mesh.global_transform*mesh.get_aabb())
+	for level in range(2):
+		var floor_y: float=level*4.2
+		for obstacle in bounds:
+			if obstacle.position.y>floor_y+2.5 or obstacle.end.y<floor_y+.35: continue
+			var a: AABB=obstacle.grow(.86)
+			for x in range(ceili(a.position.x*2),floori(a.end.x*2)+1):
+				for z in range(ceili(a.position.z*2),floori(a.end.z*2)+1): nav_blocked[Vector3i(x,z,level)]=true
+		for x in range(0,113):
+			for z in range(0,73):
+				var cell:=Vector3i(x,z,level)
+				var point:=Vector3(x*.5,floor_y,z*.5)
+				if walkable(point) and not nav_blocked.has(cell):
+					var id:=nav.get_available_point_id()
+					nav.add_point(id,point+Vector3(0,1.5,0))
+					nav_lookup[cell]=id
 	for cell in nav_lookup:
-		for offset in [Vector2i(1,0),Vector2i(0,1)]:
+		for offset in [Vector3i(1,0,0),Vector3i(0,1,0)]:
 			if nav_lookup.has(cell+offset): nav.connect_points(nav_lookup[cell],nav_lookup[cell+offset])
-	# Discard isolated pockets narrower than the creature's body (between desks).
-	var connected := {}
-	var pending: Array[int] = [nav.get_closest_point(Vector3(-22,1.5,-5))]
-	while not pending.is_empty():
-		var id: int = pending.pop_back()
-		if connected.has(id): continue
-		connected[id] = true
-		for next in nav.get_point_connections(id):
-			if not connected.has(next): pending.append(next)
-	for id in nav.get_point_ids():
-		if not connected.has(id): nav.remove_point(id)
+	for route in layout.stair_routes:
+		var previous: int=-1
+		for i in range(route.size()):
+			var id:=nav.get_available_point_id()
+			nav.add_point(id,route[i]+Vector3(0,1.5,0))
+			if previous>=0: nav.connect_points(previous,id)
+			if i==0 or i==route.size()-1:
+				var cell:=Vector3i(roundi(route[i].x*2),roundi(route[i].z*2),0 if i==0 else 1)
+				if nav_lookup.has(cell): nav.connect_points(id,nav_lookup[cell])
+			previous=id
 
 func navigate(to: Vector3) -> void:
 	var a := nav.get_closest_point(enemy.position)
@@ -559,17 +682,24 @@ func build_gui() -> void:
 	sm.shader = load("res://shaders/film.gdshader")
 	film.material = sm
 	gui.add_child(film)
+	interaction_hints = preload("res://scripts/interaction_hints.gd").new()
+	interaction_hints.game = self
+	gui.add_child(interaction_hints)
 	hud = text_label("",20)
 	hud.position = Vector2(38,28)
 	prompt = text_label("",19)
 	prompt.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	prompt.position = Vector2(-290,-110)
-	prompt.size = Vector2(580,45)
+	prompt.offset_left=-290
+	prompt.offset_right=290
+	prompt.offset_top=-110
+	prompt.offset_bottom=-65
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	message = text_label("",17)
 	message.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	message.position = Vector2(-440,-65)
-	message.size = Vector2(880,40)
+	message.offset_left=-440
+	message.offset_right=440
+	message.offset_top=-65
+	message.offset_bottom=-25
 	message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	menu = Control.new()
 	menu.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -594,10 +724,18 @@ func text_label(value: String, size_px: int, parent: Node = null) -> Label:
 	return l
 
 func clear_menu() -> void:
+	if player: player.cancel_movement()
+	stop_movement_audio()
+	nav_buttons.clear()
+	menu_selection=null
+	menu_indicator=null
 	for c in menu.get_children():
 		menu.remove_child(c)
 		c.queue_free()
 	menu.visible = true
+	prompt.text = ""
+	interaction_hints.cues.clear()
+	interaction_hints.hide()
 	hud.visible = false
 	prompt.visible = false
 	message.visible = false
@@ -641,19 +779,32 @@ func panel_stack(title: String, subtitle: String) -> VBoxContainer:
 	v.add_theme_constant_override("separation",8)
 	center.add_child(v)
 	var l := text_label(title,48,v)
+	l.visible=not title.is_empty()
 	l.add_theme_font_override("font",horror_font)
 	l.add_theme_color_override("font_color",Color("8f353a"))
 	text_label(subtitle,16,v)
 	var spacer := Control.new()
 	spacer.custom_minimum_size.y = 18
 	v.add_child(spacer)
+	# Containers settle their minimum sizes on the following frame. Keep the
+	# content transparent until that first layout is complete (still laid out).
+	v.modulate.a=0
+	reveal_panel.call_deferred(v)
 	return v
 
+func reveal_panel(content: Control) -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if not is_instance_valid(content) or not content.is_inside_tree(): return
+	create_tween().tween_property(content,"modulate:a",1.0,.10)
+
 func show_main_menu() -> void:
+	if hum: hum.stop()
 	if is_instance_valid(ending): ending.queue_free()
 	ending = null
 	film.show()
 	mode = "menu"
+	if player_voice: player_voice.flush()
 	if progression: progression.finish_intro(false)
 	if player: player.pant.stop()
 	clear_menu()
@@ -688,7 +839,7 @@ func show_main_menu() -> void:
 	var jp := text_label("さ  き  こ",27,title_box)
 	jp.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	jp.add_theme_color_override("font_color",Color("935153"))
-	var sub := text_label("THE LAST BELL HAS ALREADY RUNG",13,title_box)
+	var sub := text_label("THE LAST BELL HAS RUNG",13,title_box)
 	sub.add_theme_font_override("font",horror_font)
 	sub.add_theme_font_size_override("font_size",18)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -705,26 +856,43 @@ func show_main_menu() -> void:
 	button("CREATOR",show_credits,navbox)
 	button("EXIT",quit_game,navbox)
 	for nav_button in navbox.get_children():
+		nav_buttons.append(nav_button)
 		nav_button.add_theme_font_override("font",horror_font)
 		nav_button.add_theme_font_size_override("font_size",32)
+		nav_button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+		nav_button.mouse_entered.connect(func(): select_menu_item(nav_button,true))
+		nav_button.focus_entered.connect(func(): select_menu_item(nav_button))
+		nav_button.pressed.connect(func(): main_menu_return=nav_button.text)
+	menu_indicator=ColorRect.new()
+	menu_indicator.color=Color("763239")
+	menu_indicator.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	menu.add_child(menu_indicator)
+	for nav_button in nav_buttons:
+		if nav_button.text==main_menu_return: first=nav_button; break
 	first.grab_focus()
+	select_menu_item(first)
 	var control_label := text_label("W A S D   MOVE     /     SHIFT   RUN     /     E   INTERACT     /     F   LIGHT     /     ESC   PAUSE",13,menu)
 	control_label.anchor_top = 1
 	control_label.position = Vector2(42,-38)
 
 func show_options() -> void:
 	var v := panel_stack("OPTIONS","Make the silence comfortable.")
-	for row in [["Master volume","master",0.0,1.0,.01],["Ambience","ambience",0.0,1.0,.01],["Sound effects","sfx",0.0,1.0,.01],["Mouse sensitivity","sensitivity",.3,5.0,.1]]:
-		text_label(row[0],17,v)
+	for row in [["Master volume","master",0.0,1.0,.01],["Ambience","ambience",0.0,1.0,.01],["Sound effects","sfx",0.0,1.0,.01],["Creature sounds","voice",0.0,1.0,.01],["Mouse sensitivity","sensitivity",.3,5.0,.1]]:
+		var heading:=HBoxContainer.new();v.add_child(heading)
+		var name_label:=text_label(row[0],17,heading);name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		var value_label:=text_label("%.1f" % settings[row[1]] if row[1]=="sensitivity" else "%d%%" % roundi(settings[row[1]]*100),17,heading)
 		var slider := HSlider.new()
 		slider.min_value = row[2]
 		slider.max_value = row[3]
 		slider.step = row[4]
 		slider.value = settings[row[1]]
 		var key: String = row[1]
-		slider.value_changed.connect(func(value): settings[key]=value; save_settings())
+		slider.value_changed.connect(func(value):
+			settings[key]=value
+			value_label.text="%.1f" % value if key=="sensitivity" else "%d%%" % roundi(value*100)
+			save_settings())
 		v.add_child(slider)
-	for row in [["Fullscreen","fullscreen"],["Camera shake","shake"],["Reduced analog / blur effects","reduced"]]:
+	for row in [["Subtitles","subtitles"],["Fullscreen","fullscreen"],["Camera shake","shake"],["Reduced analog / blur effects","reduced"]]:
 		var check := CheckButton.new()
 		check.text = row[0]
 		check.button_pressed = settings[row[1]]
@@ -732,12 +900,53 @@ func show_options() -> void:
 		var key: String = row[1]
 		check.toggled.connect(func(on): settings[key]=on; save_settings())
 		v.add_child(check)
+	var quality_row:=HBoxContainer.new();v.add_child(quality_row)
+	var quality_label:=text_label("Anti-aliasing",17,quality_row);quality_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var quality:=OptionButton.new();quality_row.add_child(quality)
+	for label in ["Off","2x","4x"]: quality.add_item(label)
+	quality.select(clampi(int(settings.msaa),0,2))
+	quality.item_selected.connect(func(index): settings.msaa=index;save_settings())
+	quality.tooltip_text="Smooths edges. Lower values can improve performance."
 	button("BACK",options_back,v)
 	v.get_child(4).grab_focus()
 
 func options_back() -> void:
 	if options_return=="pause": show_pause()
 	else: show_main_menu()
+
+func select_menu_item(item: Button,mouse:=false) -> void:
+	if not is_instance_valid(item) or item.disabled or not item.is_visible_in_tree(): return
+	menu_selection=item
+	if mouse: item.grab_focus()
+	update_menu_indicator.call_deferred()
+
+func update_menu_indicator() -> void:
+	if not is_instance_valid(menu_indicator): return
+	if not is_instance_valid(menu_selection) or menu_selection.disabled or not menu_selection.is_visible_in_tree():
+		menu_indicator.hide()
+		for item in nav_buttons:
+			if is_instance_valid(item) and not item.disabled and item.is_visible_in_tree(): menu_selection=item; break
+		if not is_instance_valid(menu_selection) or menu_selection.disabled or not menu_selection.is_visible_in_tree(): return
+	if menu_indicator.get_parent()!=menu_selection: menu_indicator.reparent(menu_selection,false)
+	var face: Font=menu_selection.get_theme_font("font")
+	var size_px: int=menu_selection.get_theme_font_size("font_size")
+	menu_indicator.position=Vector2(-12,(menu_selection.size.y-face.get_height(size_px)*.8)*.5)
+	menu_indicator.size=Vector2(2,face.get_height(size_px)*.8)
+	menu_indicator.show()
+
+func _notification(what: int) -> void:
+	if what==NOTIFICATION_WM_CLOSE_REQUEST: quit_game(); return
+	if what in [NOTIFICATION_APPLICATION_FOCUS_OUT,NOTIFICATION_WM_WINDOW_FOCUS_OUT]:
+		# A scripted benchmark must not silently turn into a pause-menu workload.
+		if "--profile-route" in OS.get_cmdline_user_args(): return
+		input_focused=false
+		for action in InputMap.get_actions(): Input.action_release(action)
+		if is_instance_valid(player): player.cancel_movement()
+		if mode=="playing": call_deferred("pause_after_focus_loss")
+	elif what in [NOTIFICATION_APPLICATION_FOCUS_IN,NOTIFICATION_WM_WINDOW_FOCUS_IN]: input_focused=true
+
+func pause_after_focus_loss() -> void:
+	if mode=="playing" and not input_focused: show_pause()
 
 func show_credits() -> void:
 	var v := panel_stack("CREATOR", "SAKIKO / さきこ")
@@ -764,7 +973,10 @@ func start_game() -> void:
 	clear_menu()
 	menu.visible = false
 	collected = 0
-	for lock in entrance_locks: lock.material_override = materials.red
+	checkpoint_state.clear()
+	checkpoint_id="start"
+	if player_voice: player_voice.reset()
+	hardware.reset()
 	exit_open = false
 	for p in exit_panels: p.material_override = materials.metal
 	for k in keys:
@@ -775,29 +987,35 @@ func start_game() -> void:
 		d.open = false
 		d.busy = false
 		d.node.position = d.origin
-		d.shape.disabled = false
+		for cs in d.shapes: cs.disabled=false
+		for i in range(2): d.panels[i].position.x=(-.5 if i==0 else .5)
+		d.locked=not str(d.get("requirement","")).is_empty()
 	progression.reset()
-	checkpoint = Vector3(-20.5,0,-5)
+	build_navigation()
+	checkpoint = layout.NIGHT
 	player.reset()
-	player.position = Vector3(-20.5,0,-9)
+	player.position = layout.NIGHT
 	player.rotation = Vector3.ZERO
 	player.pitch = 0
+	player.rotation.y = PI/2
 	player.camera.rotation = Vector3.ZERO
 	player.velocity = Vector3.ZERO
 	player.lamp.visible = true
 	player.camera.current = true
-	enemy.position = Vector3(72,1.5,5)
+	enemy.position = Vector3(6.8,1.5,17.8)
 	enemy.rotation = Vector3.ZERO
+	enemy.pursuing = false
+	enemy.detection = 0
 	enemy.velocity = Vector3.ZERO
-	enemy.visible = true
+	enemy.visible = false
 	previous_enemy = enemy.position
 	ai_state = "roam"
 	state_time = 0
 	repath = 0
 	stuck_time = 0
 	path.clear()
-	grace = 18
-	breath.play()
+	grace = 8
+	breath.stop()
 	breath.stream_paused = false
 	player.pant.stream_paused = false
 	ambient.volume_db = -12
@@ -809,16 +1027,16 @@ func start_game() -> void:
 	message.visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	mode = "playing"
-	toast("Find the entrance.  |  WASD move · SHIFT sprint · E interact · F light · ESC pause",9)
 	create_tween().tween_property(curtain,"modulate:a",0.0,.7)
 
-func spawn_key(pos: Vector3) -> void:
+func make_physical_key(pos: Vector3) -> Node3D:
 	var root := Node3D.new()
 	root.position = pos
 	world.add_child(root)
 	var torus := TorusMesh.new()
 	torus.inner_radius = .055
 	torus.outer_radius = .10
+	torus.rings=32;torus.ring_segments=8
 	var ring := MeshInstance3D.new()
 	ring.mesh = torus
 	ring.material_override = materials.gold
@@ -826,13 +1044,10 @@ func spawn_key(pos: Vector3) -> void:
 	root.add_child(ring)
 	box(Vector3(.15,0,0),Vector3(.25,.045,.045),"gold",false,root)
 	box(Vector3(.25,-.05,0),Vector3(.045,.10,.045),"gold",false,root)
-	var glint := OmniLight3D.new()
-	glint.position.y = .18
-	glint.light_color = Color("b09a62")
-	glint.light_energy = .28
-	glint.omni_range = 1.2
-	root.add_child(glint)
-	keys.append(root)
+	return root
+
+func spawn_key(pos: Vector3) -> void:
+	keys.append(make_physical_key(pos))
 
 func toast(value: String, seconds := 3.0) -> void:
 	message.text = value
@@ -842,27 +1057,41 @@ func target_visible(point: Vector3,reach: float,dot: float) -> bool:
 	var eye: Vector3 = player.camera.global_position
 	var diff := point-eye
 	if diff.length()>reach or (-player.camera.global_basis.z).dot(diff.normalized())<dot: return false
-	var q := PhysicsRayQueryParameters3D.create(eye,point,1)
+	var q := PhysicsRayQueryParameters3D.create(eye,point,1|4)
 	q.exclude = [player.get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(q)
 	return hit.is_empty() or hit.position.distance_to(point)<.12
 
-func interactable() -> Dictionary:
+func interactable(fresh:=false) -> Dictionary:
+	if mode!="playing": return {}
+	var frame:=Engine.get_process_frames()
+	if interaction_cache_enabled and not fresh and aimed_frame==frame: return aimed_cache
+	var candidates: Array[Dictionary]=progression.story_puzzles.available_targets()
 	for key in keys:
-		if not is_instance_valid(key) or not key.visible or key.get_meta("collected",false): continue
-		if target_visible(key.global_position,2.5,.94): return {"type":"key","node":key}
-	var puzzle: Dictionary = progression.targeted()
-	if not puzzle.is_empty(): return puzzle
-	if target_visible(Vector3(-26.42,1.4,0),3.1,.83): return {"type":"exit"}
+		if is_instance_valid(key) and key.visible and not key.get_meta("collected",false): candidates.append({"type":"key","node":key,"point":key.global_position})
+	candidates.append({"type":"exit","point":layout.EXIT_TARGET})
 	for d in doors:
-		var centre: Vector3 = d.node.position+Vector3(0,1.3,0)
-		if d.open: centre = d.origin+Vector3(1.34,1.3,-signf(d.origin.z)*.18)
-		if target_visible(centre,2.8,.86): return {"type":"door","door":d}
-	return {}
+		if d.busy: continue
+		var local_x: float=float(d.get("slide_direction",1))*1.55 if d.open else 0.0
+		var centre: Vector3=d.node.to_global(Vector3(local_x,1.3,float(d.track_side)*.27))
+		centre+=d.node.global_basis.z*.08*signf((player.global_position-centre).dot(d.node.global_basis.z))
+		candidates.append({"type":"door","door":d,"point":centre})
+	var best: Dictionary={}
+	var alignment:=.96
+	for item in candidates:
+		if not target_visible(item.point,1.85 if item.type=="door" else 1.65,.96): continue
+		var diff: Vector3=item.point-player.camera.global_position
+		var score: float=(-player.camera.global_basis.z).dot(diff.normalized())
+		if score>alignment:
+			alignment=score
+			best=item
+	aimed_frame=frame
+	aimed_cache=best
+	return best
 
 func interact() -> void:
 	if mode!="playing": return
-	var it := interactable()
+	var it := interactable(true)
 	if it.is_empty(): return
 	match it.type:
 		"key":
@@ -870,51 +1099,79 @@ func interact() -> void:
 			it.node.set_meta("collected",true)
 			it.node.visible = false
 			collected += 1
-			entrance_locks[collected-1].material_override = materials.gold
-			update_checkpoint(it.node.position)
+
+			progression.staff_completion()
+			if int(it.node.get_meta("lock_index",0))>=2: progression.encounters_controller.phase=4
+			player_voice.progress()
+			save_checkpoint("key"+str(int(it.node.get_meta("lock_index",collected-1))+1))
 			sound("key",-14)
-			toast("Entrance key  -  %d/4   |   Checkpoint saved" % collected)
-			if collected==4: toast("All four keys. Return to the entrance.",5)
 		"door": toggle_door(it.door)
 		"exit":
 			progression.discovered = true
-			if collected<4:
-				sound("locked",-16)
-				toast("Four locks. Find the entrance keys  -  %d/4." % collected)
-				for i in range(exit_panels.size()):
-					var tw := create_tween()
-					tw.tween_property(exit_panels[i],"position:x",progression.exit_origins[i].x-.045,.07)
-					tw.tween_property(exit_panels[i],"position",progression.exit_origins[i],.13)
-					progression.puzzle_tweens.append(tw)
+			player_voice.request("P02")
+			var released_one:=false
+			for i in range(4):
+				if keys[i].get_meta("collected",false) and not hardware.released[i]:
+					hardware.release(i)
+					released_one=true
+					break
+			if released_one or hardware.busy:
+				if not checkpoint_state.is_empty(): checkpoint_state.locks=hardware.released.duplicate()
+				return
+			if hardware.released.has(false):
+				world_sound("locked",layout.EXIT_TARGET,-19)
+				toast("Locked.",2)
 			elif not exit_open:
 				exit_open = true
+				if not checkpoint_state.is_empty(): checkpoint_state.exit_open=true; persist_voice_flags()
 				sound("unlock",-13)
 				for i in range(exit_panels.size()):
 					var tw := create_tween()
 					tw.tween_property(exit_panels[i],"position:z",progression.exit_origins[i].z+(-1.3 if i==0 else 1.3),.7)
-					progression.puzzle_tweens.append(tw)
-				toast("The entrance opens. E  -  step outside.",4)
-			else: victory()
+					progression.story_puzzles.tweens.append(tw)
 		_: progression.interact(it)
 
 func toggle_door(d: Dictionary, force_open := false) -> void:
+	if d.get("locked",false):
+		if force_open: return
+		var requirement: String=d.get("requirement","")
+		if requirement=="upper" and not progression.story_puzzles.utility_inventory.has("upper"): player_voice.request("P03")
+		if not progression.story_puzzles.utility_inventory.has(requirement):
+			if clock>=float(d.get("feedback_until",-1)):
+				d.feedback_until=clock+.5
+				toast("Locked.",2)
+				world_sound("locked",d.origin+Vector3(0,1.0,0),-19)
+			return
+		d.locked=false
+		world_sound("lock_turn",d.origin+Vector3(0,1.0,0),-14)
 	if d.busy or (force_open and d.open): return
 	if d.open and not force_open:
-		if player.position.distance_to(d.origin)<1.65 or Vector2(enemy.position.x-d.origin.x,enemy.position.z-d.origin.z).length()<1.9: return
+		var local: Vector3=d.node.to_local(player.global_position)
+		if absf(local.z)<.75 and absf(local.x)<2.15: return
+		if Vector2(enemy.position.x-d.origin.x,enemy.position.z-d.origin.z).length()<1.9: return
 	d.busy = true
 	d.open = true if force_open else not d.open
-	var destination: Vector3 = d.origin+Vector3(2.8 if d.open else 0.0,0,0)
 	if d.has("tween") and d.tween: d.tween.kill()
 	d.tween = create_tween()
-	sound("latch",-25)
-	sound("door",-27 if force_open else -20)
-	d.tween.tween_property(d.node,"position",destination,.55)
-	d.tween.tween_callback(func():
+	if is_instance_valid(d.get("motion_audio")): d.motion_audio.stop(); d.motion_audio.queue_free()
+	world_sound("latch",d.origin+Vector3(0,1.0,0),-17)
+	d.motion_audio=world_sound("door_track",d.origin+Vector3(0,1.2,0),-17 if force_open else -12,.65)
+	for i in range(2):
+		var closed_x: float=-.5 if i==0 else .5
+		d.tween.parallel().tween_property(d.panels[i],"position:x",float(d.slide_direction)*1.55 if d.open else closed_x,.65)
+
+	d.tween.chain().tween_callback(func():
 		d.busy = false
-		if not d.open: sound("close",-21))
+		if not d.open: world_sound("close",d.origin+Vector3(0,1.2,0),-16))
+
+func stop_movement_audio() -> void:
+	for weak in moving_sounds:
+		var audio: AudioStreamPlayer3D=weak.get_ref()
+		if audio: audio.stop(); audio.queue_free()
+	moving_sounds.clear()
 
 func clear_line(a: Vector3,b: Vector3) -> bool:
-	var q := PhysicsRayQueryParameters3D.create(a,b,1)
+	var q := PhysicsRayQueryParameters3D.create(a,b,1|4)
 	q.exclude = [player.get_rid()]
 	return get_world_3d().direct_space_state.intersect_ray(q).is_empty()
 
@@ -931,6 +1188,16 @@ func sees_player() -> bool:
 	var normal_sight := distance<Tuning.DETECTION_RANGE and (distance<3 or (-enemy.global_basis.z).dot(flat)>.38)
 	return (normal_sight or flashlight_exposure()) and clear_line(enemy.position,player.position+Vector3(0,1.3,0))
 
+func _input(event: InputEvent) -> void:
+	if is_instance_valid(studio_intro):
+		studio_intro.consume(event)
+		return
+	# Escape closes a modal even when a number wheel's LineEdit owns focus.
+	if event.is_action_pressed("pause") and mode in ["document","puzzle"]:
+		if mode=="document": progression.evidence.close()
+		else: resume_game()
+		get_viewport().set_input_as_handled()
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause"):
 		if mode=="playing": show_pause()
@@ -938,7 +1205,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func show_pause() -> void:
 	mode = "paused"
-	var v := panel_stack("PAUSED","The halls are still.")
+	var v := panel_stack("PAUSED","WASD move  ·  Shift run  ·  E interact  ·  F light  ·  J journal")
 	button("RESUME",resume_game,v).grab_focus()
 	button("OPTIONS",func(): options_return="pause"; show_options(),v)
 	button("MAIN MENU",show_main_menu,v)
@@ -947,6 +1214,7 @@ func show_pause() -> void:
 
 func resume_game() -> void:
 	mode = "playing"
+	prompt.text = ""
 	menu.visible = false
 	hud.visible = true
 	prompt.visible = true
@@ -956,6 +1224,7 @@ func resume_game() -> void:
 	player.pant.stream_paused = false
 
 func victory() -> void:
+	if player_voice: player_voice.flush()
 	if ending_started or mode!="playing" or collected!=4: return
 	ending_started = true
 	mode = "ending"
@@ -980,13 +1249,19 @@ func victory() -> void:
 	gui.add_child(ending)
 
 func capture() -> void:
+	if hum: hum.stop()
 	if mode!="playing": return
+	player.cancel_movement()
+	stop_movement_audio()
 	player.pant.stop()
 	progression.giggle.stop()
 	mode = "capture"
+	player_voice.flush()
 	capture_time = 0
 	pain_triggered = false
+	capture_scream_started=false
 	var env: Environment = world.get_child(0).environment
+	env.background_mode = Environment.BG_COLOR
 	env.background_color = Color.BLACK
 	env.fog_enabled = false
 	scare_camera.position = Vector3(0,-40,0)
@@ -1004,14 +1279,20 @@ func capture() -> void:
 	scare_camera.current = true
 	scare_camera.rotation = Vector3.ZERO
 	scare_head.position = Vector3(0,-40,-3.5)
-	sound("capture_v2",-5)
-	sound("sakiko_scream",-7,.78)
+	sound("capture",-15)
+	progression.cry.stop()
+	progression.voice.stop()
+	capture_ghost.stream=sounds.sakiko_humming
+	capture_ghost.pitch_scale=.82
+	capture_ghost.volume_db=-15
+	capture_ghost.play()
 	film.material.set_shader_parameter("trauma",.8)
 
 func death_screen() -> void:
 	mode = "dead"
 	scare_head.visible = false
 	var v := panel_stack("YOU DIED","She swallowed the last sound. Your checkpoint remains.")
+	menu.get_child(0).color = Color(.13,.008,.014,.97)
 	v.get_child(0).add_theme_color_override("font_color",Color("b52b34"))
 	button("RETURN TO CHECKPOINT",return_to_checkpoint,v).grab_focus()
 	button("RESTART RUN",start_game,v)
@@ -1021,9 +1302,15 @@ func death_screen() -> void:
 
 func _physics_process(delta: float) -> void:
 	if mode!="playing": return
+	watch_doors()
+	if exit_open and player.position.x< -.75 and player.position.y<1 and absf(player.position.z-12)<1.0:
+		victory()
+		return
+	if not progression.hunt_enabled or progression.story_puzzles.shelf_moving: return
 	grace -= delta
 	state_time += delta
 	repath -= delta
+	enemy.pursuing = ai_state=="chase"
 	var sees := grace<=0 and sees_player()
 	if sees:
 		last_seen = player.position+Vector3(0,1.5,0)
@@ -1039,10 +1326,12 @@ func _physics_process(delta: float) -> void:
 		navigate(last_seen)
 		repath = .45
 	if ai_state=="roam" and (path.is_empty() or state_time>22):
-		var points := [Vector3(-22,1.5,-5),Vector3(22,1.5,-5),Vector3(78,1.5,-5),Vector3(78,1.5,5),Vector3(-22,1.5,5),Vector3(35.5,1.5,-12),Vector3(60.5,1.5,12)]
+		var points: Array=layout.PATROL
+		if progression.encounters_controller.pressure_cooldown>0:
+			points=points.filter(func(point): return point.distance_to(player.position+Vector3(0,1.5,0))>12)
 		navigate(points[randi()%points.size()])
 		state_time = 0
-	if ai_state=="investigate" and (path.is_empty() or state_time>12):
+	if ai_state=="investigate" and (path.is_empty() or state_time>24):
 		ai_state = "search"
 		state_time = 0
 	if ai_state=="search":
@@ -1054,7 +1343,6 @@ func _physics_process(delta: float) -> void:
 		if not path.is_empty():
 			waypoint = path[0]
 			var offset: Vector3 = waypoint-enemy.position
-			offset.y = 0
 			if offset.length()<.25: path.remove_at(0)
 			else:
 				var direction := offset.normalized()
@@ -1065,7 +1353,7 @@ func _physics_process(delta: float) -> void:
 				enemy.rotation.y = lerp_angle(enemy.rotation.y,yaw,delta*5)
 				enemy.move_and_slide()
 	for d in doors:
-		if Vector2(enemy.position.x-d.origin.x,enemy.position.z-d.origin.z).length()<2.8: toggle_door(d,true)
+		if absf(enemy.position.y-d.origin.y-1.5)<1.0 and Vector2(enemy.position.x-d.origin.x,enemy.position.z-d.origin.z).length()<2.8: toggle_door(d,true)
 	if enemy.position.distance_to(previous_enemy)<delta*.12 and not path.is_empty(): stuck_time += delta
 	else: stuck_time = 0
 	previous_enemy = enemy.position
@@ -1079,90 +1367,258 @@ func _physics_process(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	clock += delta
+	if mode=="menu": update_menu_indicator()
 	if music:
 		music.volume_db = lerpf(music.volume_db,-18.0 if mode=="menu" else -65.0,minf(1,delta*1.8))
-		var story_quiet := mode in ["ending","credits"]
-		ambient.volume_db = -80 if story_quiet else lerpf(ambient.volume_db,-25.0 if mode=="playing" else -32.0,minf(1,delta*2))
-		hum.volume_db = -80 if story_quiet else lerpf(hum.volume_db,-32.0,minf(1,delta*2))
+		var story_quiet: bool = mode in ["ending","credits"] or (mode=="intro" and progression.intro_time<129)
+		ambient.volume_db = -80 if story_quiet else lerpf(ambient.volume_db,0.0 if mode=="playing" else -22.0,minf(1,delta*2))
+		hum.volume_db = -80 if story_quiet else lerpf(hum.volume_db,-23.0,minf(1,delta*2))
+	var dialogue_active: bool=progression and (progression.story_puzzles.recording.playing or (mode=="intro" and expansion.time<125))
+	if dialogue_active:
+		ambient.volume_db-=minf(4,delta*12)
+		music.volume_db-=minf(4,delta*12)
+	if mode=="playing" and ai_state=="chase" and enemy.visible:
+		if not breath.playing: breath.play()
+	else: breath.stop()
 	if film: film.material.set_shader_parameter("reduced",settings.reduced)
 	if mode=="menu":
-		menu_camera.position.z = -5+sin(clock*.09)*.12
+		menu_camera.position.z = 10+sin(clock*.09)*.12
 		menu_camera.rotation.z = sin(clock*.12)*.003
 	if not lights.is_empty():
-		lights[2].light_energy = .055 if sin(clock*1.7)>-.95 else .008
+		if mode!="intro": lights[2].light_energy = float(lights[2].get_meta("night_energy",.055))*(1.0 if sin(clock*1.7)>-.95 else .16)
 	if mode=="playing":
 		hud.text = progression.objective()
 		var it := interactable()
 		prompt.text = ""
 		if not it.is_empty():
 			match it.type:
-				"key": prompt.text = "E  -  Pick up entrance key"
-				"door": prompt.text = "E  -  Close" if it.door.open else "E  -  Open"
+				"key","utility","service_key","fragment": prompt.text = "E — Take"
+				"door": prompt.text = "E — Close" if it.door.open else "E — Open"
 				"exit": prompt.text = "E  -  Escape" if exit_open else "E  -  Try entrance"
-				_: prompt.text = it.get("label", "E  -  Interact")
+				"evidence","portrait": prompt.text = "E — Inspect"
+				"container": prompt.text = "E — Open"
+				_: prompt.text = "E — Interact"
 		message_time -= delta
 		message.modulate.a = clampf(message_time,0,1)
-		for key in keys:
-			if is_instance_valid(key): key.rotation.y += delta*.22
-		creak_clock -= delta
-		if creak_clock<0:
-			sound("creak",-28,randf_range(.7,1.1))
-			creak_clock = randf_range(13,25)
 	if mode=="capture":
 		capture_time += delta
 		var t := capture_time
-		var lunge := 1-pow(1-clampf(t/.18,0,1),3)
+		if t>=.35 and not capture_scream_started:
+			capture_scream_started=true
+			capture_ghost.stop()
+			capture_ghost.stream=sounds.sakiko_scream
+			capture_ghost.volume_db=-9
+			capture_ghost.play()
+		if t>.90 and t<1.08: capture_ghost.volume_db=lerpf(-9,-60,(t-.90)/.18)
+		if t>=1.08: capture_ghost.stop()
+		var lunge := smoothstep(.40,.80,t)
 		scare_head.position.z = lerpf(-3.5,-2.08,lunge)
-		scare_head.scare = clampf(t*4.8,0,1.35)
+		scare_head.scare = clampf((t-.35)*4.8,0,1.35)
 		scare_head.rotation.z = -.07+sin(t*53)*.014*exp(-t*4)
-		# The camera dives through the empty mouth opening, between the teeth.
-		var swallow := smoothstep(.56,1.27,t)
-		scare_camera.position = Vector3(0,lerpf(-40,-40.63,swallow),lerpf(0,-1.96,swallow))
+		# Stop outside the mouth and cut before the camera crosses the face.
+		var swallow := smoothstep(.65,1.18,t)
+		scare_camera.position = Vector3(0,lerpf(-40,-40.63,swallow),lerpf(0,-.55,swallow))
 		scare_camera.fov = lerpf(72,86,swallow)
 		scare_camera.look_at(Vector3(0,lerpf(-40.05,-40.63,smoothstep(.40,.80,t)),-2.6))
 		if settings.shake and not settings.reduced:
 			scare_camera.rotation.z = sin(t*61)*.022*exp(-t*5)
 			scare_camera.position.x = sin(t*83)*.018*exp(-t*6)
-		curtain.modulate.a = clampf((t-1.19)/.18,0,1)
+		curtain.modulate.a = clampf((t-1.10)/.12,0,1)
+		if t>=1.22 and not pain_triggered:
+			pain_triggered = true
+			sound("player_pain",-8)
 		if t>1.85: death_screen()
 
-func update_checkpoint(key_pos: Vector3) -> void:
-	var closest := -16.0
-	for cx in Tuning.ROOM_CENTRES:
-		if absf(cx-key_pos.x)<absf(closest-key_pos.x): closest = cx
-	checkpoint = Vector3(closest-4.5,0,-5 if key_pos.z<0 else 5)
+const SAFE_CHECKPOINTS: Dictionary={"key1":Vector3(27.7,0,6.9),"key2":Vector3(10,4.2,29.8),"tape":Vector3(44,4.2,5.5),"key3":Vector3(43.6,0,3.4),"key4":Vector3(26,4.2,29.2)}
+
+func save_checkpoint(id: String) -> void:
+	checkpoint_id=id
+	checkpoint=SAFE_CHECKPOINTS.get(id,layout.NIGHT)
+	var p: Node=progression.story_puzzles
+	var container_states: Dictionary={}
+	for name in p.containers: container_states[name]=p.containers[name].open
+	var door_states: Array=[]
+	for d in doors: door_states.append({"open":d.open,"locked":d.locked})
+	var key_states: Array=[]
+	for key in keys: key_states.append(key.get_meta("collected",false))
+	checkpoint_state={"version":2,"id":id,"position":checkpoint,"containers":container_states,"doors":door_states,"keys":key_states,"utility":p.utility_inventory.duplicate(true),"utility_taken":p.utility_taken.duplicate(true),"service":p.service_taken,"solved":p.solved.duplicate(),"evidence":progression.evidence.collected.duplicate(),"shelf":p.opened,"brake":p.brake,"power":p.power,"played":p.played,"inserted":p.inserted,"tape_done":p.tape_done,"locks":hardware.released.duplicate(),"exit_open":exit_open,"encounters":progression.encounters_controller.snapshot(),"hunt":progression.hunt_enabled,"discovered":progression.discovered,"voice":player_voice.snapshot()}
+	var save:=FileAccess.open("user://checkpoint.save",FileAccess.WRITE)
+	if save: save.store_var(checkpoint_state); save.close()
 
 func return_to_checkpoint() -> void:
-	mode = "playing"
+	stop_movement_audio()
+	if checkpoint_state.is_empty() and FileAccess.file_exists("user://checkpoint.save"):
+		var saved:=FileAccess.open("user://checkpoint.save",FileAccess.READ)
+		checkpoint_state=saved.get_var()
+	if checkpoint_state.is_empty(): return
+	var data: Dictionary=checkpoint_state.duplicate(true)
+	var p: Node=progression.story_puzzles
+	for tw in p.tweens:
+		if tw and tw.is_valid(): tw.kill()
+	p.tweens.clear()
+	p.recording.stop()
+	p.recording_time=-1
+	p.utility_inventory=data.utility.duplicate(true)
+	p.utility_taken=data.utility_taken.duplicate(true)
+	p.service_taken=data.service
+	p.service_key.visible=not data.service and data.containers.service_drawer
+	p.rehearsal_taken=p.utility_taken.get("rehearsal_U08",false)
+	p.power=data.power
+	p.played=data.played
+	p.inserted=data.inserted
+	p.tape_done=data.tape_done
+	p.brake=data.brake
+	p.opened=data.shelf
+	p.shelf_moving=false
+	p.shelf.position=p.shelf_origin+Vector3(-1.9 if p.opened else 0,0,0)
+	p.release_lever.rotation.z=.6 if p.brake else 0.0
+	p.power_lever.rotation.z=0.0 if p.power else .5
+	p.evidence_models.maintenance.visible=p.opened
+	for name in p.containers:
+		var c: Dictionary=p.containers[name]
+		c.open=data.containers[name]
+		c.busy=false
+		c.hinge.position=c.origin
+		c.hinge.rotation=Vector3.ZERO
+		if c.open:
+			if c.kind=="drawer": c.hinge.position.z-=.6
+			elif c.kind=="cabinet": c.hinge.rotation.y=PI*.63
+			else: c.hinge.rotation.x=PI*.65
+		for content in c.contents: content.visible=c.open
+	for name in p.utility_nodes:
+		if p.utility_taken.get(name,false): p.utility_nodes[name].hide()
+	p.solved.assign(data.solved)
+	progression.evidence.collected.assign(data.evidence)
+	collected=0
+	for i in range(4):
+		keys[i].set_meta("collected",data.keys[i])
+		keys[i].visible=not data.keys[i] and p.solved[i]
+		if data.keys[i]: collected+=1
+	for i in range(doors.size()):
+		var d: Dictionary=doors[i]
+		if d.has("tween") and d.tween: d.tween.kill()
+		d.busy=false
+		d.open=data.doors[i].open
+		d.locked=data.doors[i].locked
+		for n in range(2): d.panels[n].position.x=d.slide_direction*1.55 if d.open else (-.5 if n==0 else .5)
+	hardware.reset()
+	hardware.released.assign(data.locks)
+	for i in range(4): hardware.locks[i].lock.visible=not hardware.released[i]
+	exit_open=data.exit_open
+	for i in range(exit_panels.size()): exit_panels[i].position=progression.exit_origins[i]+Vector3(0,0,(-1.3 if i==0 else 1.3) if exit_open else 0)
+	progression.encounters_controller.restore(data.encounters)
+	progression.hunt_enabled=data.hunt
+	progression.discovered=data.discovered
+	checkpoint=data.position
+	checkpoint_id=data.id
+	player_voice.restore(data.get("voice",{}))
+	mode="playing"
 	player.reset()
-	player.position = checkpoint
-	player.rotation = Vector3.ZERO
-	player.pitch = 0
-	player.camera.rotation = Vector3.ZERO
-	player.camera.current = true
-	player.lamp.visible = true
-	player.velocity = Vector3.ZERO
-	enemy.position = Vector3(-20,1.5,5) if checkpoint.x>30 else Vector3(72,1.5,5)
-	enemy.velocity = Vector3.ZERO
-	enemy.visible = true
-	scare_head.visible = false
+	player.position=checkpoint
+	player.rotation=Vector3.ZERO
+	player.pitch=0
+	player.camera.rotation=Vector3.ZERO
+	player.camera.current=true
+	player.lamp.show()
+	player.velocity=Vector3.ZERO
+	# Opposite-floor anchor is occluded by a slab and connected to real stairs.
+	enemy.position=Vector3(46,1.5,26) if checkpoint.y>2 else Vector3(10,5.7,10)
+	enemy.velocity=Vector3.ZERO
+	enemy.visible=data.hunt
+	enemy.pursuing=false
+	enemy.detection=0
+	scare_head.hide()
 	path.clear()
-	ai_state = "roam"
-	state_time = 0
-	stuck_time = 0
-	grace = 16
-	repath = 0
-	progression.scream_cooldown = 8
-	curtain.modulate.a = 0
+	ai_state="roam"
+	state_time=0
+	stuck_time=0
+	grace=8
+	repath=0
+	progression.scream_cooldown=8
+	progression.cry.stop()
+	progression.giggle.stop()
+	progression.voice.stop()
+	breath.stop()
+	curtain.modulate.a=0
 	film.material.set_shader_parameter("trauma",0)
 	expansion.set_day(false)
-	breath.play()
+	build_navigation()
 	resume_game()
-	toast("Checkpoint restored. Keys and solved puzzles retained.",4)
+	toast("Checkpoint restored. Completed tasks retained.",4)
+
+func watch_doors() -> void:
+	for d in doors:
+		if not d.busy or d.open: continue
+		var local: Vector3=d.node.to_local(player.global_position)
+		if absf(local.z-float(d.track_side)*.27)<.6 and absf(local.x)<1.65:
+			d.tween.kill()
+			d.busy=false
+			d.open=false
+			toggle_door(d,true)
 
 func verify_game() -> void:
-	var suite = preload("res://tests/integration.gd").new()
+	var suite = load("res://tests/corrections_integration.gd").new()
 	await suite.run(self)
+
+func bugfix_check() -> void:
+	await load("res://tests/bugfix_audio_lighting.gd").new().run(self)
+
+func profile_route() -> void:
+	await load("res://tests/performance_route.gd").new().run(self)
+
+func warm_capture_assets() -> void:
+	# Upload/compile the existing head during startup, away from the first scare.
+	if DisplayServer.get_name()=="headless": return
+	var view:=SubViewport.new();view.size=Vector2i(64,64)
+	view.world_3d=get_world_3d();view.msaa_3d=get_viewport().msaa_3d
+	view.render_target_update_mode=SubViewport.UPDATE_ALWAYS
+	add_child(view)
+	var camera:=Camera3D.new();view.add_child(camera)
+	camera.position=Vector3(0,-40,0);camera.look_at(Vector3(0,-40,-2.5));camera.current=true
+	scare_head.show()
+	for frame in range(3): await RenderingServer.frame_post_draw
+	scare_head.hide();view.queue_free()
+
+func placement_audit() -> void:
+	await load("res://tests/placement_audit.gd").new().run(self)
+
+func nonverbal_check() -> void:
+	await load("res://tests/nonverbal_pass.gd").new().run(self)
+
+func master_ui_check() -> void:
+	await load("res://tests/master_ui.gd").new().run(self)
+
+func bugfix_menu_render() -> void:
+	show_main_menu()
+	await get_tree().create_timer(.2).timeout
+	for item in nav_buttons.duplicate():
+		item.mouse_entered.emit()
+		await get_tree().create_timer(.08).timeout
+		await snapshot("bugfix_menu_"+item.text.to_lower())
+	get_window().size=Vector2i(1024,576)
+	await get_tree().create_timer(.2).timeout
+	nav_buttons[1].grab_focus()
+	await get_tree().create_timer(.1).timeout
+	await snapshot("bugfix_menu_resized")
+	quit_game()
+
+func bugfix_lighting_render() -> void:
+	start_game()
+	player_voice.flush();player_voice.wake_delay=-1
+	mode="inspection"
+	hud.hide();prompt.hide();message.hide();film.hide()
+	expansion.set_day(true)
+	await audit_view(Vector3(14.8,0,5.5),Vector3(10.5,1.5,4))
+	player.lamp.hide()
+	await snapshot("bugfix_classroom_day")
+	expansion.set_day(false)
+	for shot in [["G01",Vector3(14.8,0,5.5),Vector3(10.5,1.5,4)],["corridor",Vector3(28,0,10),Vector3(38,1.5,10)],["archive",Vector3(14,4.2,32.5),Vector3(14.3,5.1,35.3)],["rehearsal",Vector3(44,4.2,31.2),Vector3(45.5,5.1,34.4)],["stairs",Vector3(4.6,.5,19.6),Vector3(4.6,1.8,22.6)]]:
+		await audit_view(shot[1],shot[2])
+		for on in [false,true]:
+			player.lamp.visible=on
+			await get_tree().create_timer(.15).timeout
+			await snapshot("bugfix_"+shot[0]+("_on" if on else "_off"))
+	quit_game()
 
 func snapshot(filename: String) -> void:
 	await RenderingServer.frame_post_draw
@@ -1170,185 +1626,10 @@ func snapshot(filename: String) -> void:
 	print("RENDER ",filename)
 
 func presentation_audit() -> void:
-	start_game()
-	grace = 999
-	mode = "paused"
-	scare_head.show()
-	scare_head.scare = 0
-	scare_head.position = Vector3(0,-40,-2.08)
-	scare_camera.current = true
-	var env: Environment = world.get_child(0).environment
-	env.ambient_light_energy = .6
-	env.background_color = Color("171b1c")
-	var fill := OmniLight3D.new()
-	fill.position = Vector3(2,-38,-4)
-	fill.light_energy = 4
-	fill.omni_range = 8
-	add_child(fill)
-	for pose in [["creature_front_studio",Vector3(0,-40,2)],["creature_profile_studio",Vector3(4,-40,-2.08)],["creature_back_studio",Vector3(0,-40,-6.4)],["creature_threequarter_studio",Vector3(3,-40,1)]]:
-		scare_camera.position = pose[1]
-		scare_camera.look_at(scare_head.position)
-		await snapshot(pose[0])
-	fill.queue_free()
-	env.ambient_light_energy = .075
-	mode = "playing"
-	capture()
-	await get_tree().create_timer(.3).timeout
-	await snapshot("capture")
-	await get_tree().create_timer(.62).timeout
-	await snapshot("capture_mouth")
-	await get_tree().create_timer(1.2).timeout
-	start_game()
-	collected = 4
-	victory()
-	await get_tree().create_timer(1.4).timeout
-	ending.advance()
-	ending.advance()
-	ending.advance()
-	ending.advance()
-	ending.advance()
-	await get_tree().create_timer(1.3).timeout
-	ending.advance()
-	await get_tree().create_timer(2).timeout
-	ending.credits_y = -400
-	ending.credits.position.y = -400
-	await get_tree().process_frame
-	print("CREDITS DIAGNOSTIC ",ending.credits.get_global_rect()," alpha ",ending.curtain.modulate.a," label0 ",ending.credits.get_child(0).get_global_rect()," visible ",ending.credits.get_child(0).is_visible_in_tree())
-	await snapshot("credits")
-	ending.credits_y = -2500
-	ending.credits.position.y = -2500
-	await snapshot("credits_attribution")
-	ending.finish()
-	await get_tree().create_timer(1).timeout
-	quit_game()
+	await polish_render_audit()
 
 func render_audit() -> void:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://tests/artifacts"))
-	await get_tree().create_timer(1).timeout
-	await snapshot("menu")
-	show_credits()
-	await snapshot("creator")
-	show_options()
-	await snapshot("options")
-	play_intro()
-	await get_tree().create_timer(1).timeout
-	await snapshot("intro_day")
-	player.position = Vector3(-10,0,-9)
-	player.camera.position.y = 1.4
-	player.camera.look_at(Vector3(-18,1,-13))
-	mode = "audit_intro"
-	await snapshot("intro_actors")
-	player.position = Vector3(-19.8,0,-14)
-	player.camera.look_at(Vector3(-19.8,2,-16.84))
-	await snapshot("window_day")
-	mode = "intro"
-	progression.intro_time = 8.2
-	await get_tree().process_frame
-	await snapshot("intro_eyelids")
-	progression.finish_intro()
-	start_game()
-	grace = 999
-	player.position = Vector3(-19.8,0,-14)
-	player.camera.look_at(Vector3(-19.8,2,-16.84))
-	await snapshot("window_night")
-	player.position = Vector3(-19,0,-5)
-	player.camera.look_at(Vector3(15,1.5,-5))
-	player.lamp.visible = false
-	await snapshot("corridor_off")
-	player.lamp.visible = true
-	await snapshot("corridor_on")
-	player.camera.look_at(Vector3(-16,1.6,-3.1))
-	await snapshot("flashlight_wall")
-	progression.evidence.inspect("preparation")
-	await snapshot("evidence_preparation")
-	progression.evidence.inspect("original")
-	await snapshot("evidence_original")
-	progression.evidence.inspect("class_photo")
-	await snapshot("evidence_class")
-	progression.evidence.inspect("display")
-	await snapshot("evidence_display")
-	progression.evidence.reverse = true
-	progression.evidence.show_entry()
-	await snapshot("evidence_reverse")
-	progression.evidence.show_journal()
-	await snapshot("journal")
-	resume_game()
-	player.position = Vector3(56,0,-12.4)
-	player.camera.look_at(Vector3(56,1.5,-15.3))
-	await snapshot("festival_puzzle")
-	player.position = Vector3(16,0,12.2)
-	player.camera.look_at(Vector3(16,1.3,15.2))
-	await snapshot("av_room")
-	progression.story_puzzles.interact({"type":"shelf"})
-	progression.story_puzzles.interact({"type":"shelf"})
-	await get_tree().create_timer(1.4).timeout
-	player.position = Vector3(80.2,0,12.2)
-	player.camera.look_at(Vector3(81.2,.7,14.4))
-	await snapshot("storeroom")
-	player.position = Vector3(40,0,8.7)
-	player.camera.look_at(Vector3(40,1.5,15))
-	await snapshot("toilets")
-	mode = "paused"
-	scare_head.visible = true
-	scare_head.scare = 0
-	scare_head.position = Vector3(0,-40,-2.08)
-	scare_camera.current = true
-	var fill := OmniLight3D.new()
-	fill.position = Vector3(2,-38,-4)
-	fill.light_energy = .35
-	fill.omni_range = 8
-	add_child(fill)
-	for pose in [["creature_front_studio",Vector3(0,-40,2)],["creature_profile_studio",Vector3(4,-40,-2.08)],["creature_back_studio",Vector3(0,-40,-6.4)],["creature_threequarter_studio",Vector3(3,-40,1)]]:
-		scare_camera.position = pose[1]
-		scare_camera.look_at(scare_head.position)
-		await snapshot(pose[0])
-	fill.queue_free()
-	scare_head.hide()
-	player.camera.current = true
-	mode = "playing"
-	capture()
-	await get_tree().create_timer(.30).timeout
-	await snapshot("capture")
-	await get_tree().create_timer(.62).timeout
-	await snapshot("capture_mouth")
-	await get_tree().create_timer(1.6).timeout
-	await snapshot("death")
-	start_game()
-	collected = 4
-	victory()
-	await get_tree().create_timer(.8).timeout
-	await snapshot("ending_reveal")
-	ending.advance()
-	await snapshot("ending_1280")
-	get_window().size = Vector2i(960,540)
-	await get_tree().create_timer(.4).timeout
-	await snapshot("ending_960")
-	get_window().size = Vector2i(1920,1080)
-	await get_tree().create_timer(.4).timeout
-	await snapshot("ending_1920")
-	get_window().size = Vector2i(1280,720)
-	ending.advance()
-	ending.advance()
-	await snapshot("ending_page2")
-	ending.advance()
-	ending.advance()
-	await get_tree().create_timer(1.3).timeout
-	await snapshot("ending_final")
-	ending.advance()
-	await get_tree().create_timer(1.1).timeout
-	ending.credits_y = -400
-	ending.credits.position.y = -400
-	await snapshot("credits")
-	ending.credits_y = -2500
-	ending.credits.position.y = -2500
-	await snapshot("credits_attribution")
-	ending.finish()
-	await get_tree().create_timer(1).timeout
-	await snapshot("menu_after_ending")
-	quit_game()
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_CLOSE_REQUEST: quit_game()
+	await polish_render_audit()
 
 func quit_game() -> void:
 	if mode=="quitting": return
@@ -1363,3 +1644,366 @@ func quit_game() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	get_tree().quit()
+
+func interaction_audit() -> void:
+	start_game()
+	await audit_view(Vector3(26.2,0,7.3),Vector3(26.2,.68,6.025))
+	await snapshot("interaction_aimed")
+	player.camera.rotate_y(.7)
+	await get_tree().process_frame
+	await snapshot("interaction_look_away")
+	await audit_view(Vector3(26.2,0,10),Vector3(26.2,.68,6.025))
+	await snapshot("interaction_far")
+	quit_game()
+
+func audit_view(from: Vector3,to: Vector3) -> void:
+	player.position=from
+	player.velocity=Vector3.ZERO
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	player.look_at(Vector3(to.x,player.global_position.y,to.z))
+	player.camera.rotation=Vector3(atan2(to.y-player.camera.global_position.y,Vector2(to.x-player.global_position.x,to.z-player.global_position.z).length()),0,0)
+	await get_tree().create_timer(.15).timeout
+
+func polish_render_audit() -> void:
+	await get_tree().create_timer(.5).timeout
+	start_game()
+	grace=999
+	var env: Environment=world.get_child(0).environment
+	mode="inspection"
+	hud.hide()
+	prompt.hide()
+	message.hide()
+	film.hide()
+	for light in layout.inspection_lights: light.show()
+	env.ambient_light_energy=.6
+	env.fog_enabled=false
+	if "--detail-render" in OS.get_cmdline_user_args():
+		await audit_view(Vector3(45.7,4.2,32.8),Vector3(45.6,4.8,34.4))
+		await snapshot("revamp_rehearsal_neutral")
+		quit_game()
+		return
+	var ceiling_nodes: Array[Node]=get_tree().get_nodes_in_group("audit_ceilings")
+	for node in ceiling_nodes: node.hide()
+	var upper: Array[Node3D]=[]
+	for node in layout.get_children():
+		if node is Node3D and node.position.y>4.0 and node.visible: upper.append(node); node.hide()
+	for node in world.get_children():
+		if node is Node3D and node!=layout and node.position.y>4.0 and node.visible: upper.append(node); node.hide()
+	for core_name in ["WestStairs_Green","EastStairs_Blue"]:
+		for node in layout.get_node(core_name).get_children():
+			if node is MeshInstance3D and node.position.y>3.9 and node.visible: upper.append(node); node.hide()
+	menu_camera.projection=Camera3D.PROJECTION_ORTHOGONAL
+	menu_camera.size=42
+	menu_camera.position=Vector3(28,45,18)
+	menu_camera.look_at(Vector3(28,0,18),Vector3(0,0,-1))
+	menu_camera.current=true
+	# Parent room lights disappear in the cutaway; use dedicated audit lighting.
+	var audit_sun:=DirectionalLight3D.new()
+	audit_sun.rotation_degrees=Vector3(-70,-25,0)
+	audit_sun.light_energy=1.1
+	add_child(audit_sun)
+	env.ambient_light_energy=1.1
+	await get_tree().create_timer(.2).timeout
+	await snapshot("revamp_ground_overview_neutral")
+	for node in upper: node.show()
+	await get_tree().create_timer(.2).timeout
+	await snapshot("revamp_upper_overview_neutral")
+	audit_sun.queue_free()
+	env.ambient_light_energy=.6
+	for node in ceiling_nodes: node.show()
+	menu_camera.projection=Camera3D.PROJECTION_PERSPECTIVE
+	player.camera.current=true
+	for shot in [["lobby",Vector3(6.4,0,12.8),Vector3(0,1.6,12)], ["west_stairs",Vector3(6.8,0,17.8),Vector3(4.6,1.8,21)], ["east_stairs_upper",Vector3(49.2,4.2,17.8),Vector3(54.2,5,20.8)], ["archive",Vector3(14.3,4.2,33.8),Vector3(14.3,5.15,34.9)], ["rehearsal",Vector3(45.7,4.2,32.8),Vector3(45.6,4.8,34.4)]]:
+		await audit_view(shot[1],shot[2])
+		await snapshot("revamp_"+shot[0]+"_neutral")
+	for light in layout.inspection_lights: light.hide()
+	film.show()
+	expansion.set_day(false)
+	mode="playing"
+	resume_game()
+	await audit_view(Vector3(29,0,10.6),Vector3(29,2.95,8.10))
+	player.lamp.hide()
+	await snapshot("revamp_sign_dark")
+	player.lamp.show()
+	await snapshot("revamp_sign_flashlight")
+	await audit_view(Vector3(28,0,10.3),Vector3(28,1.8,12))
+	await snapshot("revamp_courtyard_window")
+	player.camera.rotation.x=.5
+	await snapshot("revamp_window_look_up")
+	player.camera.rotation.x=-.5
+	await snapshot("revamp_window_look_down")
+	await audit_view(Vector3(12,0,2),Vector3(12,1.8,0))
+	await snapshot("revamp_exterior_window")
+	play_intro()
+	await get_tree().create_timer(.5).timeout
+	await snapshot("revamp_intro_rear_seat")
+	progression.finish_intro()
+	await get_tree().create_timer(.2).timeout
+	await snapshot("revamp_night_hud")
+	await audit_view(Vector3(26.2,0,7.3),Vector3(26.2,.68,6.025))
+	await snapshot("revamp_staff_prompt")
+	progression.evidence.inspect("sketch")
+	await get_tree().create_timer(.25).timeout
+	await snapshot("revamp_document_front")
+	progression.evidence.reverse=true
+	progression.evidence.update_preview()
+	await get_tree().create_timer(.2).timeout
+	await snapshot("revamp_document_back")
+	progression.evidence.close()
+	quit_game()
+
+func verify_layout_shell() -> void:
+	var suite=load("res://tests/layout_shell.gd").new()
+	await suite.run(self)
+
+func bake_courtyard() -> void:
+	mode="bake"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://assets/windows"))
+	for pane in get_tree().get_nodes_in_group("exterior_panes"): pane.hide()
+	enemy.hide()
+	scare_head.hide()
+	var view:=SubViewport.new()
+	view.size=Vector2i(1536,768)
+	view.world_3d=get_world_3d()
+	view.render_target_update_mode=SubViewport.UPDATE_ALWAYS
+	add_child(view)
+	var camera:=Camera3D.new()
+	camera.fov=72
+	view.add_child(camera)
+	var sun:=DirectionalLight3D.new()
+	sun.rotation_degrees=Vector3(-55,-25,0)
+	sun.light_color=Color("eee7d2")
+	sun.shadow_enabled=true
+	add_child(sun)
+	var env: Environment=world.get_child(0).environment
+	for level in range(2):
+		for side in ["north","south","west","east"]:
+			var y: float=level*4.2+1.75
+			var point: Vector3={"north":Vector3(28,y,12.25),"south":Vector3(28,y,23.75),"west":Vector3(12.25,y,18),"east":Vector3(43.75,y,18)}[side]
+			camera.position=point
+			camera.look_at(Vector3(28,3.5,18))
+			var atlas:=Image.create(1536,1536,false,Image.FORMAT_RGBA8)
+			for day in [true,false]:
+				expansion.set_day(day)
+				sun.light_energy=1.2 if day else .08
+				env.ambient_light_energy=.65 if day else .13
+				await get_tree().process_frame
+				await RenderingServer.frame_post_draw
+				await get_tree().process_frame
+				await RenderingServer.frame_post_draw
+				var capture_image: Image=view.get_texture().get_image()
+				capture_image.convert(Image.FORMAT_RGBA8)
+				atlas.blit_rect(capture_image,Rect2i(0,0,1536,768),Vector2i(0,0 if day else 768))
+			atlas.save_png("res://assets/windows/courtyard_%s_%d.png" % [side,level])
+			print("BAKED courtyard ",side," ",level)
+	quit_game()
+
+func corrections_render() -> void:
+	await get_tree().create_timer(.4).timeout
+	start_game()
+	player_voice.flush()
+	player_voice.wake_delay=-1
+	mode="inspection"
+	hud.hide()
+	prompt.hide()
+	message.hide()
+	film.hide()
+	var env: Environment=world.get_child(0).environment
+	for light in layout.inspection_lights: light.show()
+	env.fog_enabled=false
+	env.ambient_light_energy=.75
+	var audit_sun:=DirectionalLight3D.new()
+	audit_sun.rotation_degrees=Vector3(-65,-25,0)
+	audit_sun.light_energy=.9
+	add_child(audit_sun)
+	var ceilings: Array[Node]=get_tree().get_nodes_in_group("audit_ceilings")
+	for node in ceilings: node.hide()
+	var upper: Array[Node3D]=[]
+	for node in layout.get_children():
+		if node is Node3D and node.position.y>4.0 and node.visible: upper.append(node); node.hide()
+	for node in world.get_children():
+		if node is Node3D and node!=layout and node.position.y>4.0 and node.visible: upper.append(node); node.hide()
+	for core_name in ["WestStairs_Green","EastStairs_Blue"]:
+		for node in layout.get_node(core_name).get_children():
+			if node is MeshInstance3D and node.position.y>3.9 and node.visible: upper.append(node); node.hide()
+	menu_camera.projection=Camera3D.PROJECTION_ORTHOGONAL
+	menu_camera.size=42
+	menu_camera.position=Vector3(28,45,18)
+	menu_camera.look_at(Vector3(28,0,18),Vector3(0,0,-1))
+	menu_camera.current=true
+	await get_tree().create_timer(.2).timeout
+	await snapshot("correction_ground_overview")
+	for node in upper: node.show()
+	await get_tree().create_timer(.2).timeout
+	await snapshot("correction_upper_overview")
+	for node in ceilings: node.show()
+	menu_camera.projection=Camera3D.PROJECTION_PERSPECTIVE
+	player.camera.current=true
+	for shot in [["staff_cabinet",Vector3(29.5,0,3.4),Vector3(31.7,1.6,2)],["upper_sign",Vector3(6.8,4.2,19),Vector3(7.86,6.65,22)],["science_entrance",Vector3(25.5,4.2,10.7),Vector3(25.5,5.7,8)],["library_front",Vector3(36,0,11),Vector3(36,1.7,7.4)],["art_widening",Vector3(29.7,0,25.7),Vector3(29.7,1.7,30)],["entrance_hardware_locked",Vector3(1.0,0,12),Vector3(.13,1.25,12)],["west_landing",Vector3(3.5,0,23),Vector3(0,1.8,20)],["east_landing",Vector3(50,4.2,18),Vector3(55.9,5.9,20)]]:
+		await audit_view(shot[1],shot[2])
+		await snapshot("correction_"+shot[0])
+	var p: Node=progression.story_puzzles
+	for id in ["upper","festival","archive","media","rehearsal_U08"]: p.utility_inventory[id]=true
+	for d in doors:
+		d.locked=false
+		toggle_door(d,true)
+	await get_tree().create_timer(.9).timeout
+	for shot in [["archive_vestibule",Vector3(10,4.2,27),Vector3(13.3,5.2,29.4)],["classroom",Vector3(14.9,0,6.6),Vector3(9,1.3,4)],["rehearsal",Vector3(45.7,4.2,32.8),Vector3(45.6,4.8,34.4)]]:
+		await audit_view(shot[1],shot[2])
+		await snapshot("correction_"+shot[0])
+	var door: Dictionary=layout.room_doors.G04[0]
+	await audit_view(Vector3(33.5,0,10.3),Vector3(34.3,1.4,7.6))
+	await snapshot("correction_door_parked")
+	toggle_door(door)
+	await get_tree().create_timer(.30).timeout
+	await snapshot("correction_door_midcycle")
+	await get_tree().create_timer(.5).timeout
+	await snapshot("correction_door_closed")
+	for i in range(4): hardware.release(i); await get_tree().create_timer(.6).timeout
+	await audit_view(Vector3(1.0,0,12),Vector3(.13,1.25,12))
+	await snapshot("correction_entrance_hardware_released")
+	audit_sun.queue_free()
+	for light in layout.inspection_lights: light.hide()
+	for day in [true,false]:
+		expansion.set_day(day)
+		for level in range(2):
+			await audit_view(Vector3(12,level*4.2,1.3),Vector3(12,level*4.2+1.8,-5))
+			await snapshot("correction_window_"+("day" if day else "night")+str(level))
+			player.camera.rotation.x=.95
+			await snapshot("correction_window_up_"+str(day)+str(level))
+			player.camera.rotation.x=-.95
+			await snapshot("correction_window_down_"+str(day)+str(level))
+			await audit_view(Vector3(13.5,level*4.2,1.3),Vector3(12,level*4.2+1.8,-5))
+			await snapshot("correction_window_side_"+str(day)+str(level))
+		await audit_view(Vector3(28,0,10.4),Vector3(28,1.8,18))
+		await snapshot("correction_courtyard_"+str(day))
+	expansion.set_day(false)
+	film.show()
+	play_intro()
+	await get_tree().create_timer(3).timeout
+	await snapshot("correction_intro")
+	print("PLACEMENT accepted=",layout.placement.accepted.size()," rejected=",layout.placement.rejected)
+	quit_game()
+
+func scenery_render() -> void:
+	await get_tree().create_timer(.4).timeout
+	start_game()
+	player_voice.flush()
+	player_voice.wake_delay=-1
+	mode="inspection"
+	hud.hide();prompt.hide();message.hide();film.hide()
+	if "--creature-render" in OS.get_cmdline_user_args():
+		expansion.set_day(true)
+		enemy.position=Vector3(28,1.5,-90)
+		enemy.rotation=Vector3.ZERO
+		enemy.show()
+		for shot in [["front",Vector3(28,0,-94)],["quarter",Vector3(31,0,-93)],["side",Vector3(32,0,-90)],["rear",Vector3(28,0,-86)]]:
+			await audit_view(shot[1],enemy.position)
+			await snapshot("final_head_"+shot[0])
+		await audit_view(Vector3(28,0,-94),enemy.position)
+		enemy.slow_blink()
+		await get_tree().create_timer(.22).timeout
+		await snapshot("final_head_halfblink")
+		await get_tree().create_timer(.2).timeout
+		await snapshot("final_head_closed")
+		enemy.scare=1.0
+		await audit_view(Vector3(31,0,-93),enemy.position)
+		await snapshot("final_head_open_quarter")
+		mode="playing"
+		capture()
+		await get_tree().create_timer(.42).timeout
+		await snapshot("final_capture_stare")
+		await get_tree().create_timer(.58).timeout
+		await snapshot("final_capture_lunge")
+		await get_tree().create_timer(.3).timeout
+		await snapshot("final_capture_black")
+		quit_game()
+		return
+	if "--hallway-render" in OS.get_cmdline_user_args():
+		expansion.set_day(false)
+		film.show()
+		var encounter: RefCounted=progression.encounters_controller
+		mode="playing"
+		await audit_view(Vector3(38,4.2,26.5),Vector3(44,6,26.5))
+		encounter.portrait_closed()
+		await get_tree().create_timer(.2).timeout
+		await audit_view(Vector3(38,4.2,26.5),Vector3(10,5.7,26))
+		await get_tree().create_timer(.3).timeout
+		await snapshot("final_hallway_distant")
+		print("HALLWAY distance=",player.position.distance_to(enemy.position)," hunt=",progression.hunt_enabled," noticed=",encounter.reveal_seen)
+		await get_tree().create_timer(1.45).timeout
+		await snapshot("final_hallway_blink")
+		print("HALLWAY blink=",enemy.face_material.get_shader_parameter("blink"))
+		await get_tree().create_timer(5).timeout
+		await snapshot("final_hallway_withdrawn")
+		print("HALLWAY sighted=",encounter.reveal_seen," withdrawn=",encounter.reveal_finished," hunt=",progression.hunt_enabled)
+		quit_game()
+		return
+	if "--door-render" in OS.get_cmdline_user_args():
+		expansion.set_day(true)
+		var d: Dictionary=layout.room_doors.G01[0]
+		for opened in [false,true]:
+			if opened: toggle_door(d,true); await get_tree().create_timer(.8).timeout
+			for shot in [["inside",Vector3(10.7,0,5.7),Vector3(10.5,1.4,8.25)],["edge",Vector3(12.4,0,7.45),Vector3(10.7,1.4,8.25)],["hall",Vector3(10.8,0,10.4),Vector3(10.5,1.4,8.25)]]:
+				await audit_view(shot[1],shot[2])
+				await snapshot("door_"+shot[0]+"_"+str(opened))
+		quit_game()
+		return
+	if "--graphics-final" in OS.get_cmdline_user_args():
+		for day in [true,false]:
+			expansion.set_day(day)
+			await audit_view(Vector3(12,4.2,1.3),Vector3(12,5.4,-5))
+			await snapshot("final_exterior_"+str(day))
+			await audit_view(Vector3(28,0,10.4),Vector3(25,2.1,18))
+			await snapshot("final_courtyard_"+str(day))
+		enemy.position=Vector3(31,1.5,26);enemy.rotation.y=-PI/2;enemy.show()
+		await audit_view(Vector3(35,0,26),Vector3(31,1.5,26))
+		enemy.slow_blink()
+		await get_tree().create_timer(.4).timeout
+		await snapshot("final_creature_blink")
+		for light in layout.inspection_lights: light.show()
+		await audit_view(Vector3(31.3,4.2,5),Vector3(31.3,5,3.5))
+		await snapshot("final_science_sink")
+		print("FINAL PLACEMENT ",layout.placement.accepted.size()," accepted; rejected ",layout.placement.rejected)
+		quit_game()
+		return
+	for day in [true,false]:
+		expansion.set_day(day)
+		for shot in [["courtyard_ground",Vector3(28,0,10.4),Vector3(25,2.1,18)],["courtyard_upper",Vector3(28,4.2,10.4),Vector3(25,2.3,18)],["exterior_ground",Vector3(12,0,1.3),Vector3(12,2,-5)],["exterior_upper",Vector3(12,4.2,1.3),Vector3(12,5.4,-5)]]:
+			await audit_view(shot[1],shot[2])
+			await snapshot("scenery_"+shot[0]+("_day" if day else "_night"))
+		await audit_view(Vector3(12,4.2,1.1),Vector3(12,5.8,-5))
+		player.camera.rotation.x=.95
+		await snapshot("scenery_pitch_up_"+str(day))
+		player.camera.rotation.x=-.95
+		await snapshot("scenery_pitch_down_"+str(day))
+		await audit_view(Vector3(13.5,4.2,1.1),Vector3(12,5.8,-5))
+		await snapshot("scenery_sideways_"+str(day))
+	for light in layout.inspection_lights: light.show()
+	await audit_view(Vector3(19.4,0,33.0),Vector3(19.4,1.9,35.9))
+	await snapshot("scenery_student_art")
+	await audit_view(Vector3(31.3,4.2,5.0),Vector3(31.3,5.0,3.5))
+	await snapshot("scenery_science_sink")
+	await audit_view(Vector3(14.8,0,3.6),Vector3(14.1,.9,2.7))
+	await snapshot("scenery_desk_belongings")
+	for light in layout.inspection_lights: light.hide()
+	enemy.position=Vector3(31,1.5,26)
+	enemy.rotation.y=-PI/2
+	enemy.show()
+	await audit_view(Vector3(35,0,26),Vector3(31,1.5,26))
+	await snapshot("correction_creature_front")
+	enemy.slow_blink()
+	await get_tree().create_timer(.4).timeout
+	await snapshot("correction_creature_blink")
+	await audit_view(Vector3(31,0,22),Vector3(31,1.5,26))
+	await snapshot("correction_creature_side")
+	mode="playing"
+	capture()
+	await get_tree().create_timer(.42).timeout
+	await snapshot("correction_capture_stare")
+	await get_tree().create_timer(.58).timeout
+	await snapshot("correction_capture_lunge")
+	await get_tree().create_timer(.3).timeout
+	await snapshot("correction_capture_black")
+	quit_game()

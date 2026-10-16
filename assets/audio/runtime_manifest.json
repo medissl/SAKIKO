@@ -1,0 +1,672 @@
+{
+  "review": "Final master: no spoken player, teacher, student or tape VA. Source/code checks and measured peaks; perceptual listening remains unverified. Legacy speech source files and notices retained.",
+  "weak_replacements": "18 noise-derived footstep variants and 17 mechanical/paper/furniture placeholders replaced by category-matched recorded CC0 excerpts; classroom page handling rebuilt from recorded paper.",
+  "retained": "Recorded male pant/pain, Sakiko vocals, licensed outdoor children ambience and menu music. Nonverbal night beds and filtered murmur: nonverbal_manifest.json.",
+  "gains_db": {
+    "foot_walk": -11,
+    "foot_run": -8,
+    "near_door_slide": -12,
+    "container": -12,
+    "paper": -16,
+    "lock_turn": -14,
+    "tape": -12,
+    "creature_capture": -9,
+    "male_pain": -8,
+    "game_ambience": -25
+  },
+  "buses": {
+    "PlayerSFX": "SFX (-1 dB trim)",
+    "WorldSFX": "SFX (0 dB trim)",
+    "Ghost": "SFX, light positional reverb; Creature sounds slider",
+    "Voice": "Master; legacy speech disabled",
+    "TeacherVoice": "Voice, currently disabled",
+    "Classroom": "Ambience",
+    "Master": "Existing user gain; HardLimiter ceiling -1 dB, no pre-gain",
+    "CreatureDry": "SFX, dry capture vocals; Creature sounds slider"
+  },
+  "files": [
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_stair_walk_0.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.34,
+      "source_peak": 0.48,
+      "rms_dbfs": -32.4
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_stair_walk_1.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.34,
+      "source_peak": 0.48,
+      "rms_dbfs": -33.07
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_stair_walk_2.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.34,
+      "source_peak": 0.48,
+      "rms_dbfs": -29.25
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_tile_walk_0.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.28,
+      "source_peak": 0.48,
+      "rms_dbfs": -27.31
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_tile_walk_1.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.28,
+      "source_peak": 0.48,
+      "rms_dbfs": -27.01
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_tile_walk_2.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.28,
+      "source_peak": 0.48,
+      "rms_dbfs": -27.85
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_wood_walk_0.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.34,
+      "source_peak": 0.48,
+      "rms_dbfs": -28.21
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_wood_walk_1.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.34,
+      "source_peak": 0.48,
+      "rms_dbfs": -32.72
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_wood_walk_2.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.34,
+      "source_peak": 0.48,
+      "rms_dbfs": -30.14
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_stair_run_0.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.34,
+      "source_peak": 0.64,
+      "rms_dbfs": -29.9
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_stair_run_1.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.34,
+      "source_peak": 0.64,
+      "rms_dbfs": -30.57
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_stair_run_2.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.34,
+      "source_peak": 0.64,
+      "rms_dbfs": -26.75
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_tile_run_0.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.28,
+      "source_peak": 0.64,
+      "rms_dbfs": -24.81
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_tile_run_1.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.28,
+      "source_peak": 0.64,
+      "rms_dbfs": -24.52
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_tile_run_2.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.28,
+      "source_peak": 0.64,
+      "rms_dbfs": -25.35
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_wood_run_0.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.34,
+      "source_peak": 0.64,
+      "rms_dbfs": -25.71
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_wood_run_1.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.34,
+      "source_peak": 0.64,
+      "rms_dbfs": -30.22
+    },
+    {
+      "category": "movement",
+      "file": "assets/audio/foot_wood_run_2.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.34,
+      "source_peak": 0.64,
+      "rms_dbfs": -27.64
+    },
+    {
+      "category": "doors_and_containers",
+      "file": "assets/audio/door_track.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.65,
+      "source_peak": 0.53,
+      "rms_dbfs": -25.45
+    },
+    {
+      "category": "doors_and_containers",
+      "file": "assets/audio/latch.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.18,
+      "source_peak": 0.53,
+      "rms_dbfs": -29.34
+    },
+    {
+      "category": "doors_and_containers",
+      "file": "assets/audio/close.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.15,
+      "source_peak": 0.53,
+      "rms_dbfs": -19.19
+    },
+    {
+      "category": "doors_and_containers",
+      "file": "assets/audio/drawer_slide.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.65,
+      "source_peak": 0.53,
+      "rms_dbfs": -27.9
+    },
+    {
+      "category": "doors_and_containers",
+      "file": "assets/audio/cabinet_hinge.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.65,
+      "source_peak": 0.53,
+      "rms_dbfs": -27.9
+    },
+    {
+      "category": "doors_and_containers",
+      "file": "assets/audio/bag_fabric.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.7,
+      "source_peak": 0.53,
+      "rms_dbfs": -31.57
+    },
+    {
+      "category": "doors_and_containers",
+      "file": "assets/audio/case_latch.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.18,
+      "source_peak": 0.53,
+      "rms_dbfs": -29.34
+    },
+    {
+      "category": "doors_and_containers",
+      "file": "assets/audio/code_tick.wav",
+      "enabled": true,
+      "rate": 22050,
+      "channels": 1,
+      "seconds": 0.06,
+      "source_peak": 0.1414,
+      "rms_dbfs": -32.82
+    },
+    {
+      "category": "doors_and_containers",
+      "file": "assets/audio/shelf_track.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.65,
+      "source_peak": 0.53,
+      "rms_dbfs": -25.45
+    },
+    {
+      "category": "paper_and_pickup",
+      "file": "assets/audio/paper_lift.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.3,
+      "source_peak": 0.4,
+      "rms_dbfs": -34.57
+    },
+    {
+      "category": "paper_and_pickup",
+      "file": "assets/audio/paper_flip.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.3,
+      "source_peak": 0.53,
+      "rms_dbfs": -32.13
+    },
+    {
+      "category": "paper_and_pickup",
+      "file": "assets/audio/photo_handle.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.3,
+      "source_peak": 0.4,
+      "rms_dbfs": -34.57
+    },
+    {
+      "category": "paper_and_pickup",
+      "file": "assets/audio/key.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.22,
+      "source_peak": 0.53,
+      "rms_dbfs": -27.53
+    },
+    {
+      "category": "paper_and_pickup",
+      "file": "assets/audio/unlock.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.22,
+      "source_peak": 0.53,
+      "rms_dbfs": -27.53
+    },
+    {
+      "category": "paper_and_pickup",
+      "file": "assets/audio/lock_turn.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.22,
+      "source_peak": 0.53,
+      "rms_dbfs": -27.53
+    },
+    {
+      "category": "paper_and_pickup",
+      "file": "assets/audio/shackle_release.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.18,
+      "source_peak": 0.53,
+      "rms_dbfs": -29.34
+    },
+    {
+      "category": "paper_and_pickup",
+      "file": "assets/audio/creak.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 0.85,
+      "source_peak": 0.53,
+      "rms_dbfs": -23.01
+    },
+    {
+      "category": "creature_and_player_nonverbal",
+      "file": "assets/audio/sakiko_humming.ogg",
+      "enabled": true,
+      "rate": 48000,
+      "channels": 1,
+      "seconds": 66.838,
+      "source_peak": 0.3042,
+      "rms_dbfs": -22.78
+    },
+    {
+      "category": "creature_and_player_nonverbal",
+      "file": "assets/audio/sakiko_laugh.ogg",
+      "enabled": true,
+      "rate": 48000,
+      "channels": 1,
+      "seconds": 2.78,
+      "source_peak": 0.6742,
+      "rms_dbfs": -18.64
+    },
+    {
+      "category": "creature_and_player_nonverbal",
+      "file": "assets/audio/sakiko_scream.ogg",
+      "enabled": true,
+      "rate": 48000,
+      "channels": 1,
+      "seconds": 1.822,
+      "source_peak": 0.6041,
+      "rms_dbfs": -16.09
+    },
+    {
+      "category": "creature_and_player_nonverbal",
+      "file": "assets/audio/player_breath_male.mp3",
+      "enabled": true,
+      "rate": 48000,
+      "channels": 2,
+      "seconds": 5.176,
+      "source_peak": 0.0973,
+      "rms_dbfs": -42.14
+    },
+    {
+      "category": "creature_and_player_nonverbal",
+      "file": "assets/audio/player_pain.wav",
+      "enabled": true,
+      "rate": 22050,
+      "channels": 1,
+      "seconds": 1.0,
+      "source_peak": 0.5,
+      "rms_dbfs": -26.98
+    },
+    {
+      "category": "creature_and_player_nonverbal",
+      "file": "assets/audio/capture.wav",
+      "enabled": true,
+      "rate": 22050,
+      "channels": 1,
+      "seconds": 1.75,
+      "source_peak": 0.6756,
+      "rms_dbfs": -27.02
+    },
+    {
+      "category": "disabled_teacher",
+      "file": "assets/audio/teacher_lesson.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 125.0,
+      "source_peak": 0.4748,
+      "rms_dbfs": -28.03
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_P01.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 2.458,
+      "source_peak": 0.7422,
+      "rms_dbfs": -23.03
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_P02.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 3.123,
+      "source_peak": 0.5772,
+      "rms_dbfs": -23.07
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_P03.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 3.987,
+      "source_peak": 0.5779,
+      "rms_dbfs": -22.47
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_P04.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 1.999,
+      "source_peak": 0.5151,
+      "rms_dbfs": -22.5
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_P05.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 2.378,
+      "source_peak": 0.5674,
+      "rms_dbfs": -22.67
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_P06.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 2.977,
+      "source_peak": 0.5618,
+      "rms_dbfs": -23.49
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_P07.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 3.092,
+      "source_peak": 0.4838,
+      "rms_dbfs": -22.9
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_P08.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 3.731,
+      "source_peak": 0.5107,
+      "rms_dbfs": -22.78
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_P09.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 4.339,
+      "source_peak": 0.6091,
+      "rms_dbfs": -22.69
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_P10.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 3.196,
+      "source_peak": 0.639,
+      "rms_dbfs": -23.11
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_P11.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 3.573,
+      "source_peak": 0.6708,
+      "rms_dbfs": -23.34
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_P12.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 1.727,
+      "source_peak": 0.5006,
+      "rms_dbfs": -23.12
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_H01.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 2.367,
+      "source_peak": 0.6197,
+      "rms_dbfs": -22.45
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_H02.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 3.241,
+      "source_peak": 0.8761,
+      "rms_dbfs": -22.83
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_H03.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 2.345,
+      "source_peak": 0.5141,
+      "rms_dbfs": -22.92
+    },
+    {
+      "category": "disabled_player",
+      "file": "assets/audio/production/ja_H04.wav",
+      "enabled": false,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 3.422,
+      "source_peak": 0.6194,
+      "rms_dbfs": -22.73
+    },
+    {
+      "category": "japanese_tape",
+      "file": "assets/audio/festival_students.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 24.0,
+      "source_peak": 0.4147,
+      "rms_dbfs": -29.32
+    },
+    {
+      "category": "ambience",
+      "file": "assets/audio/ambience.wav",
+      "enabled": true,
+      "rate": 22050,
+      "channels": 1,
+      "seconds": 8.0,
+      "source_peak": 0.28,
+      "rms_dbfs": -22.94
+    },
+    {
+      "category": "ambience",
+      "file": "assets/audio/hum.wav",
+      "enabled": true,
+      "rate": 22050,
+      "channels": 1,
+      "seconds": 4.0,
+      "source_peak": 0.18,
+      "rms_dbfs": -19.75
+    },
+    {
+      "category": "ambience",
+      "file": "assets/audio/menu_theme.ogg",
+      "enabled": true,
+      "rate": 44100,
+      "channels": 2,
+      "seconds": 100.0,
+      "source_peak": 0.7433,
+      "rms_dbfs": -15.05
+    },
+    {
+      "category": "ambience",
+      "file": "assets/audio/classroom_foley.wav",
+      "enabled": true,
+      "rate": 24000,
+      "channels": 1,
+      "seconds": 125.0,
+      "source_peak": 0.1,
+      "rms_dbfs": -63.87
+    },
+    {
+      "category": "ambience",
+      "file": "assets/audio/production/children_playing_piermic.mp3",
+      "enabled": true,
+      "rate": 44100,
+      "channels": 2,
+      "seconds": 31.1,
+      "source_peak": 0.9698,
+      "rms_dbfs": -21.4
+    }
+  ],
+  "nonverbal_manifest": "assets/audio/nonverbal_manifest.json",
+  "pant_gain_change_db": 3,
+  "silence": "No looping dramatic suspense; six-second texture only at authored moments. Twenty-four-second tape ends in silence; mandatory transcript supplies original clue."
+}

@@ -1,0 +1,10 @@
+{
+  "asset": "assets/characters/sakiko_hair.glb",
+  "source": "Original Blender 5.0 curve groom authored by tools/build_sakiko_hair.py",
+  "mode": "offline Blender curves converted to solid geometry; no provider",
+  "strands": 2370,
+  "triangles": 381792,
+  "sha256": "4553ab45fbc7845f3b686e2358c61bbe4bbbce798b5f0061046cbe13d4018730",
+  "axes": "Godot +Y up; face looks -Z",
+  "checks": "Export succeeded. Runtime multi-angle checks are separate; see tests/artifacts/creature-final.log."
+}

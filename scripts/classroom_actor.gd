@@ -26,7 +26,16 @@ func _ready() -> void:
 	actor.scale *= factor
 	actor.position.y -= bounds.position.y*factor
 
-func _process(delta: float) -> void:
-	if not is_visible_in_tree() or not actor: return
-	elapsed += delta
-	actor.rotation.y = sin(elapsed*.43+position.x)*.004
+func class_activity(t: float) -> void:
+	if not actor: return
+	var phase := absf(position.x*1.7+position.z*.83)
+	var shift := exp(-pow((fmod(t+phase,27.3)-8)/1.8,2))
+	actor.rotation.z = sin(t*.33+phase)*.003+shift*.009
+	actor.position.x = shift*.018
+	actor.rotation.y = sin(t*.43+phase)*.004
+	if teacher:
+		# Brief turns toward the class punctuate work at the board.
+		actor.rotation.y += .48*(smoothstep(19,21,fmod(t,40))*(1-smoothstep(25,27,fmod(t,40))))
+	else:
+		var notice := smoothstep(52,53,t)*(1-smoothstep(55,57,t))
+		if position.x> -16: actor.rotation.y += notice*.20

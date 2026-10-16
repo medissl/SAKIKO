@@ -1,0 +1,198 @@
+{
+  "author": "Original project geometry authored in build_school_finish_kit.py",
+  "license": "Original project content; no third-party source geometry",
+  "coordinates": "Godot metres, Y up, floor-contact origin; fronts -Z",
+  "policy": "Under 12k triangles per complete asset, joined by shared palette material, no embedded lights/physics/animation",
+  "source_sha256": "ea11027c53c9338c320d82a0d0e6236758793627310eb12c0dd3b86163545322",
+  "assets": [
+    {
+      "name": "teacher_desk",
+      "file": "assets\\furniture\\finish\\teacher_desk.glb",
+      "triangles": 952,
+      "materials": 3,
+      "sha256": "a3ecd19d8bd56463319f99429f1ddb3e185a7f0066aaaa9f722182cdd0fe7baf"
+    },
+    {
+      "name": "staff_desk",
+      "file": "assets\\furniture\\finish\\staff_desk.glb",
+      "triangles": 952,
+      "materials": 3,
+      "sha256": "00a0df10706298e2a03c86762af1c7bb61a2461fcfbd9ec4053fdb56c27d1639"
+    },
+    {
+      "name": "broadcast_desk",
+      "file": "assets\\furniture\\finish\\broadcast_desk.glb",
+      "triangles": 952,
+      "materials": 3,
+      "sha256": "70df804e6de8f7827837c4b729567af50de60db67336d595634f10ec47887d65"
+    },
+    {
+      "name": "av_bench",
+      "file": "assets\\furniture\\finish\\av_bench.glb",
+      "triangles": 952,
+      "materials": 3,
+      "sha256": "24c556a79f9cc0a22bc0709f0a4a761854280a9a5b90a267c380fe0c79ad66a1"
+    },
+    {
+      "name": "nurse_station",
+      "file": "assets\\furniture\\finish\\nurse_station.glb",
+      "triangles": 952,
+      "materials": 3,
+      "sha256": "bdaf83eca2d8c59ddd5fd98ab02af20cf2b2ccad8934021584c25eef5fc26121"
+    },
+    {
+      "name": "clinic_bed",
+      "file": "assets\\furniture\\finish\\clinic_bed.glb",
+      "triangles": 1484,
+      "materials": 4,
+      "sha256": "f92020a4c16592d1943c0eeebe6e5e8677fb5abae3f18e89187d3b878b1ef5ba"
+    },
+    {
+      "name": "sink_station",
+      "file": "assets\\furniture\\finish\\sink_station.glb",
+      "triangles": 892,
+      "materials": 3,
+      "sha256": "3fdeb12d8291d7453ef6bf60a1b7ecf7efd62b4d3b58dec8f88156cbe7c3d451"
+    },
+    {
+      "name": "medicine_cabinet",
+      "file": "assets\\furniture\\finish\\medicine_cabinet.glb",
+      "triangles": 396,
+      "materials": 3,
+      "sha256": "609e81b654c195673049d28370db269c1f23853c558e601cdae7c131b8095ee8"
+    },
+    {
+      "name": "class_cubby",
+      "file": "assets\\furniture\\finish\\class_cubby.glb",
+      "triangles": 972,
+      "materials": 1,
+      "sha256": "15f316b5fecafcbcdb4d3b9ee311fa3d87bc5290b3de2b2ad71bab6bda8fedf1"
+    },
+    {
+      "name": "archive_box",
+      "file": "assets\\furniture\\finish\\archive_box.glb",
+      "triangles": 432,
+      "materials": 3,
+      "sha256": "b1716dd831679f16fe3a327cad4beae5fff9a0bfb0fbff3812a2885770523f71"
+    },
+    {
+      "name": "office_chair",
+      "file": "assets\\furniture\\finish\\office_chair.glb",
+      "triangles": 1284,
+      "materials": 2,
+      "sha256": "5abbb65476f9816c0276221b4d595c05d60ab8862b3aa38247362f7f2f3eef71"
+    },
+    {
+      "name": "laboratory_bench",
+      "file": "assets\\furniture\\finish\\laboratory_bench.glb",
+      "triangles": 936,
+      "materials": 3,
+      "sha256": "808e0751f572107efcf74da94ce29131c14f82ebcd4742177d867b757bae67d9"
+    },
+    {
+      "name": "broadcast_mixer",
+      "file": "assets\\furniture\\finish\\broadcast_mixer.glb",
+      "triangles": 2040,
+      "materials": 3,
+      "sha256": "745017c0316d2bf71c6b2fc472b47f4ef8f4e86c4c0bd85b118dbc1fa06f6194"
+    },
+    {
+      "name": "task_lamp",
+      "file": "assets\\furniture\\finish\\task_lamp.glb",
+      "triangles": 240,
+      "materials": 3,
+      "sha256": "69489005333b20bbd26adf49e49f0c29d91ac8f30aca610cc4ff21c360667805"
+    },
+    {
+      "name": "office_phone",
+      "file": "assets\\furniture\\finish\\office_phone.glb",
+      "triangles": 1404,
+      "materials": 2,
+      "sha256": "1d3b960a247e4abd83aa4ae82db67f768ce36e27be8283c1dbe25786da663155"
+    },
+    {
+      "name": "flat_files",
+      "file": "assets\\furniture\\finish\\flat_files.glb",
+      "triangles": 1188,
+      "materials": 4,
+      "sha256": "6afec14050d5671b972d57001902d9324916e0f007b276ac6f6a7994fb30cff8"
+    },
+    {
+      "name": "demo_bench",
+      "file": "assets\\furniture\\finish\\demo_bench.glb",
+      "triangles": 1188,
+      "materials": 4,
+      "sha256": "bc62c750d20d7b2e8640f7ec9b633d4d38258402d01f63aef11257b049a7fdba"
+    },
+    {
+      "name": "art_workbench",
+      "file": "assets\\furniture\\finish\\art_workbench.glb",
+      "triangles": 952,
+      "materials": 3,
+      "sha256": "e9562b28b06424e803de7cae56076ab37234a4527d9ebc5b05fcef4718f00ce9"
+    },
+    {
+      "name": "prep_island",
+      "file": "assets\\furniture\\finish\\prep_island.glb",
+      "triangles": 952,
+      "materials": 3,
+      "sha256": "316efb711526412500c76d84e5117a4191ce02f844e5be204ba435c022522763"
+    },
+    {
+      "name": "bedside_stand",
+      "file": "assets\\furniture\\finish\\bedside_stand.glb",
+      "triangles": 468,
+      "materials": 3,
+      "sha256": "ae5732a6d3e506e9f7b02a7ce5abf119855e35d7416c885a12246a780cec395c"
+    },
+    {
+      "name": "common_bench",
+      "file": "assets\\furniture\\finish\\common_bench.glb",
+      "triangles": 484,
+      "materials": 2,
+      "sha256": "746a6242ec660491442ea627667c83f9a18e6340f80d088a9083091ff1e0ee8e"
+    },
+    {
+      "name": "art_stool",
+      "file": "assets\\furniture\\finish\\art_stool.glb",
+      "triangles": 416,
+      "materials": 2,
+      "sha256": "837a091d2ea45a9184385db79019c38eb6382f155b7c116173daf715345eb5ac"
+    },
+    {
+      "name": "headphones",
+      "file": "assets\\furniture\\finish\\headphones.glb",
+      "triangles": 408,
+      "materials": 2,
+      "sha256": "28114cffe065b55462236cc930a000cd956c2e37d136bbdda581e32f6ac3dfb8"
+    },
+    {
+      "name": "microscope",
+      "file": "assets\\furniture\\finish\\microscope.glb",
+      "triangles": 372,
+      "materials": 3,
+      "sha256": "048954f7cd430ee71241a1d5e5ed5252910d22d21aa5f9d6e716c1b884a604e4"
+    },
+    {
+      "name": "water_dispenser",
+      "file": "assets\\furniture\\finish\\water_dispenser.glb",
+      "triangles": 564,
+      "materials": 4,
+      "sha256": "59c33fd457371c9297f3b1b62a4ee9678e33cf75a68560844f7a4bd328cbd9d8"
+    },
+    {
+      "name": "folded_cardigan",
+      "file": "assets\\furniture\\finish\\folded_cardigan.glb",
+      "triangles": 672,
+      "materials": 3,
+      "sha256": "02df833e93378dc0f3eb2f2c119d049140557f56396655ba85805f423bbeec16"
+    },
+    {
+      "name": "av_projector",
+      "file": "assets\\furniture\\finish\\av_projector.glb",
+      "triangles": 1540,
+      "materials": 3,
+      "sha256": "98ca6dd2cde084d2bf0217e0b5bf51ba2819b8e57c4ab5500e6dd865133ff186"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "author": "Original authored PIL/numpy textures; build_finish_textures.py",
+  "source": "No downloaded or edited source images",
+  "files": [
+    {
+      "file": "book_atlas.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "sha256": "8e33e87d3a73912407a2c02ba465930a7f1eb2d2de263516cdb1f9f7b37cca6e"
+    },
+    {
+      "file": "case_atlas.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "sha256": "02e60b0e985ee182faae539e9e77580559c616152be29fa4bf5425eec50653a4"
+    },
+    {
+      "file": "ceiling_ivory.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "sha256": "a1a3b91932028eca7bc46073c3f29733f369727204955d0722bbf48f69307069"
+    },
+    {
+      "file": "chair_scuffs.png",
+      "dimensions": [
+        256,
+        256
+      ],
+      "sha256": "412812f77fd1280ab1331db09e5cfb2a90cf172cdff687844bb268e1bbc53d47"
+    },
+    {
+      "file": "clinic_vinyl.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "sha256": "55fe30306f01cdec2d1888bc283abe7ddf65f4b22543ac443263670f65deabb6"
+    },
+    {
+      "file": "file_atlas.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "sha256": "bcd85250e7968b4a7245df88463459e896f6614703c88437078d09d3a91b4ed8"
+    },
+    {
+      "file": "service_tile.png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "sha256": "f54744aa70b3d10293f6c672f9fe9ec23976fe4896bd26080f701198ca934b24"
+    }
+  ]
+}

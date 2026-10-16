@@ -1,0 +1,8 @@
+{
+  "player_enabled": false,
+  "teacher_enabled": false,
+  "tape_enabled": false,
+  "reason": "No player/teacher/tape speech. User-requested sparse practical player captions run without VA, outside scares, inspection and recording. Retired speech remains excluded.",
+  "model": "Kokoro-82M v1.0 / kokoro-onnx 0.6.1 / Misaki Japanese G2P / local CPU / 24000 Hz",
+  "terms": "Apache-2.0 model; stock jm_kumo training attribution Koniwa CC BY 3.0 retained in ASSET_SOURCES.md. No cloning or paid API. Model card reports limited Japanese training data; downloading the weights does not establish acceptable acting."
+}

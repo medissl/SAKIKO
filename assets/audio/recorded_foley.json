@@ -1,0 +1,437 @@
+{
+  "sources": [
+    {
+      "id": "wood",
+      "author": "Noted451",
+      "page": "https://freesound.org/people/Noted451/sounds/582202/",
+      "download": "https://cdn.freesound.org/previews/582/582202_9818404-hq.mp3",
+      "license": "CC0-1.0",
+      "sha256": "6b935b43a86e23db3e354ea7e47e2ae65573707fcef2faf821922a0819cc29e6"
+    },
+    {
+      "id": "tile",
+      "author": "ChloePieterse",
+      "page": "https://freesound.org/people/ChloePieterse/sounds/764530/",
+      "download": "https://cdn.freesound.org/previews/764/764530_15688677-hq.mp3",
+      "license": "CC0-1.0",
+      "sha256": "b45721dcdb725d43cb4651c2bbac8feda36bbfddd42cec8185ecf09bf36d13d6"
+    },
+    {
+      "id": "stair",
+      "author": "Anthousai",
+      "page": "https://freesound.org/people/Anthousai/sounds/398784/",
+      "download": "https://cdn.freesound.org/previews/398/398784_5923045-hq.mp3",
+      "license": "CC0-1.0",
+      "sha256": "955082088f850a35296cb02c71c0a7d35ee9195a74cc0bde52684d5487c5d3a4"
+    },
+    {
+      "id": "slide",
+      "author": "Rudmer_Rotteveel",
+      "page": "https://freesound.org/people/Rudmer_Rotteveel/sounds/364104/",
+      "download": "https://cdn.freesound.org/previews/364/364104_4921277-hq.mp3",
+      "license": "CC0-1.0",
+      "sha256": "a206b58beb7103cd00f9ef54cff0e09f34076f1879be597a4b521972d11e03e9"
+    },
+    {
+      "id": "paper",
+      "author": "bdunis4",
+      "page": "https://freesound.org/people/bdunis4/sounds/271459/",
+      "download": "https://cdn.freesound.org/previews/271/271459_4190771-hq.mp3",
+      "license": "CC0-1.0",
+      "sha256": "867de51d8f705a6c076badb113b65e6f2279dd276d32ecd0f7a31d42ac05a01a"
+    },
+    {
+      "id": "drawer",
+      "author": "FOSSarts",
+      "page": "https://freesound.org/people/FOSSarts/sounds/740449/",
+      "download": "https://cdn.freesound.org/previews/740/740449_14631530-hq.mp3",
+      "license": "CC0-1.0",
+      "sha256": "509a6e3f8a47452c4a3c2b5434196a9da1820aea5224ac47598ce49dd163632a"
+    },
+    {
+      "id": "lock",
+      "author": "ani_music",
+      "page": "https://freesound.org/people/ani_music/sounds/632480/",
+      "download": "https://cdn.freesound.org/previews/632/632480_3008343-hq.mp3",
+      "license": "CC0-1.0",
+      "sha256": "b1696e7b281e33ffbe2786f1a5216733d9dc365aae177bc068eb39bf058bb57e"
+    },
+    {
+      "id": "shackle",
+      "author": "Rudmer_Rotteveel",
+      "page": "https://freesound.org/people/Rudmer_Rotteveel/sounds/536414/",
+      "download": "https://cdn.freesound.org/previews/536/536414_4921277-hq.mp3",
+      "license": "CC0-1.0",
+      "sha256": "008a8daaf6c0c64960826882205c1f464da06faa7a7a9590229bea53ad0860d0"
+    },
+    {
+      "id": "bag",
+      "author": "OwlStorm",
+      "page": "https://freesound.org/people/OwlStorm/sounds/212180/",
+      "download": "https://cdn.freesound.org/previews/212/212180_140737-hq.mp3",
+      "license": "CC0-1.0",
+      "sha256": "7f5110eca651810f8a376f0b9ace51e32d18015971f6c197be192a38de3e8c08"
+    },
+    {
+      "id": "chair",
+      "author": "SpliceSound",
+      "page": "https://freesound.org/people/SpliceSound/sounds/188204/",
+      "download": "https://cdn.freesound.org/previews/188/188204_1480854-hq.mp3",
+      "license": "CC0-1.0",
+      "sha256": "e1e8902061a5b6bb8b4e9dba54d09b59dd05417f54f02ac111d3760e069b01ac"
+    }
+  ],
+  "clips": [
+    {
+      "id": "foot_wood_walk_0",
+      "file": "res://assets/audio/foot_wood_walk_0.wav",
+      "source_id": "wood",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.34,
+      "peak": 0.48,
+      "rms": 0.03886205878755964,
+      "sha256": "a72d804cf54e05ab6f04faa2a525606841ac164941cc6c115e34353ef71bfdcb"
+    },
+    {
+      "id": "foot_wood_walk_1",
+      "file": "res://assets/audio/foot_wood_walk_1.wav",
+      "source_id": "wood",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.34,
+      "peak": 0.48,
+      "rms": 0.023130898056088846,
+      "sha256": "8694dc7377b42bf65c6f8d21eb3d20f13099e7413e94540d66c2ae03ad91c339"
+    },
+    {
+      "id": "foot_wood_walk_2",
+      "file": "res://assets/audio/foot_wood_walk_2.wav",
+      "source_id": "wood",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.34,
+      "peak": 0.48,
+      "rms": 0.031133386180522166,
+      "sha256": "c56993ca2503e6293d096996fee9391fe2b69bc635e3f45d8b2364742c24fd45"
+    },
+    {
+      "id": "foot_wood_run_0",
+      "file": "res://assets/audio/foot_wood_run_0.wav",
+      "source_id": "wood",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.34,
+      "peak": 0.64,
+      "rms": 0.05181607838341286,
+      "sha256": "f370e8f1b720868b058c3d3dfdd775a7e91e5c985c47fb630328d6b971c48cd2"
+    },
+    {
+      "id": "foot_wood_run_1",
+      "file": "res://assets/audio/foot_wood_run_1.wav",
+      "source_id": "wood",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.34,
+      "peak": 0.64,
+      "rms": 0.03084119740811847,
+      "sha256": "9afa97f07d037249e416c728e02dbae85546c68b0d5c03764950f93d091d9c21"
+    },
+    {
+      "id": "foot_wood_run_2",
+      "file": "res://assets/audio/foot_wood_run_2.wav",
+      "source_id": "wood",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.34,
+      "peak": 0.64,
+      "rms": 0.04151118157402956,
+      "sha256": "06f470d70701b1e6654c99bdcd620a2c27879c6c9b5cd7e1c089adada2ae8a90"
+    },
+    {
+      "id": "foot_tile_walk_0",
+      "file": "res://assets/audio/foot_tile_walk_0.wav",
+      "source_id": "tile",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.28,
+      "peak": 0.48,
+      "rms": 0.04308506356625883,
+      "sha256": "a3f65172a2e4ed6dc9483c73b5d50deec73d4399180e1aba6154efa76af02ea6"
+    },
+    {
+      "id": "foot_tile_walk_1",
+      "file": "res://assets/audio/foot_tile_walk_1.wav",
+      "source_id": "tile",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.28,
+      "peak": 0.48,
+      "rms": 0.04459539064266292,
+      "sha256": "be7dee1c41bb6c6b558a9500fc4e47d684e9192a4b6f5387f57b9fa08957d525"
+    },
+    {
+      "id": "foot_tile_walk_2",
+      "file": "res://assets/audio/foot_tile_walk_2.wav",
+      "source_id": "tile",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.28,
+      "peak": 0.48,
+      "rms": 0.04050710204831088,
+      "sha256": "56bcdf028939bd8ffcbf0e82f5884ee3ecb00ff322a2d9f4b6ea9512c696d260"
+    },
+    {
+      "id": "foot_tile_run_0",
+      "file": "res://assets/audio/foot_tile_run_0.wav",
+      "source_id": "tile",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.28,
+      "peak": 0.64,
+      "rms": 0.057446751421678446,
+      "sha256": "8ff81dc7d30f5c18098dac856722669b82bb6318768b3681143c493e3d99cb68"
+    },
+    {
+      "id": "foot_tile_run_1",
+      "file": "res://assets/audio/foot_tile_run_1.wav",
+      "source_id": "tile",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.28,
+      "peak": 0.64,
+      "rms": 0.05946052085688391,
+      "sha256": "43a7966d0e7e6a55492f8eeb4f45296a7bdb8bfe65c4bef14fda73ca1677c30d"
+    },
+    {
+      "id": "foot_tile_run_2",
+      "file": "res://assets/audio/foot_tile_run_2.wav",
+      "source_id": "tile",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.28,
+      "peak": 0.64,
+      "rms": 0.054009469397747846,
+      "sha256": "9c89a23286da1ce9276805c87eef91587bdde75f08822586b9056c9d6d59c6f1"
+    },
+    {
+      "id": "foot_stair_walk_0",
+      "file": "res://assets/audio/foot_stair_walk_0.wav",
+      "source_id": "stair",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.34,
+      "peak": 0.48,
+      "rms": 0.023996419321000575,
+      "sha256": "8198cabdcb1de8441a8f07bc11fdd6284b0477834a90c1525407485239a26b75"
+    },
+    {
+      "id": "foot_stair_walk_1",
+      "file": "res://assets/audio/foot_stair_walk_1.wav",
+      "source_id": "stair",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.34,
+      "peak": 0.48,
+      "rms": 0.022219669749949315,
+      "sha256": "75246434d4a819aa083fe85b0df5806fef6ec5c2ba467c2582e96060e35ae111"
+    },
+    {
+      "id": "foot_stair_walk_2",
+      "file": "res://assets/audio/foot_stair_walk_2.wav",
+      "source_id": "stair",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.34,
+      "peak": 0.48,
+      "rms": 0.0344923164500295,
+      "sha256": "90bfd0a44e2b8bf75cfb3639065cd5f239067ce71152e3037d9399716570938f"
+    },
+    {
+      "id": "foot_stair_run_0",
+      "file": "res://assets/audio/foot_stair_run_0.wav",
+      "source_id": "stair",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.34,
+      "peak": 0.64,
+      "rms": 0.0319952257613341,
+      "sha256": "9967c4349c4d605cf7df4282033ca393bc54522c6bf127dd8785af70b060df33"
+    },
+    {
+      "id": "foot_stair_run_1",
+      "file": "res://assets/audio/foot_stair_run_1.wav",
+      "source_id": "stair",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.34,
+      "peak": 0.64,
+      "rms": 0.029626226333265754,
+      "sha256": "e71716d0806ab4354b3a35613bf5151de0e1a19fd456016ab1bb86ccab353d46"
+    },
+    {
+      "id": "foot_stair_run_2",
+      "file": "res://assets/audio/foot_stair_run_2.wav",
+      "source_id": "stair",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.34,
+      "peak": 0.64,
+      "rms": 0.045989755266706,
+      "sha256": "12db7714c17814c367d4db313d82f8b1504270ace110ae6d449a4144a80daa4d"
+    },
+    {
+      "id": "door_track",
+      "file": "res://assets/audio/door_track.wav",
+      "source_id": "slide",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.65,
+      "peak": 0.53,
+      "rms": 0.05339762822255686,
+      "sha256": "c8a82e58edb11d55004a9cc97d640af5a44e2856dface7e87caefc948c26939d"
+    },
+    {
+      "id": "shelf_track",
+      "file": "res://assets/audio/shelf_track.wav",
+      "source_id": "slide",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.65,
+      "peak": 0.53,
+      "rms": 0.05339762822255686,
+      "sha256": "c8a82e58edb11d55004a9cc97d640af5a44e2856dface7e87caefc948c26939d"
+    },
+    {
+      "id": "drawer_slide",
+      "file": "res://assets/audio/drawer_slide.wav",
+      "source_id": "drawer",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.65,
+      "peak": 0.53,
+      "rms": 0.04025851675975618,
+      "sha256": "1eaf9bfcafa1453d5350f005deb52af91f51b6ad21ec3b49a52ed110d5e4428c"
+    },
+    {
+      "id": "cabinet_hinge",
+      "file": "res://assets/audio/cabinet_hinge.wav",
+      "source_id": "drawer",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.65,
+      "peak": 0.53,
+      "rms": 0.04025851675975618,
+      "sha256": "1eaf9bfcafa1453d5350f005deb52af91f51b6ad21ec3b49a52ed110d5e4428c"
+    },
+    {
+      "id": "paper_flip",
+      "file": "res://assets/audio/paper_flip.wav",
+      "source_id": "paper",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.3,
+      "peak": 0.53,
+      "rms": 0.024759262434075575,
+      "sha256": "9b94209d6f8f52fc9563b18c1e7ecf659cd8bf70622c75b2328ca356454ab085"
+    },
+    {
+      "id": "paper_lift",
+      "file": "res://assets/audio/paper_lift.wav",
+      "source_id": "paper",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.3,
+      "peak": 0.4,
+      "rms": 0.01868623579930232,
+      "sha256": "26160175f1e6f08c7fa4f158b732b48e47d522bf2ded62b0ccbb723001b2c734"
+    },
+    {
+      "id": "photo_handle",
+      "file": "res://assets/audio/photo_handle.wav",
+      "source_id": "paper",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.3,
+      "peak": 0.4,
+      "rms": 0.01868623579930232,
+      "sha256": "26160175f1e6f08c7fa4f158b732b48e47d522bf2ded62b0ccbb723001b2c734"
+    },
+    {
+      "id": "bag_fabric",
+      "file": "res://assets/audio/bag_fabric.wav",
+      "source_id": "bag",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.7,
+      "peak": 0.53,
+      "rms": 0.02640824186051541,
+      "sha256": "c8d32002fd78a1d3e08b7c397bd883d55f732371b9cdd24bd67ffbbd754e99ec"
+    },
+    {
+      "id": "lock_turn",
+      "file": "res://assets/audio/lock_turn.wav",
+      "source_id": "lock",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.22,
+      "peak": 0.53,
+      "rms": 0.04202114398952052,
+      "sha256": "096f477aee0dd20dc9738cfdba717654828c64843a8afb3749ada934e1f456b4"
+    },
+    {
+      "id": "key",
+      "file": "res://assets/audio/key.wav",
+      "source_id": "lock",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.22,
+      "peak": 0.53,
+      "rms": 0.04202114398952052,
+      "sha256": "096f477aee0dd20dc9738cfdba717654828c64843a8afb3749ada934e1f456b4"
+    },
+    {
+      "id": "locked",
+      "file": "res://assets/audio/locked.wav",
+      "source_id": "lock",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.22,
+      "peak": 0.53,
+      "rms": 0.04202114398952052,
+      "sha256": "096f477aee0dd20dc9738cfdba717654828c64843a8afb3749ada934e1f456b4"
+    },
+    {
+      "id": "unlock",
+      "file": "res://assets/audio/unlock.wav",
+      "source_id": "lock",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.22,
+      "peak": 0.53,
+      "rms": 0.04202114398952052,
+      "sha256": "096f477aee0dd20dc9738cfdba717654828c64843a8afb3749ada934e1f456b4"
+    },
+    {
+      "id": "shackle_release",
+      "file": "res://assets/audio/shackle_release.wav",
+      "source_id": "shackle",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.18,
+      "peak": 0.53,
+      "rms": 0.03410278529361118,
+      "sha256": "8463574f7a6e939d701dc668800dd32ac643703347bf8d3655a2baba506e1af5"
+    },
+    {
+      "id": "case_latch",
+      "file": "res://assets/audio/case_latch.wav",
+      "source_id": "shackle",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.18,
+      "peak": 0.53,
+      "rms": 0.03410278529361118,
+      "sha256": "8463574f7a6e939d701dc668800dd32ac643703347bf8d3655a2baba506e1af5"
+    },
+    {
+      "id": "latch",
+      "file": "res://assets/audio/latch.wav",
+      "source_id": "shackle",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.18,
+      "peak": 0.53,
+      "rms": 0.03410278529361118,
+      "sha256": "8463574f7a6e939d701dc668800dd32ac643703347bf8d3655a2baba506e1af5"
+    },
+    {
+      "id": "close",
+      "file": "res://assets/audio/close.wav",
+      "source_id": "slide",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.15,
+      "peak": 0.53,
+      "rms": 0.1097314949114304,
+      "sha256": "0fac36c1dd64898bad6e082aaae1a41499aa0fbdb34d306c804ba355ed5f9928"
+    },
+    {
+      "id": "creak",
+      "file": "res://assets/audio/creak.wav",
+      "source_id": "chair",
+      "processing": "Mono, DC removal, isolated recorded event, endpoint fades, bounded peak; no pitch shift/reverb.",
+      "duration": 0.85,
+      "peak": 0.53,
+      "rms": 0.07075235462587272,
+      "sha256": "5c524134ef47234c2a1a9c1933f45b04995bc839510020b94b439c0531e9daed"
+    }
+  ],
+  "review": "Recorded category sources replace noise-only placeholders. Numerical checks are not a listening/performance review."
+}

@@ -9,72 +9,112 @@
     "title": "The small original photograph",
     "photo": 1,
     "body": "Sakiko sits at a desk holding scissors. She has just looked up. Her expression is reserved. She is not smiling.",
-    "reverse": "Sakiko. Festival preparations, 15 October 1999.\nThe photograph has been folded once, face inward."
+    "reverse": "Sakiko / 15 October 1999"
   },
   "folded": {
-    "title": "Folded note from desk 17",
+    "title": "Folded note from the student bag",
     "body": "Take it down before she sees it.",
-    "reverse": "Aya Ito\nFestival decorations / desk 17"
+    "reverse": "Aya Ito\nFestival decorations / 1999"
   },
   "sketch": {
-    "title": "Festival mounting sketch",
-    "body": "ASSEMBLY\nPosition 1: RED FAN\nPosition 2: WHITE LANTERN\nPosition 3: BLUE STAR\n\nPlace each loose decoration on its matching numbered mount. The shallow drawer opens when all three mounting catches are seated.",
-    "reverse": "Ken Sato\nArt room display materials\n15 October 1999"
+    "title": "Art packing list F-12",
+    "body": "PACKING DRAWER: F-12 MATERIAL\nOriginal photograph and collection access envelope.\n\nOpen the labeled flat drawer at the packing station. The collection key admits the upstairs exhibition and archive reading room.",
+    "reverse": "Packing station / Art room G08"
   },
   "display": {
     "title": "The enlarged festival portrait",
     "photo": 2,
     "body": "An enormous cardboard head hangs above the attraction. The enlarged photograph has uneven dark eyes and a grotesque smile painted over the mouth. Strings support the cardboard. Black strips trail below it.",
-    "reverse": "Ken Sato / display frame.\nReturn the two entrance keys after dismantling.\nThe face in the print has the same fringe as the small photograph."
+    "reverse": "F-12 / Oversized portrait\nCommittee envelope: ARCHIVE BAY B3, COMPARTMENT 12.\n\nA small brass key is fixed inside the rear document sleeve."
   },
   "recording": {
-    "title": "Festival recording / captions",
-    "body": "[Student chatter]\n“Does it hang straight?”\n“Put the spare equipment case on shelf B two.”\n[Laughter]\n[Three quiet knocks]\n“Is that part of the attraction?”\n“Leave it. We still have cleanup.”\n\nEquipment shelf B2 is labeled beside the audiovisual cabinet.",
-    "reverse": "Mika Endo / AV equipment\nFestival tape, 15 October 1999"
+    "title": "Festival recording transcript",
+    "body": "Student A: F-12 is packed. Leave the equipment case in the AV room.\nStudent B: What is the combination?\nStudent A: The festival date. Month, then day. Same as the program.\n[Two faint knocks.]\nStudent B: Did someone stay behind?\nStudent A: I thought you checked.\n[Handling noise. Recording stops.]",
+    "reverse": "Mika Endo / festival recording, 15 October 1999"
   },
   "account": {
     "title": "A handwritten account",
-    "body": "I gave the key to you after cleanup.\nYou said you were going back.\nPlease stop saying we all forgot.",
-    "reverse": "Mika Endo\nThe reverse is otherwise blank."
+    "body": "I gave the key to you after cleanup.\nYou said you were going back.\nPlease stop saying we all forgot.\n\nEquipment return: U08 rehearsal access key is in case B2. The scenery inventory report is stored in G09.",
+    "reverse": "Mika Endo"
   },
   "plan": {
-    "title": "Maintenance plan",
-    "body": "OLD SCENERY STORE\nBehind the archive shelving, south end of the old wing.\n\nTo move the archive shelf: lift its floor brake, then slide it left. Keep the doorway clear.\n\nFestival scenery was moved here after the attraction closed.",
-    "reverse": "Service copy / 1999\nRoom location: south archive, east wall recess."
+    "title": "Scenery shelving maintenance plan",
+    "body": "G09 SCENERY INVENTORY\n\nThe report sleeve is behind the rolling shelf. Lift its visible brake, then slide the shelf left along the short floor rails. Keep the travel path clear.\n\nThe report concerns former rehearsal room U08 upstairs. Its ordinary access key is kept with AV equipment, in case B2.",
+    "reverse": ""
   },
   "letter": {
     "title": "Sakiko’s undelivered letter",
     "body": "Could I help in the library next year instead?\nI know the festival needs people.\nI would rather do something where nobody has to look at me.",
-    "reverse": "No address. No stamp.\nThe paper was folded inside a small school bag."
+    "reverse": ""
   },
   "belongings": {
     "title": "A discarded festival tag",
-    "body": "Yui Kanda\nSCENERY / FINAL CLEANUP\nReturn entrance key with the costume bag.",
+    "body": "YUI KANDA\nSCENERY / FINAL CLEANUP\n\nPersonal papers and the old student bag were left in rehearsal room U08.\nDo not discard them with the backdrop material.",
     "reverse": "15 October 1999"
   },
   "class_photo": {
     "title": "A class photograph",
     "body": "A class photograph from autumn 1999. Sakiko stands near the left edge, a little apart, behind a classmate’s shoulder. Her expression is reserved.",
-    "reverse": "Class 1-A / autumn 1999\nSakiko’s name is written at the left margin."
+    "reverse": "Class 2-B / autumn 1999\nSakiko"
   },
   "notice": {
     "title": "School notice",
     "body": "18 October 1999\n\nWe regret to inform families of the death of student Sakiko following an accident in a restricted scenery storage room.\n\nFestival activities are suspended. Please direct inquiries to the school office.",
-    "reverse": "Office copy. No names appear beneath the printed statement."
+    "reverse": ""
   },
   "inventory": {
     "title": "Festival inventory",
     "body": "15 October 1999\n\n3 mounting decorations\n1 hanging frame\n1 oversized portrait\n1 scenery-room key\n\nReturn borrowed equipment to shelf B2.",
-    "reverse": "Ken Sato / Mika Endo\nThe portrait entry has been circled."
+    "reverse": "Ken Sato / Mika Endo"
   },
   "destroy": {
     "title": "A later message",
     "body": "Please destroy the old festival photographs.\nI do not want another copy turning up.\nAsk the others as well.",
-    "reverse": "Yui Kanda\nUndated."
+    "reverse": "Yui Kanda"
   },
   "maintenance": {
     "title": "Caretaker’s maintenance sheet",
-    "body": "16 October 1999\n\n08:40  Scenery storeroom opened.\nStudent found shortly afterward. Police notified.\n\n18:10  Returned to secure storeroom.\nKnocking heard [u]inside[/u].\n\nThe word “inside” is underlined twice in the handwritten original.",
-    "reverse": "Caretaker’s duplicate.\nBoth entries are in the same handwriting."
+    "body": "FORMER REHEARSAL ROOM U08\nScenery inventory report\n\n16 October 1999\n\n08:40  Room opened.\nStudent found shortly afterward. Police notified.\n\n18:10  Returned to secure room.\nKnocking heard [u]inside[/u].",
+    "reverse": "Caretaker’s duplicate."
+  },
+  "handover": {
+    "title": "Staff handover slip",
+    "body": "Night handover\n\nThe cabinet service key is in this desk drawer. Collect the upper-wing key and festival storeroom key from the wall cabinet. Both stair doors use the same upper-wing key. AV and scenery storage share the festival storeroom key.",
+    "reverse": ""
+  },
+  "loan": {
+    "title": "AV equipment loan slip",
+    "body": "MIKA ENDO / EQUIPMENT\n\nRecording FEST-99-10-15 is stored in BROADCAST U05 upstairs. Use the local playback breaker.\n\nCase B2 remains in AV G05 downstairs. The recording custodian describes how its combination was set.",
+    "reverse": ""
+  },
+  "envelope": {
+    "title": "Aya Ito festival envelope",
+    "body": "Aya Ito / committee envelope\nEntrance key I.\n\nUpper-wing and festival storeroom keys are on the lower cabinet shelf. The collection access envelope remains in the art packing drawer.",
+    "reverse": ""
+  },
+  "exhibit": {
+    "title": "Exhibit F-12 inventory label",
+    "body": "F-12 / CULTURE FESTIVAL 1999\nOversized portrait / Ken Sato\n\nInventory paperwork retained on the reverse of the mounted panel.",
+    "reverse": ""
+  },
+  "archive_record": {
+    "title": "Ken Sato committee envelope",
+    "body": "B3-12 / Ken Sato\n\nCommittee envelope: entrance key II, F-12 festival cassette, media-room key and dated festival program.\n\nSakiko sat in classroom 2-B. A narrow red ribbon marked her exercise book. Her ordinary class photograph is still there.",
+    "reverse": ""
+  },
+  "program": {
+    "title": "Dated festival program",
+    "body": "CULTURE FESTIVAL\n15 OCTOBER 1999\n\nExhibition committee / equipment returns\nAV case B2: festival date, month then day.",
+    "reverse": ""
+  },
+  "tape_index": {
+    "title": "Broadcast recording index",
+    "body": "BROADCAST / U05\n\nFEST-99-10-15\nFestival equipment and cleanup recording\nCustodian: Mika Endo\n\nLocal breaker supplies this playback deck only.",
+    "reverse": ""
+  },
+  "case_reference": {
+    "title": "Scenery report reference",
+    "body": "Equipment return / B2\n\nEntrance key III and old rehearsal-room access key.\nThe incident report is filed behind the mobile scenery rack in G09. Release its brake and slide along the floor track.",
+    "reverse": ""
   }
 }

@@ -1,0 +1,41 @@
+{
+  "license": "CC0-1.0; source attribution in recorded_foley.json",
+  "clips": [
+    {
+      "file": "hover.wav",
+      "source": "paper_flip.wav",
+      "source_sha256": "9b94209d6f8f52fc9563b18c1e7ecf659cd8bf70622c75b2328ca356454ab085",
+      "duration": 0.08,
+      "peak": 0.16,
+      "sha256": "e83e55c32a4fe804417514583cac66bc323dbc33949a285b42c12633f7c3492c",
+      "processing": "Recorded transient crop, DC removal, low-pass and endpoint fades; no oscillators, pitch glide or added voice."
+    },
+    {
+      "file": "press.wav",
+      "source": "case_latch.wav",
+      "source_sha256": "8463574f7a6e939d701dc668800dd32ac643703347bf8d3655a2baba506e1af5",
+      "duration": 0.12,
+      "peak": 0.25,
+      "sha256": "21097eb3313a6e3601c11a13986318a2564777a5fe002a614d57d7b48b3cafe7",
+      "processing": "Recorded transient crop, DC removal, low-pass and endpoint fades; no oscillators, pitch glide or added voice."
+    },
+    {
+      "file": "code_tick.wav",
+      "source": "lock_turn.wav",
+      "source_sha256": "096f477aee0dd20dc9738cfdba717654828c64843a8afb3749ada934e1f456b4",
+      "duration": 0.055,
+      "peak": 0.2,
+      "sha256": "5296e4e44a4341bdfaa5c3737bac3ed1ed49e0a967faf63300242965466bd40b",
+      "processing": "Recorded transient crop, DC removal, low-pass and endpoint fades; no oscillators, pitch glide or added voice."
+    },
+    {
+      "file": "capture.wav",
+      "source": "close.wav",
+      "source_sha256": "0fac36c1dd64898bad6e082aaae1a41499aa0fbdb34d306c804ba355ed5f9928",
+      "duration": 0.34,
+      "peak": 0.65,
+      "sha256": "ffde07081b0b03b099e31cb4dbf8fac3eaf62524b81baed906f34ea050d064b3",
+      "processing": "Recorded transient crop, DC removal, low-pass and endpoint fades; no oscillators, pitch glide or added voice."
+    }
+  ]
+}

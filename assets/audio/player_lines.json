@@ -1,0 +1,162 @@
+{
+  "P01": {
+    "text": "Where did everyone go?",
+    "file": "res://assets/audio/production/ja_P01.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "あれ……みんな、どこに行ったんだ？",
+    "language": "ja-JP"
+  },
+  "P02": {
+    "text": "Four locks. I need the keys.",
+    "file": "res://assets/audio/production/ja_P02.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "錠前が四つ……鍵を探さないと。",
+    "language": "ja-JP"
+  },
+  "P03": {
+    "text": "The upper floor's locked. Maybe the staff room has a key.",
+    "file": "res://assets/audio/production/ja_P03.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "上は閉まってる。職員室に鍵があるかな。",
+    "language": "ja-JP"
+  },
+  "P04": {
+    "text": "This should open the upstairs doors.",
+    "file": "res://assets/audio/production/ja_P04.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "これ、二階の鍵だ。",
+    "language": "ja-JP"
+  },
+  "P05": {
+    "text": "She wasn't smiling in the original.",
+    "file": "res://assets/audio/production/ja_P05.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "元の写真じゃ、笑ってない。",
+    "language": "ja-JP"
+  },
+  "P06": {
+    "text": "The festival exhibit. Upstairs.",
+    "file": "res://assets/audio/production/ja_P06.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "文化祭の展示……二階か。",
+    "language": "ja-JP"
+  },
+  "P07": {
+    "text": "They painted that smile on her.",
+    "file": "res://assets/audio/production/ja_P07.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "この笑顔、あとから描き足したんだ。",
+    "language": "ja-JP"
+  },
+  "P08": {
+    "text": "Now I can try the playback deck.",
+    "file": "res://assets/audio/production/ja_P08.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "テープだ。どこかで再生できないかな。",
+    "language": "ja-JP"
+  },
+  "P09": {
+    "text": "Month, then day. It's on the festival program.",
+    "file": "res://assets/audio/production/ja_P09.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "月、それから日。文化祭のプログラムに載ってた。",
+    "language": "ja-JP"
+  },
+  "P10": {
+    "text": "Rehearsal room. That must be the old room upstairs.",
+    "file": "res://assets/audio/production/ja_P10.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "練習室……二階の古い部屋か。",
+    "language": "ja-JP"
+  },
+  "P11": {
+    "text": "They left her here.",
+    "file": "res://assets/audio/production/ja_P11.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "ここに、置き去りにしたのか……。",
+    "language": "ja-JP"
+  },
+  "P12": {
+    "text": "I can try the entrance now.",
+    "file": "res://assets/audio/production/ja_P12.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "玄関に戻ろう。",
+    "language": "ja-JP"
+  },
+  "H01": {
+    "text": "Maybe I missed something in the staff room.",
+    "file": "res://assets/audio/production/ja_H01.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "職員室を調べてみよう。",
+    "language": "ja-JP"
+  },
+  "H02": {
+    "text": "I should check that inventory label again.",
+    "file": "res://assets/audio/production/ja_H02.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "この番号、資料室の何かと合うはず。",
+    "language": "ja-JP"
+  },
+  "H03": {
+    "text": "I haven’t tried the playback deck.",
+    "file": "res://assets/audio/production/ja_H03.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "二階に放送室があったな。",
+    "language": "ja-JP"
+  },
+  "H04": {
+    "text": "All four keys. Time to leave.",
+    "file": "res://assets/audio/production/ja_H04.wav",
+    "speaker": "Player",
+    "source": "Local Kokoro-82M v1.0 stock voice blend; see japanese_voice.json",
+    "trigger": "Exact ID in SAKIKO_VOICE_AND_AUDIO_GUIDE.md",
+    "delivery_review": "Japanese retake; native-speaker performance review pending.",
+    "spoken_text": "玄関は下だ。下駄箱のところ。",
+    "language": "ja-JP"
+  }
+}

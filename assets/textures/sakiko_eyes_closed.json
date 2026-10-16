@@ -1,0 +1,9 @@
+{
+  "tool": "Built-in image_gen.imagegen",
+  "mode": "Edit",
+  "source": "assets/textures/sakiko_face.png",
+  "output": "assets/textures/sakiko_eyes_closed.png",
+  "scope": "Only eye-island UV regions are used by the blink shader; original texture elsewhere remains untouched.",
+  "prompt": "Make a surgical texture edit of this exact square horror face UV albedo. Preserve the original face, hair, smile, teeth, skin color, lighting, projection, framing, dimensions and all landmarks. ONLY EDIT BOTH EYES: her eyes are fully closed in a natural relaxed slow blink, with thin horizontal curved lash creases in the lower third of each original eye opening, pale aged upper eyelids with realistic fine wrinkles matching surrounding skin, no eyeball or black opening visible. Maintain the existing dark eye sockets around the lids. Do not add eye bags, vertical streaks, new eyes, painted grey circles, cosmetics or new facial features. This is a matching CLOSED-EYE texture state for animation, not a new character portrait. Keep the eyes exact original location and asymmetry, entire rest of image unchanged.",
+  "sha256": "226729efd5e128cacaacb3467e1156c0f12df9a0353ba487f5c549e4478541ab"
+}

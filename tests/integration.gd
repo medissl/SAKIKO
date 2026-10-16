@@ -1,129 +1,225 @@
 extends RefCounted
 var g: Node
-var failed := false
-var count := 0
+var count:=0
+var failed:=false
+var finished:=false
 
-func check(ok: bool,description: String) -> void:
-	count += 1
-	if not ok:
-		failed = true
-		push_error("CHECK FAILED: "+description)
-	print("CHECK ","PASS " if ok else "FAIL ",description)
+func check(ok: bool,label: String) -> void:
+	count+=1
+	if not ok: failed=true; push_error("CHECK FAILED: "+label)
+	print("CHECK ","PASS " if ok else "FAIL ",label)
 
 func aim(from: Vector3,to: Vector3) -> void:
-	g.player.position = from
-	g.player.velocity = Vector3.ZERO
-	await g.get_tree().create_timer(.09).timeout
+	g.player.position=from
+	g.player.velocity=Vector3.ZERO
+	await g.get_tree().physics_frame
+	await g.get_tree().physics_frame
 	g.player.camera.look_at(to)
 	await g.get_tree().physics_frame
 
-func use_point(point: Vector3,from: Vector3) -> void:
+func use(point: Vector3,from: Vector3) -> void:
 	await aim(from,point)
+	if g.interactable().is_empty():
+		var q:=PhysicsRayQueryParameters3D.create(g.player.camera.global_position,point,1)
+		q.exclude=[g.player.get_rid()]
+		var hit: Dictionary=g.get_world_3d().direct_space_state.intersect_ray(q)
+		print("AIM MISS eye=",g.player.camera.global_position," point=",point," hit=",hit.get("position",Vector3.INF))
 	g.interact()
 
-func run(game: Node) -> void:
-	g = game
-	g.start_game()
-	g.grace = 999
+func target(kind: String,id: String="") -> Dictionary:
+	for item in g.progression.story_puzzles.available_targets():
+		if item.type==kind and (id.is_empty() or item.get("id","")==id): return item
+	return {}
+
+func container(id: String,from: Vector3) -> void:
+	var item:=target("container",id)
+	check(not item.is_empty(),"physical mechanism "+id+" available")
+	if item.is_empty(): return
+	await use(item.point,from)
 	await g.get_tree().create_timer(.8).timeout
-	var puzzles = g.progression.story_puzzles
-	var journal = g.progression.evidence
-	check(g.doors.size()==24 and g.keys.size()==4 and g.entrance_locks.size()==4,"four keys and four visible entrance locks")
-	check(not g.keys[0].visible and not puzzles.solved.has(true),"all four rewards start hidden")
-	check(g.music.stream.get_length()>30 and g.sounds.sakiko_scream!=null,"music and recorded ghost vocal load")
-	check(g.player.pant.stream.resource_path.ends_with("player_breath_male.mp3") and g.progression.cry.stream.resource_path.ends_with("sakiko_scream.ogg"),"male player breath and female ghost scream assigned separately")
-	g.play_intro()
-	check(g.mode=="intro" and g.expansion.figures.visible,"daytime intro with occupants")
-	var skip := InputEventAction.new()
-	skip.action = "interact"
-	skip.pressed = true
-	g.progression._unhandled_input(skip)
-	check(g.mode=="playing" and not g.expansion.figures.visible,"intro can be skipped")
-	g.play_intro()
-	Engine.time_scale = 6
-	await g.get_tree().create_timer(16).timeout
-	Engine.time_scale = 1
-	check(g.mode=="playing" and not g.progression.eyelids.visible,"intro completes naturally")
-	g.start_game()
-	g.grace = 999
-	await use_point(Vector3(-26.42,1.4,0),Vector3(-24.8,0,0))
-	check(g.progression.discovered and g.progression.objective().contains("/4"),"entrance discovers four-key objective")
-	await use_point(Vector3(-18.6,1.35,-15.2),Vector3(-18.6,0,-13.4))
-	check(g.mode=="document" and journal.collected.has("preparation"),"preparation photograph uses actual inspection target")
-	journal.reverse = true
-	journal.show_entry()
-	check(journal.reverse and journal.entries.preparation.reverse.contains("Aya"),"photograph reverse preserves classmate clue")
-	g.resume_game()
-	await use_point(Vector3(-19.9,.85,-13.4),Vector3(-18.3,0,-13.4))
-	check(puzzles.solved[0] and journal.collected.has("original") and journal.collected.has("folded"),"marked desk yields first key and original photo/note")
-	g.resume_game()
-	await use_point(g.keys[0].position,Vector3(-18.3,0,-13.4))
-	check(g.collected==1,"desk key physically reachable")
+
+func key(index: int,from: Vector3) -> void:
+	await use(g.keys[index].global_position,from)
+	check(g.keys[index].get_meta("collected",false),"entrance key "+str(index+1)+" physically collected")
+	var before: int=g.collected
 	g.interact()
-	check(g.collected==1,"duplicate pickup prevented")
-	await use_point(Vector3(52.8,1.45,-15.4),Vector3(52.8,0,-13.5))
-	check(journal.collected.has("sketch"),"mounting sketch can be inspected")
-	g.resume_game()
-	for i in range(3):
-		await use_point(puzzles.piece_origins[i],Vector3(puzzles.piece_origins[i].x,0,-13.0))
-		check(puzzles.held==i,"take unique display piece %d" % i)
-		await use_point(puzzles.mount_points[i],Vector3(puzzles.mount_points[i].x,0,-13.4))
-		check(puzzles.slots[i]==i,"mount display piece %d" % i)
-	check(puzzles.solved[1] and puzzles.held<0,"three physical decorations release display compartment")
-	await use_point(g.keys[1].position,Vector3(56,0,-12.8))
-	check(g.collected==2,"display key physically reachable")
-	await use_point(Vector3(55.1,1.1,-14.6),Vector3(55.1,0,-12.8))
-	check(journal.collected.has("display"),"monstrous festival head photograph inspectable")
-	g.resume_game()
-	await use_point(Vector3(21,1.2,15.1),Vector3(21,0,13.5))
-	check(not puzzles.solved[2],"AV case requires power and tape clue")
-	await use_point(Vector3(12,1.5,15.2),Vector3(12,0,13.4))
-	check(puzzles.power,"nearby labeled switch restores AV power")
-	await use_point(Vector3(16,1.15,15.1),Vector3(16,0,13.3))
-	check(puzzles.played and journal.collected.has("recording") and journal.entries.recording.body.contains("B two"),"recording has spoken clue and permanent readable captions")
-	g.resume_game()
-	await use_point(Vector3(21,1.2,15.1),Vector3(21,0,13.5))
-	check(puzzles.solved[2] and journal.collected.has("account"),"B2 case yields key and exact handwritten account")
-	g.resume_game()
-	await use_point(g.keys[2].position,Vector3(21,0,13.3))
-	check(g.collected==3,"AV key physically reachable")
-	await use_point(Vector3(72,1.5,-15.35),Vector3(73.2,0,-13.5))
-	check(journal.collected.has("plan"),"maintenance plan identifies concealed storeroom")
-	g.resume_game()
-	await use_point(Vector3(78.2,1,12),Vector3(77,0,12))
-	check(puzzles.brake and not puzzles.opened,"archive shelf floor brake releases first")
+	check(g.collected==before,"duplicate entrance pickup prevented "+str(index+1))
+	if g.mode=="document": g.progression.evidence.close()
+
+func document(id: String,from: Vector3) -> void:
+	await use(g.progression.story_puzzles.evidence_models[id].global_position,from)
+	check(g.mode=="document" and g.progression.evidence.collected.has(id),"physical document "+id+" inspectable")
+	if g.mode=="document": g.progression.evidence.close()
+
+func run(game: Node) -> void:
+	g=game
+	g.get_tree().create_timer(120,true,false,true).timeout.connect(func():
+		if not finished: push_error("Verification watchdog expired"); g.get_tree().quit(1))
+	g.start_game()
+	g.grace=999
+	var p: Node=g.progression.story_puzzles
+	var journal: Node=g.progression.evidence
+	var walker=preload("res://tests/layout_shell.gd").new()
+	walker.game=g
+	if "--bag-only" in OS.get_cmdline_user_args():
+		await container("bag",Vector3(45.6,4.2,33.3))
+		await key(3,Vector3(45.4,4.2,33.4))
+		finished=true
+		print("BAG VERIFY COMPLETE: ",count," checks; failures: ",failed)
+		if failed: g.get_tree().quit(1)
+		else: g.quit_game()
+		return
+	if "--final-focus" in OS.get_cmdline_user_args():
+		await verify_final_changes()
+		finished=true
+		print("FOCUSED VERIFY COMPLETE: ",count," checks; failures: ",failed)
+		if failed: g.get_tree().quit(1)
+		else: g.quit_game()
+		return
+	if "--stairs-only" in OS.get_cmdline_user_args():
+		await verify_stair_routes()
+		finished=true
+		print("STAIR VERIFY COMPLETE: ",count," checks; failures: ",failed)
+		if failed: g.get_tree().quit(1)
+		else: g.quit_game()
+		return
+	check(g.doors.size()==26 and g.layout.rooms.size()==17,"final map has 17 rooms and 26 actual room doors across two floors")
+	check(g.keys.size()==4 and g.entrance_locks.size()==4,"four physical keys and matching exit locks")
+	check(g.layout.seats.size()==12 and g.expansion.figures.get_child_count()==12,"measured classroom layout has twelve seats and eleven classmates")
+	check(not p.solved.has(true) and not g.enemy.visible,"new night starts with concealed keys and no early monster")
+	for i in range(4): check(g.keys[i].get_parent()==p.containers[p.KEY_CONTAINERS[i]].tray,"key preexists inside container "+str(i))
+	# Both skip and normal playback use the same mandatory sleep/bell/waking path.
+	g.play_intro()
+	await g.get_tree().process_frame
+	check(not g.hud.visible and not g.prompt.visible and not g.progression.stamina_bar.visible and g.interactable().is_empty(),"intro disables gameplay UI and targets")
+	var skip:=InputEventAction.new()
+	skip.action="interact"
+	skip.pressed=true
+	g.progression._unhandled_input(skip)
+	g.progression._unhandled_input(skip)
+	check(g.mode=="intro" and g.progression.intro_time==125,"skip enters shared sleep transition and repeated input cannot skip waking")
+	Engine.time_scale=6
+	await g.get_tree().create_timer(6).timeout
+	check(g.mode=="intro" and g.progression.intro_dark and g.progression.intro_chime,"mandatory blackout plays the school bell")
+	var transition_time: float=g.progression.intro_time
+	g.progression._unhandled_input(skip)
+	check(g.mode=="intro" and g.progression.intro_time<transition_time+.5,"late skip input cannot bypass transition")
+	await g.get_tree().create_timer(15).timeout
+	Engine.time_scale=1
+	var skipped: Vector3=g.player.position
+	check(g.mode=="playing" and not g.expansion.figures.visible and skipped.distance_to(g.layout.NIGHT)<.2,"skip reaches valid nighttime classroom after waking")
+	g.play_intro()
+	Engine.time_scale=12
+	await g.get_tree().create_timer(146).timeout
+	Engine.time_scale=1
+	check(g.mode=="playing" and g.player.position.distance_to(skipped)<.2 and not g.enemy.visible,"full lesson naturally reaches identical night state")
+	g.start_game()
+	g.grace=999
+	await use(g.layout.EXIT_TARGET,Vector3(1.4,0,12))
+	check(g.progression.discovered and g.progression.objective().contains("0/4"),"entrance establishes objective without granting anything")
+	check(not g.progression.hunt_enabled,"exit discovery alone does not start hunting")
+	await document("handover",Vector3(26.2,0,7.0))
+	await container("staff_cabinet",Vector3(30,0,1.9))
+	check(not p.containers.staff_cabinet.open,"cabinet physically requires service key")
+	await container("service_drawer",Vector3(26.2,0,7.3))
+	await use(p.service_key.global_position,Vector3(26.2,0,7.1))
+	check(p.service_taken and g.collected==0,"desk service key is utility inventory, not entrance count")
+	await container("staff_cabinet",Vector3(30,0,1.9))
+	await key(0,Vector3(29.85,0,1.75))
+	await document("envelope",Vector3(29.85,0,1.75))
+	await document("sketch",Vector3(29.6,0,33.5))
+	check(journal.entries.sketch.body.contains("F-12"),"art ID is reviewable F-12")
+	await document("display",Vector3(32,4.2,34.5))
+	await document("exhibit",Vector3(33.1,4.2,34.5))
+	check(journal.entries.exhibit.body.contains("B3-12"),"exhibit supplies exact archive compartment reference")
+	# This drawer has no clue-read gate or unrelated lock.
+	await container("archive_12",Vector3(14.3,4.2,33.75))
+	await key(1,Vector3(13.8,4.2,33.95))
+	await document("loan",Vector3(14.65,4.2,34.0))
+	await use(target("recording").point,Vector3(41.65,4.2,2.7))
+	check(not p.played,"unpowered playback device stays off")
+	await use(target("av_power").point,Vector3(41.5,4.2,3))
+	check(p.power,"local broadcast breaker powers playback")
+	await use(target("recording").point,Vector3(41.65,4.2,2.7))
+	check(p.played and journal.collected.has("recording"),"recording plays and stores readable transcript")
+	if g.mode=="document": journal.close()
+	await document("program",Vector3(42.55,4.2,2.5))
+	check(journal.entries.recording.body.contains("Month first") and journal.entries.program.body.contains("15 OCTOBER"),"spoken clue and dated program agree on month/day code")
+	await container("av_case",Vector3(46.2,0,2.8))
+	check(g.mode=="puzzle" and not p.submit_combination("323"),"four-digit manual lock rejects old/incorrect combination")
+	check(p.submit_combination("1015"),"festival date combination accepted")
+	await g.get_tree().create_timer(.8).timeout
+	await key(2,Vector3(46,0,2.3))
+	var before_utility: int=g.collected
+	await use(p.rehearsal_key.global_position,Vector3(46.5,0,2.4))
+	check(p.rehearsal_taken and p.utility_inventory.has("rehearsal_U08") and g.collected==before_utility,"rehearsal access key stays separate from exit counter")
+	await use(target("shelf").point,Vector3(44.5,0,31.7))
+	check(p.brake and not p.opened,"visible shelving brake releases first")
 	g.interact()
 	await g.get_tree().create_timer(1.4).timeout
-	check(puzzles.opened and puzzles.solved[3] and puzzles.shelf.position.z>15,"shelf physically reveals storeroom")
-	await aim(Vector3(77,0,12),Vector3(82,1.58,12))
-	g.player.rotation.y = -PI/2
-	g.player.camera.rotation = Vector3.ZERO
-	Input.action_press("forward")
-	await g.get_tree().create_timer(1).timeout
-	Input.action_release("forward")
-	check(g.player.position.x>79.1,"physical player can enter concealed storeroom")
-	await use_point(Vector3(81.1,.95,11.05),Vector3(80,0,11.1))
-	if not journal.collected.has("letter"): print("LETTER DIAGNOSTIC ",g.mode," position ",g.player.position," eye ",g.player.camera.global_position," target ",g.interactable())
-	check(journal.collected.has("letter"),"Sakiko's ordinary letter can be collected")
-	g.resume_game()
-	await use_point(Vector3(81.6,1.4,15.6),Vector3(80.7,0,14.4))
-	check(journal.collected.has("maintenance") and journal.entries.maintenance.body.contains("18:10"),"two caretaker entries remain intact")
-	g.resume_game()
-	await use_point(g.keys[3].position,Vector3(80.2,0,14.4))
-	check(g.collected==4,"fourth key physically reachable")
+	check(p.opened and p.shelf.position.x<43,"shelf moves along visible short track")
+	await document("maintenance",Vector3(46.3,0,34.5))
+	check(journal.entries.maintenance.body.contains("U08") and journal.entries.maintenance.body.contains("18:10"),"report identifies rehearsal and retains unresolved inside knocking")
+	var door: Dictionary=g.layout.rehearsal_door
+	await use(door.origin+Vector3(0,1.3,-.14),Vector3(45,4.2,26.7))
+	await g.get_tree().create_timer(.8).timeout
+	check(door.open and not door.locked,"ordinary access key opens U08")
+	await container("bag",Vector3(45.6,4.2,33.3))
+	await key(3,Vector3(45.4,4.2,33.4))
+	await document("letter",Vector3(45.8,4.2,33.5))
+	check(g.collected==4,"all four entrance keys collected through final-map physical routes")
 	journal.show_journal()
-	check(g.mode=="document" and journal.journal_open,"journal reopens all collected evidence")
-	g.resume_game()
-	var saved: Vector3 = g.checkpoint
+	check(g.mode=="document" and journal.journal_open,"journal reopens collected evidence safely")
+	journal.reopen("handover")
+	journal.reverse=true
+	journal.update_preview()
+	check(journal.entries.handover.get("reverse","")=="","blank document back stays blank")
+	journal.close()
+	# Furnished room entries: walk through actual door collision after opening.
+	Engine.time_scale=3
+	for id in g.layout.room_doors:
+		var d: Dictionary=g.layout.room_doors[id][0]
+		g.toggle_door(d,true)
+		await g.get_tree().create_timer(.8).timeout
+		var north: bool=d.origin.z==8
+		g.player.position=d.origin+Vector3(0,.02,1.3 if north else -1.3)
+		g.player.velocity=Vector3.ZERO
+		await g.get_tree().physics_frame
+		check(await walker.walk_to(d.origin+Vector3(0,0,-1.5 if north else 1.5)),id+" entrance remains traversable with furniture")
+	Engine.time_scale=1
+	await verify_stair_routes()
+	g.mode="paused"
+	await aim(Vector3(28,0,10),Vector3(28.3,5.7,10))
+	g.enemy.position=Vector3(28.3,5.7,10)
+	g.enemy.rotation.y=PI/2
+	g.player.lamp.show()
+	check(not g.sees_player() and not g.flashlight_exposure(),"slabs block between-floor enemy and flashlight detection")
+	g.mode="playing"
+	await aim(Vector3(4,0,12),Vector3(4,1.4,12.7))
+	g.enemy.position=Vector3(4,1.4,12.7)
+	g.grace=0
+	g.ai_state="search"
+	g.path.clear()
+	g._physics_process(.016)
+	check(g.mode=="capture","active enemy contact starts existing capture sequence")
+	await g.get_tree().create_timer(1.25).timeout
+	check(g.pain_triggered and g.curtain.modulate.a==1,"capture cuts to black before male pain")
+	await g.get_tree().create_timer(.7).timeout
+	check(g.mode=="dead","capture reaches red death screen")
+	var saved: Vector3=g.checkpoint
 	g.return_to_checkpoint()
-	check(g.collected==4 and not puzzles.solved.has(false) and journal.collected.has("original") and g.player.position==saved,"checkpoint preserves four puzzles, keys and evidence")
-	await use_point(Vector3(-26.42,1.4,0),Vector3(-24.8,0,0))
-	check(g.exit_open,"four keys unlock entrance")
-	g.interact()
-	check(g.mode=="ending" and is_instance_valid(g.ending),"escape triggers dedicated ending")
-	if not is_instance_valid(g.ending):
-		g.get_tree().quit(1)
-		return
+	check(g.collected==4 and p.rehearsal_taken and p.opened and not p.solved.has(false) and g.player.position==saved,"retry preserves keys, utility inventory, shelf and validated floor checkpoint")
+	g.grace=999
+	await use(g.layout.EXIT_TARGET,Vector3(1.4,0,12))
+	await g.get_tree().create_timer(.8).timeout
+	check(g.exit_open and g.mode=="playing","four matching keys open actual exterior exit")
+	g.player.rotation.y=PI/2
+	g.player.camera.rotation=Vector3.ZERO
+	Input.action_press("forward")
+	await g.get_tree().create_timer(1.1).timeout
+	Input.action_release("forward")
+	check(g.mode=="ending" and is_instance_valid(g.ending),"physically leaving the school triggers established ending")
+	if not is_instance_valid(g.ending): finished=true; g.get_tree().quit(1); return
 	var ending: Control = g.ending
 	g.victory()
 	check(g.ending==ending,"ending triggers exactly once")
@@ -177,105 +273,78 @@ func run(game: Node) -> void:
 	await g.get_tree().create_timer(1).timeout
 	check(g.mode=="menu" and g.ending==null,"natural end of credits returns to menu")
 	g.start_game()
-	g.grace = 999
-	check(g.collected==0 and g.keys.size()==4 and journal.collected.is_empty() and not puzzles.solved.has(true) and not puzzles.opened and not g.ending_started,"replay resets four keys, evidence, shelf, puzzles and ending")
-	var door: Dictionary = g.doors[0]
-	await use_point(door.origin+Vector3(0,1.3,0),door.origin+Vector3(0,0,2.1))
-	await g.get_tree().create_timer(.65).timeout
-	check(door.open,"closed sliding door opens through interaction")
-	await use_point(door.origin+Vector3(1.34,1.3,-signf(door.origin.z)*.18),door.origin+Vector3(1.1,0,2.1))
-	await g.get_tree().create_timer(.65).timeout
-	check(not door.open,"open frame catch closes door")
-	# Physics-driven movement, grounded footsteps, wall obstruction, stamina hysteresis.
-	await aim(Vector3(-10,0,-5),Vector3(0,1.58,-5))
-	g.player.rotation.y = -PI/2
-	g.player.camera.rotation = Vector3.ZERO
-	var before: Vector3 = g.player.position
-	Input.action_press("forward")
-	Input.action_press("sprint")
-	await g.get_tree().create_timer(.6).timeout
-	Input.action_release("sprint")
-	Input.action_release("forward")
-	check(g.player.position.distance_to(before)>2.3 and g.player.stamina<95 and g.player.footstep_count>0,"actual sprint drains stamina and produces footsteps")
-	g.player.stamina = .2
-	g.player.update_stamina(.1,true)
-	check(g.player.exhausted,"depletion forces exhaustion")
-	g.player.update_stamina(.2,false)
-	check(g.player.exhausted,"recovery threshold prevents sprint toggling")
-	g.player.update_stamina(3,false)
-	check(not g.player.exhausted and g.player.stamina>28,"stamina restores and clears exhaustion")
-	await aim(Vector3(-26.5,0,-5),Vector3(-30,1.58,-5))
-	g.player.rotation.y = PI/2
-	g.player.camera.rotation = Vector3.ZERO
-	Input.action_press("forward")
-	await g.get_tree().create_timer(.4).timeout
-	var steps: int = g.player.footstep_count
-	await g.get_tree().create_timer(.7).timeout
-	Input.action_release("forward")
-	check(g.player.footstep_count==steps,"no footsteps while pushing into wall")
-	# Flashlight attracts attention from outside the normal enemy FOV, but not through walls.
-	g.enemy.position = Vector3(14,1.5,-5)
-	g.enemy.rotation.y = -PI/2
-	await aim(Vector3(0,0,-5),g.enemy.position)
-	g.player.lamp.visible = false
-	check(not g.sees_player(),"unlit player outside FOV unseen")
-	g.player.lamp.visible = true
-	check(g.flashlight_exposure() and g.sees_player(),"aimed flashlight raises detection outside FOV")
-	g.enemy.position = Vector3(0,1.5,5)
-	g.player.camera.look_at(g.enemy.position)
-	await g.get_tree().physics_frame
-	check(not g.flashlight_exposure() and not g.sees_player(),"walls block flashlight detection")
-	g.progression.scream_cooldown = 0
-	g.progression.spotted()
-	var cooldown: float = g.progression.scream_cooldown
-	g.progression.spotted()
-	check(g.progression.scream_cooldown==cooldown and cooldown>0,"spot scream has cooldown")
-	g.ai_state = "chase"
-	g.state_time = 2
-	g.last_seen = Vector3(10,1.5,-5)
-	g.grace = 0
-	g._physics_process(.016)
-	check(g.ai_state=="investigate","lost sight investigates last seen position")
-	g.path.clear()
-	g._physics_process(.016)
-	check(g.ai_state=="search","investigation becomes search")
-	g.state_time = 5
-	g._physics_process(.016)
-	check(g.ai_state=="roam","search returns to roaming")
-	g.start_game()
-	g.grace = 999
-	g.enemy.position = Vector3(35.5,1.5,-5)
-	g.ai_state = "investigate"
-	g.navigate(Vector3(35.5,1.5,-11))
-	Engine.time_scale = 4
-	await g.get_tree().create_timer(6).timeout
-	Engine.time_scale = 1
-	check(g.enemy.position.z < -8.2,"enemy opens and crosses east-wing door")
-	g.show_pause()
-	check(g.mode=="paused","pause")
-	g.resume_game()
-	check(g.mode=="playing","resume")
-	var old: bool = g.settings.reduced
-	g.settings.reduced = not old
-	g.save_settings()
-	g.load_settings()
-	check(g.settings.reduced!=old,"reduced-effects preference persists")
-	g.settings.reduced = old
-	g.save_settings()
-	var previous_volume: float = g.settings.sfx
-	g.settings.sfx = .33
-	g.save_settings()
-	g.load_settings()
-	check(is_equal_approx(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("SFX")),linear_to_db(.33)),"volume control reaches SFX bus")
-	g.settings.sfx = previous_volume
-	g.save_settings()
-	g.capture()
-	g.capture()
-	check(g.mode=="capture","capture only triggers once")
-	await g.get_tree().create_timer(1.9).timeout
-	check(g.mode=="dead","timed jumpscare reaches death")
-	g.show_main_menu()
-	check(g.mode=="menu" and Input.mouse_mode==Input.MOUSE_MODE_VISIBLE,"menu return restores pointer")
+	check(g.collected==0 and g.keys.size()==4 and p.utility_inventory.is_empty() and not p.opened and g.layout.rehearsal_door.locked and journal.collected.is_empty(),"restart resets final map puzzle and access states")
+	finished=true
 	print("VERIFY COMPLETE: ",count," checks; failures: ",failed)
 	if failed: g.get_tree().quit(1)
-	elif "--quit-after-verify" in OS.get_cmdline_user_args(): g.quit_game()
+	else: g.quit_game()
+
+func verify_stair_routes() -> void:
+	g.player.position=Vector3(4,0,12)
+	g.progression.hunt_enabled=true
+	g.grace=999
+	g.enemy.position=Vector3(10,1.5,19)
+	g.enemy.show()
+	g.ai_state="investigate"
+	g.state_time=0
+	g.navigate(Vector3(10,5.7,19))
+	Engine.time_scale=4
+	await g.get_tree().create_timer(22).timeout
+	Engine.time_scale=1
+	check(g.enemy.position.y>5.3,"Sakiko physically navigates west stairs to upper floor")
+	g.enemy.position=Vector3(46,5.7,19)
+	g.ai_state="investigate"
+	g.state_time=0
+	g.navigate(Vector3(46,1.5,19))
+	var uses_east:=false
+	for point in g.path:
+		if point.x>48: uses_east=true
+	check(uses_east,"east stair route connects directly to both corridor floors")
+	Engine.time_scale=4
+	await g.get_tree().create_timer(22).timeout
+	Engine.time_scale=1
+	if g.enemy.position.y>=2: print("EAST STAIR enemy=",g.enemy.position," state=",g.ai_state," next=",g.path.slice(0,mini(4,g.path.size())))
+	check(g.enemy.position.y<2,"Sakiko physically navigates east stairs down")
+
+func verify_final_changes() -> void:
+	var p: Node=g.progression.story_puzzles
+	var journal: Node=g.progression.evidence
+	g.mode="inspection"
+	await g.get_tree().physics_frame
+	for level in range(2):
+		for edge in [[Vector3(46,1.3,10),Vector3(50,1.3,10)], [Vector3(46,1.3,26),Vector3(50,1.3,26)], [Vector3(10,1.3,26),Vector3(6,1.3,26)]]:
+			var offset:=Vector3(0,level*4.2,0)
+			var query:=PhysicsRayQueryParameters3D.create(edge[0]+offset,edge[1]+offset,1)
+			query.exclude=[g.player.get_rid(),g.enemy.get_rid()]
+			check(not g.get_world_3d().direct_space_state.intersect_ray(query).is_empty(),"outer corridor corner has solid perimeter on floor "+str(level))
+	g.mode="playing"
+	g.progression.discovered=true
+	p.containers.staff_cabinet.open=true
+	g.player.position=g.layout.NIGHT
+	await g.get_tree().process_frame
+	check(not g.enemy.visible and not g.progression.hunt_enabled,"exit and cabinet do not start hunting before first story discovery")
+	g.player.position=Vector3(32,4.2,33)
+	await g.get_tree().process_frame
+	await g.get_tree().process_frame
+	check(g.progression.first_discovery and g.enemy.visible and not g.progression.hunt_enabled,"exhibition introduces concealed distant encounter before active hunting")
+	g.start_game()
+	g.grace=999
+	await container("service_drawer",Vector3(26.2,0,7.3))
+	await use(p.service_key.global_position,Vector3(26.2,0,7.1))
+	check(p.service_taken,"staff chair placement retains reachable service key")
+	await container("staff_cabinet",Vector3(30,0,1.9))
+	await key(0,Vector3(29.85,0,1.75))
+	await container("archive_12",Vector3(14.3,4.2,33.75))
+	await key(1,Vector3(13.8,4.2,33.95))
+	check(not journal.collected.has("sketch") and not journal.collected.has("exhibit"),"archive opens early without reading flags")
+	await container("av_case",Vector3(46.2,0,2.8))
+	check(p.submit_combination("1015") and not p.played,"known code opens equipment case without prior playback or reading")
+	await g.get_tree().create_timer(.8).timeout
+	await use(p.rehearsal_key.global_position,Vector3(46.5,0,2.4))
+	check(p.rehearsal_taken,"physical case utility key reachable")
+	var door: Dictionary=g.layout.rehearsal_door
+	await use(door.origin+Vector3(0,1.3,-.14),Vector3(45,4.2,26.7))
+	await g.get_tree().create_timer(.8).timeout
+	check(door.open and not p.opened and not journal.collected.has("maintenance"),"U08 access works before shelf movement or report reading")
+	await container("bag",Vector3(45.6,4.2,33.3))
+	await key(3,Vector3(45.4,4.2,33.4))

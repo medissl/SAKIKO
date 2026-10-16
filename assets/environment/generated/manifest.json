@@ -1,0 +1,52 @@
+{
+  "tool": "Built-in image_gen.imagegen",
+  "mode": "Day/foliage/art/facade generated; night image edited from day. Original outputs preserved in Codex generated_images.",
+  "scope": "Far panorama is spherical sky; near exterior stays 3D. Artwork is mounted on supported solid walls.",
+  "assets": [
+    {
+      "file": "school_panorama_day.png",
+      "size": [
+        1774,
+        887
+      ],
+      "sha256": "2d90ec89d73cfb4d96e9962d425e8c2f6f585a8d6d7fa1753b4a5f0afc3da6df",
+      "prompt_brief": "Full 360-degree equirectangular overcast Japanese suburb, distant hills/houses, clouds above, ground below; seamless horizon, full zenith/nadir, no text or foreground people."
+    },
+    {
+      "file": "school_panorama_night.png",
+      "size": [
+        1774,
+        887
+      ],
+      "sha256": "4d759e641bec58ef41ab01f62d92ef9e98955e2ff99b658e7c7c3660a78b7ebb",
+      "prompt_brief": "Edit day panorama preserving projection and geography; blue cloudy night, faint moonlight, sparse distant warm house windows, no black void or fantasy moon."
+    },
+    {
+      "file": "broadleaf_atlas.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "9c722d4f253745694e3020c3599434c9c617c305323e59e2ee520c6552e55624",
+      "prompt_brief": "Four photographic muted broadleaf/twig clusters in a 2x2 transparent atlas, varied silhouettes, gaps between leaves, transparent margins, no halo or ground."
+    },
+    {
+      "file": "student_art_atlas.png",
+      "size": [
+        1881,
+        836
+      ],
+      "sha256": "955bc7665d155adc318b50efd5f0c6e5c517c941dc97daacce12447c96562771",
+      "prompt_brief": "Three late-1990s student watercolors: autumn path, cup/book/plant still life, school facade. Paper grain, faded colors, no faces, lore or lettering."
+    },
+    {
+      "file": "school_facade_bay.png",
+      "size": [
+        887,
+        1774
+      ],
+      "sha256": "2a4541f8e0595627335849ca9bcf29c1b571c576811e2f096006440d56a5208d",
+      "prompt_brief": "Orthographic 1:2 Japanese concrete school facade bay, three storeys of paired sliding windows, curtains, aged metal and rain streaks; tileable columns, no text, sky or ground."
+    }
+  ]
+}
