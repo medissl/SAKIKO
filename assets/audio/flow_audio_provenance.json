@@ -1,0 +1,29 @@
+{
+  "source": "recorded_foley.json: Noted451 CC0 wood impacts; existing recorded transport/paper",
+  "processing": "Isolated real material contact transients, DC removal, low pass, damping envelope, varied recorded events and spacing. No tonal synthesis, bitcrushing or pitch shift. Tape and staff sequences differ.",
+  "sample_rate": 24000,
+  "physical_listening_verified": false,
+  "clips": [
+    {
+      "file": "quiet_knocks.wav",
+      "duration": 2.0,
+      "peak": 0.3,
+      "rms": 0.013343760526123712,
+      "sha256": "7bdba0b634406cf7b6e8ad5510632d9aa9c6c3d4c361abfee690636e152dae69"
+    },
+    {
+      "file": "staff_knocks.wav",
+      "duration": 2.0,
+      "peak": 0.55,
+      "rms": 0.027021988461141937,
+      "sha256": "10f7540dbf0bb4ab29ad3b3c7119ac7affd7816d9f63074166d4593e28ec02f5"
+    },
+    {
+      "file": "festival_nonverbal.wav",
+      "duration": 24.0,
+      "peak": 0.2281693604763689,
+      "rms": 0.00361328425259257,
+      "sha256": "a1b9114a052bd44afa412bb98cb35d56faa05bdca5e9b46ee27313b906bb24b9"
+    }
+  ]
+}

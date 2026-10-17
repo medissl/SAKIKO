@@ -54,3 +54,9 @@ Final Windows package: Noto Sans JP is bundled from https://github.com/google/fo
 The release uses the official Godot 4.7.2 Windows x86_64 release template, fetched through the official archive and checked against the release's published SHA256. `licenses/GODOT_WINDOWS_EXPORT_NOTICES.txt` contains copyright and full dependency license texts reported by that actual template. It supplements the existing editor-build notices.
 
 An isolated copy of the executable outside the source project passed the complete 101-check progression scenario with live capture enabled. The export excludes historical Microsoft/Kokoro speech recordings, test scripts and implementation prompts; the active tape is the cleared nonverbal replacement. The legacy speech qualification above applies only to retained source assets, not this exported build. The Japanese font derivative and its full OFL license are included. A ZIP contents/hash check accompanies final packaging. This is a packaging verification record, not a certification of every upstream ownership chain or a guarantee of performance on other hardware.
+
+## Flow remake vocal source — 2026-10-17
+
+“Horror shrieks woman” by AderuMoro, Freesound sound 320740, licensed CC0 1.0: https://freesound.org/people/AderuMoro/sounds/320740/ . Natural-pitch sections are used for the capture and chase. Source/license verification, hashes and edits are recorded in assets/audio/flow_vocal_provenance.json; assets/audio/flow_vocal_SOURCE_LICENSE.txt retains the creator credit.
+
+“Female Breathing Heavily (2)” by OwlStorm / Ashe Kirk, Freesound 151215, CC0 1.0: https://freesound.org/people/OwlStorm/sounds/151215/ . A natural-pitch breath edit precedes the capture shriek. Source/license verification and hashes are retained in assets/audio/flow_breath_provenance.json and flow_breath_SOURCE_LICENSE.txt.

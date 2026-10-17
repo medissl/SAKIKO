@@ -2,9 +2,15 @@ extends CharacterBody3D
 ## A continuous face annulus, matching concave mouth and closed rear skull.
 var face_material: ShaderMaterial
 var blink_time:=-1.0
+var blink_duration:=.24
+var blink_clock:=4.8
+var allow_idle_blink:=true
+var capture_age:=0.0
 var rig: Node3D
 var age := 0.0
 var scare := 0.0
+var capture_pose := false
+var capture_jaw := 0.0
 var detection := 0.0
 var pursuing := false
 var animated_materials: Array[ShaderMaterial] = []
@@ -115,19 +121,27 @@ uniform sampler2D face_image:source_color,filter_linear_mipmap;
 uniform sampler2D closed_eyes:source_color,filter_linear_mipmap;
 uniform float blink=0.0;
 uniform float eye_wide=0.0;
+uniform float face_variant=1.0;
 uniform float presence=1.0;
 void fragment(){
- vec3 c=texture(face_image,UV).rgb;
+ vec2 gaze_uv=UV;
+ gaze_uv.x+=face_variant*.0015*smoothstep(.49,.54,UV.x)*(1.0-smoothstep(.04,.10,abs(UV.y-.35)));
+ vec3 c=texture(face_image,gaze_uv).rgb;
  vec2 iris=vec2((abs(UV.x-.5)-.17)/.061,(UV.y-.35)/.047);
  iris.y/=1.0+eye_wide*.13;
  if(length(iris)<.88)c=vec3(.00035,.00045,.00045)+min(c,vec3(.025))*.20;
+ float socket=exp(-dot(iris*vec2(.55,.65),iris*vec2(.55,.65)));
+ float muted=dot(c,vec3(.299,.587,.114));
+ c=mix(c,mix(c,vec3(muted*.87,muted*.90,muted*.88),.55)*(.94-.10*socket),face_variant);
  // Matched authored closed-eye texture; only the two eye islands can change.
  vec2 lid=vec2((abs(UV.x-.5)-.17)/.112,(UV.y-.351)/.078);
  float region=1.0-smoothstep(.88,1.08,length(lid));
  float edge=mix(.265,.448,smoothstep(0.0,1.0,blink))+.018*lid.x*lid.x;
  float cover=(1.0-smoothstep(edge-.012,edge+.012,UV.y))*smoothstep(0.0,.08,blink);
  c=mix(c,texture(closed_eyes,UV).rgb,region*cover);
- ALBEDO=c*vec3(.86,.89,.87)*presence; ROUGHNESS=1.0; SPECULAR=0.0;
+ ALBEDO=c*vec3(.86,.89,.87)*presence;
+ float eye_surface=(1.0-smoothstep(.78,.93,length(iris)))*(1.0-blink)*face_variant;
+ ROUGHNESS=mix(1.0,.39,eye_surface); SPECULAR=.12*eye_surface;
 }"""
 	var flesh := ShaderMaterial.new()
 	shader.code = shader.code.replace("void fragment()",MOUTH_VERTEX+"void fragment()")
@@ -191,20 +205,31 @@ func _process(delta: float) -> void:
 	age += delta
 	if not rig or not is_visible_in_tree(): return
 	detection = maxf(0,detection-delta)
+	if allow_idle_blink and not capture_pose:
+		blink_clock-=delta
+		if blink_clock<=0 and blink_time<0:
+			blink(.22)
+			blink_clock=randf_range(3.8,7.5)
 	if blink_time>=0:
 		blink_time+=delta
-		face_material.set_shader_parameter("blink",sin(clampf(blink_time/.85,0,1)*PI))
-		if blink_time>.85: blink_time=-1
-	face_material.set_shader_parameter("eye_wide",1.0 if detection>0 or pursuing else 0.0)
+		face_material.set_shader_parameter("blink",sin(clampf(blink_time/blink_duration,0,1)*PI))
+		if blink_time>=blink_duration:
+			blink_time=-1
+			face_material.set_shader_parameter("blink",0.0)
+	face_material.set_shader_parameter("eye_wide",smoothstep(.85,1.7,capture_age) if capture_pose else (1.0 if detection>0 or pursuing else 0.0))
 	var tension := .035 if pursuing else 0.0
-	var opening := minf(.11,scare*.08)+tension+(.045 if detection>0 else 0.0)
+	var opening := capture_jaw if capture_pose else minf(.11,scare*.08)+tension+(.045 if detection>0 else 0.0)
 	for mat in animated_materials: mat.set_shader_parameter("jaw_open",opening)
-	rig.position.y = sin(age*1.4)*.035
-	rig.rotation.z = sin(age*.79)*.022+scare*.11
-	rig.rotation.x = -.025 if detection>0 else sin(age*.53)*.012
+	rig.position.y = sin(capture_age*4.1)*.008*(1-smoothstep(1.2,2.4,capture_age)) if capture_pose else sin(age*1.4)*.018
+	rig.rotation.z = sin(capture_age*2.8)*.009 if capture_pose else sin(age*.79)*.018+scare*.11
+	rig.rotation.x = -.008*sin(capture_age*3.4) if capture_pose else (-.025 if detection>0 else sin(age*.53)*.012)
+
+func blink(duration:=.24) -> void:
+	blink_time=0
+	blink_duration=duration
 
 func slow_blink() -> void:
-	blink_time=0
+	blink(.85)
 
 func set_presence(value: float) -> void:
 	for mat in animated_materials: mat.set_shader_parameter("presence",value)

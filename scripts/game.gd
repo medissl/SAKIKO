@@ -7,7 +7,7 @@ const Progression = preload("res://scripts/progression.gd")
 const Player = preload("res://scripts/player.gd")
 const ROOMS = ["1年 A組", "2年 B組", "保健室", "職員室", "3年 C組", "視聴覚室"]
 # Balance against recorded footsteps; avoid amplifying already-loud scare vocals.
-const INTERACTION_GAIN := {"locked":9.0,"door_track":7.0,"latch":6.0,"close":7.0,"drawer_slide":7.0,"cabinet_hinge":7.0,"bag_fabric":7.0,"case_latch":7.0,"paper_lift":8.0,"paper_flip":8.0,"photo_handle":8.0,"shelf_track":6.0,"lock_turn":7.0,"shackle_release":7.0,"key":5.0,"unlock":5.0,"code_tick":10.0,"creak":5.0,"quiet_knocks":5.0}
+const INTERACTION_GAIN := {"locked":9.0,"door_track":7.0,"latch":6.0,"close":7.0,"drawer_slide":7.0,"cabinet_hinge":7.0,"bag_fabric":7.0,"case_latch":7.0,"paper_lift":8.0,"paper_flip":8.0,"photo_handle":8.0,"shelf_track":6.0,"lock_turn":7.0,"shackle_release":7.0,"key":5.0,"unlock":5.0,"code_tick":10.0,"creak":5.0,"quiet_knocks":5.0,"staff_knocks":5.0}
 var ending: Control
 var ending_started := false
 var hardware=preload("res://scripts/school_hardware.gd").new()
@@ -69,6 +69,8 @@ var target := Vector3.ZERO
 var last_seen := Vector3.ZERO
 var ai_state := "roam"
 var state_time := 0.0
+var lost_sight := 0.0
+var visual_notice := 0.0
 var repath := 0.0
 var stuck_time := 0.0
 var previous_enemy := Vector3.ZERO
@@ -81,6 +83,9 @@ var checkpoint := Vector3(15.46,0,2.7)
 var pain_triggered := false
 var capture_ghost: AudioStreamPlayer
 var capture_scream_started:=false
+var capture_blink_started:=false
+var objective_age:=0.0
+var objective_text:=""
 var exit_panels: Array[MeshInstance3D] = []
 var clock := 0.0
 var breath: AudioStreamPlayer3D
@@ -165,9 +170,7 @@ func _ready() -> void:
 	breath.max_distance = 23
 	breath.unit_size = 3
 	enemy.add_child(breath)
-	breath.finished.connect(func():
-		if mode=="playing" and ai_state=="chase": breath.play())
-	breath.play()
+	# Creature vocals are discrete local events, never a permanent breathing bed.
 	menu_camera = Camera3D.new()
 	menu_camera.position = Vector3(10,1.65,10)
 	add_child(menu_camera)
@@ -296,7 +299,7 @@ func setup_audio() -> void:
 		room.wet = .16
 		room.dry = .92
 		AudioServer.add_bus_effect(AudioServer.get_bus_index("Ghost"),room)
-	for clip_name in ["ambience","hum","creak","step","hover","press","key","unlock","locked","door","breath","chase","capture","menu_music","chime","school_bell","classroom","run_step","pant","giggle","scream","latch","close","capture_v2","player_pain","quiet_knocks"]:
+	for clip_name in ["ambience","hum","creak","step","hover","press","key","unlock","locked","door","breath","chase","capture","menu_music","chime","school_bell","classroom","run_step","pant","giggle","scream","latch","close","capture_v2","player_pain","quiet_knocks","staff_knocks"]:
 		sounds[clip_name] = load("res://assets/audio/%s.wav" % clip_name)
 	# Warm short interaction resources once, outside movement and puzzle input.
 	for clip_name in ["door_track","shelf_track","drawer_slide","cabinet_hinge","bag_fabric","case_latch","paper_lift","paper_flip","photo_handle","lock_turn","shackle_release","code_tick"]:
@@ -310,6 +313,8 @@ func setup_audio() -> void:
 	sounds.sakiko_humming = load("res://assets/audio/sakiko_humming.ogg")
 	sounds.sakiko_scream = load("res://assets/audio/sakiko_scream.ogg")
 	sounds.sakiko_laugh = load("res://assets/audio/sakiko_laugh.ogg")
+	sounds.capture_shriek=load("res://assets/audio/sakiko_capture_shriek.wav")
+	sounds.chase_shriek=load("res://assets/audio/sakiko_chase_shriek.wav")
 	capture_ghost=AudioStreamPlayer.new()
 	capture_ghost.bus="CreatureDry"
 	add_child(capture_ghost)
@@ -385,12 +390,13 @@ func footstep(running: bool) -> void:
 	audio.bus="PlayerSFX"
 	player_steps=player_steps.filter(func(weak): return weak.get_ref()!=null)
 	player_steps.append(weakref(audio))
-	if progression.hunt_enabled and grace<=0 and ai_state!="chase" and progression.encounters_controller.pressure_cooldown<=0:
-		var reach: float=8.0 if running else 3.2
+	if progression.hunt_enabled and grace<=0 and ai_state!="chase":
+		var reach: float=5.5 if running else 2.0
 		var origin: Vector3=player.position+Vector3(0,1.2,0)
 		if not clear_line(enemy.position,origin): reach*=.4
 		if absf(enemy.position.y-origin.y)<1.8 and enemy.position.distance_to(origin)<reach:
 			last_seen=player.position+Vector3(0,1.5,0)
+			lost_sight=0
 			ai_state="investigate"
 			state_time=0
 			navigate(last_seen)
@@ -415,7 +421,7 @@ func contact_surface() -> String:
 func persist_voice_flags() -> void:
 	if checkpoint_state.is_empty(): return
 	checkpoint_state.voice=player_voice.snapshot()
-	var saved:=FileAccess.open("user://checkpoint.save",FileAccess.WRITE)
+	var saved:=FileAccess.open("user://checkpoint-flow-v5.save",FileAccess.WRITE)
 	if saved: saved.store_var(checkpoint_state); saved.close()
 
 func make_materials() -> void:
@@ -624,11 +630,15 @@ func fit_door_tracks(d: Dictionary) -> void:
 func walkable(p: Vector3) -> bool:
 	return layout.allowed_position(p)
 
-func build_navigation() -> void:
+func build_navigation(clearance:=.86) -> void:
 	nav.clear()
 	nav_lookup.clear()
 	nav_blocked.clear()
 	var bounds: Array[AABB]=obstacles.duplicate()
+	if progression and progression.story_puzzles.flags.get("middle_section_active",false) and not progression.story_puzzles.flags.get("east_landing_unbolted",false):
+		bounds.append(AABB(Vector3(47.7,4.2,17.85),Vector3(.6,2.72,2.3)))
+	if progression and progression.story_puzzles.flags.get("bolted",false):
+		bounds.append(AABB(Vector3(27.8,0,7.5),Vector3(2.4,2.7,.7)))
 	for dynamic in get_tree().get_nodes_in_group("moving_obstruction"):
 		for mesh in dynamic.find_children("*","MeshInstance3D",true,false):
 			if mesh.get_child_count()>0: bounds.append(mesh.global_transform*mesh.get_aabb())
@@ -636,7 +646,7 @@ func build_navigation() -> void:
 		var floor_y: float=level*4.2
 		for obstacle in bounds:
 			if obstacle.position.y>floor_y+2.5 or obstacle.end.y<floor_y+.35: continue
-			var a: AABB=obstacle.grow(.86)
+			var a: AABB=obstacle.grow(clearance)
 			for x in range(ceili(a.position.x*2),floori(a.end.x*2)+1):
 				for z in range(ceili(a.position.z*2),floori(a.end.z*2)+1): nav_blocked[Vector3i(x,z,level)]=true
 		for x in range(0,113):
@@ -685,9 +695,12 @@ func build_gui() -> void:
 	interaction_hints = preload("res://scripts/interaction_hints.gd").new()
 	interaction_hints.game = self
 	gui.add_child(interaction_hints)
-	hud = text_label("",20)
-	hud.position = Vector2(38,28)
-	prompt = text_label("",19)
+	hud = text_label("",16)
+	hud.add_theme_font_override("font",serif)
+	hud.add_theme_color_override("font_color",Color("a6aaa2"))
+	hud.position = Vector2(32,26)
+	prompt = text_label("",18)
+	prompt.add_theme_font_override("font",serif)
 	prompt.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	prompt.offset_left=-290
 	prompt.offset_right=290
@@ -792,13 +805,15 @@ func panel_stack(title: String, subtitle: String) -> VBoxContainer:
 	reveal_panel.call_deferred(v)
 	return v
 
-func reveal_panel(content: Control) -> void:
+func reveal_panel(content: Variant) -> void:
+	if not is_instance_valid(content): return
 	await get_tree().process_frame
 	await get_tree().process_frame
 	if not is_instance_valid(content) or not content.is_inside_tree(): return
 	create_tween().tween_property(content,"modulate:a",1.0,.10)
 
 func show_main_menu() -> void:
+	load_saved_checkpoint()
 	if hum: hum.stop()
 	if is_instance_valid(ending): ending.queue_free()
 	ending = null
@@ -851,7 +866,12 @@ func show_main_menu() -> void:
 	navbox.anchor_bottom = .88
 	navbox.add_theme_constant_override("separation",9)
 	menu.add_child(navbox)
-	var first := button("PLAY",play_intro,navbox)
+	var first: Button
+	if not checkpoint_state.is_empty():
+		navbox.anchor_top=.46
+		first=button("CONTINUE",return_to_checkpoint,navbox)
+		button("PLAY",play_intro,navbox)
+	else: first=button("PLAY",play_intro,navbox)
 	button("OPTIONS",func(): options_return="menu"; show_options(),navbox)
 	button("CREATOR",show_credits,navbox)
 	button("EXIT",quit_game,navbox)
@@ -937,6 +957,7 @@ func update_menu_indicator() -> void:
 func _notification(what: int) -> void:
 	if what==NOTIFICATION_WM_CLOSE_REQUEST: quit_game(); return
 	if what in [NOTIFICATION_APPLICATION_FOCUS_OUT,NOTIFICATION_WM_WINDOW_FOCUS_OUT]:
+		if is_instance_valid(progression) and is_instance_valid(progression.story_puzzles): progression.story_puzzles.stop_crank()
 		# A scripted benchmark must not silently turn into a pause-menu workload.
 		if "--profile-route" in OS.get_cmdline_user_args(): return
 		input_focused=false
@@ -965,6 +986,7 @@ func play_intro() -> void:
 	progression.begin_intro()
 
 func start_game() -> void:
+	backup_legacy_save()
 	if is_instance_valid(ending): ending.queue_free()
 	ending = null
 	ending_started = false
@@ -1011,6 +1033,8 @@ func start_game() -> void:
 	previous_enemy = enemy.position
 	ai_state = "roam"
 	state_time = 0
+	lost_sight=0
+	visual_notice=0
 	repath = 0
 	stuck_time = 0
 	path.clear()
@@ -1028,6 +1052,7 @@ func start_game() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	mode = "playing"
 	create_tween().tween_property(curtain,"modulate:a",0.0,.7)
+	save_checkpoint("start")
 
 func make_physical_key(pos: Vector3) -> Node3D:
 	var root := Node3D.new()
@@ -1077,9 +1102,9 @@ func interactable(fresh:=false) -> Dictionary:
 		centre+=d.node.global_basis.z*.08*signf((player.global_position-centre).dot(d.node.global_basis.z))
 		candidates.append({"type":"door","door":d,"point":centre})
 	var best: Dictionary={}
-	var alignment:=.96
+	var alignment:=.89
 	for item in candidates:
-		if not target_visible(item.point,1.85 if item.type=="door" else 1.65,.96): continue
+		if not target_visible(item.point,2.5 if item.type=="evidence" else (1.85 if item.type=="door" else 1.65),.90 if item.type=="evidence" else .96): continue
 		var diff: Vector3=item.point-player.camera.global_position
 		var score: float=(-player.camera.global_basis.z).dot(diff.normalized())
 		if score>alignment:
@@ -1094,56 +1119,18 @@ func interact() -> void:
 	var it := interactable(true)
 	if it.is_empty(): return
 	match it.type:
-		"key":
-			if it.node.get_meta("collected",false): return
-			it.node.set_meta("collected",true)
-			it.node.visible = false
-			collected += 1
-
-			progression.staff_completion()
-			if int(it.node.get_meta("lock_index",0))>=2: progression.encounters_controller.phase=4
-			player_voice.progress()
-			save_checkpoint("key"+str(int(it.node.get_meta("lock_index",collected-1))+1))
-			sound("key",-14)
 		"door": toggle_door(it.door)
-		"exit":
-			progression.discovered = true
-			player_voice.request("P02")
-			var released_one:=false
-			for i in range(4):
-				if keys[i].get_meta("collected",false) and not hardware.released[i]:
-					hardware.release(i)
-					released_one=true
-					break
-			if released_one or hardware.busy:
-				if not checkpoint_state.is_empty(): checkpoint_state.locks=hardware.released.duplicate()
-				return
-			if hardware.released.has(false):
-				world_sound("locked",layout.EXIT_TARGET,-19)
-				toast("Locked.",2)
-			elif not exit_open:
-				exit_open = true
-				if not checkpoint_state.is_empty(): checkpoint_state.exit_open=true; persist_voice_flags()
-				sound("unlock",-13)
-				for i in range(exit_panels.size()):
-					var tw := create_tween()
-					tw.tween_property(exit_panels[i],"position:z",progression.exit_origins[i].z+(-1.3 if i==0 else 1.3),.7)
-					progression.story_puzzles.tweens.append(tw)
+		"exit": progression.story_puzzles.try_exit()
 		_: progression.interact(it)
 
 func toggle_door(d: Dictionary, force_open := false) -> void:
-	if d.get("locked",false):
-		if force_open: return
-		var requirement: String=d.get("requirement","")
-		if requirement=="upper" and not progression.story_puzzles.utility_inventory.has("upper"): player_voice.request("P03")
-		if not progression.story_puzzles.utility_inventory.has(requirement):
-			if clock>=float(d.get("feedback_until",-1)):
-				d.feedback_until=clock+.5
-				toast("Locked.",2)
-				world_sound("locked",d.origin+Vector3(0,1.0,0),-19)
-			return
-		d.locked=false
-		world_sound("lock_turn",d.origin+Vector3(0,1.0,0),-14)
+	if not progression.story_puzzles.can_open(d):
+		if not force_open and clock>=float(d.get("feedback_until",-1)):
+			d.feedback_until=clock+.5
+			toast("Latched.",2)
+			world_sound("locked",d.origin+Vector3(0,1.0,0),-19)
+		return
+	d.locked=false
 	if d.busy or (force_open and d.open): return
 	if d.open and not force_open:
 		var local: Vector3=d.node.to_local(player.global_position)
@@ -1155,10 +1142,10 @@ func toggle_door(d: Dictionary, force_open := false) -> void:
 	d.tween = create_tween()
 	if is_instance_valid(d.get("motion_audio")): d.motion_audio.stop(); d.motion_audio.queue_free()
 	world_sound("latch",d.origin+Vector3(0,1.0,0),-17)
-	d.motion_audio=world_sound("door_track",d.origin+Vector3(0,1.2,0),-17 if force_open else -12,.65)
+	d.motion_audio=world_sound("door_track",d.origin+Vector3(0,1.2,0),-17 if force_open else -12,1.2)
 	for i in range(2):
 		var closed_x: float=-.5 if i==0 else .5
-		d.tween.parallel().tween_property(d.panels[i],"position:x",float(d.slide_direction)*1.55 if d.open else closed_x,.65)
+		d.tween.parallel().tween_property(d.panels[i],"position:x",float(d.slide_direction)*1.55 if d.open else closed_x,1.2 if force_open else .65)
 
 	d.tween.chain().tween_callback(func():
 		d.busy = false
@@ -1176,9 +1163,8 @@ func clear_line(a: Vector3,b: Vector3) -> bool:
 	return get_world_3d().direct_space_state.intersect_ray(q).is_empty()
 
 func flashlight_exposure() -> bool:
-	if not player.lamp.visible: return false
-	var diff: Vector3 = enemy.position-player.camera.global_position
-	return diff.length()<Tuning.FLASHLIGHT_RANGE and (-player.camera.global_basis.z).dot(diff.normalized())>Tuning.FLASHLIGHT_DOT and clear_line(player.camera.global_position,enemy.position)
+	# Illumination only. No hidden location beacon or unreliable light-attraction rule.
+	return false
 
 func sees_player() -> bool:
 	var diff: Vector3 = player.position+Vector3(0,1.3,0)-enemy.position
@@ -1186,7 +1172,7 @@ func sees_player() -> bool:
 	if distance>Tuning.FLASHLIGHT_RANGE: return false
 	var flat := Vector3(diff.x,0,diff.z).normalized()
 	var normal_sight := distance<Tuning.DETECTION_RANGE and (distance<3 or (-enemy.global_basis.z).dot(flat)>.38)
-	return (normal_sight or flashlight_exposure()) and clear_line(enemy.position,player.position+Vector3(0,1.3,0))
+	return normal_sight and clear_line(enemy.position,player.position+Vector3(0,1.3,0))
 
 func _input(event: InputEvent) -> void:
 	if is_instance_valid(studio_intro):
@@ -1204,6 +1190,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif mode=="paused": resume_game()
 
 func show_pause() -> void:
+	progression.story_puzzles.stop_crank()
 	mode = "paused"
 	var v := panel_stack("PAUSED","WASD move  ·  Shift run  ·  E interact  ·  F light  ·  J journal")
 	button("RESUME",resume_game,v).grab_focus()
@@ -1225,7 +1212,7 @@ func resume_game() -> void:
 
 func victory() -> void:
 	if player_voice: player_voice.flush()
-	if ending_started or mode!="playing" or collected!=4: return
+	if ending_started or mode!="playing" or collected!=1: return
 	ending_started = true
 	mode = "ending"
 	breath.stop()
@@ -1249,6 +1236,7 @@ func victory() -> void:
 	gui.add_child(ending)
 
 func capture() -> void:
+	progression.story_puzzles.stop_crank()
 	if hum: hum.stop()
 	if mode!="playing": return
 	player.cancel_movement()
@@ -1260,6 +1248,7 @@ func capture() -> void:
 	capture_time = 0
 	pain_triggered = false
 	capture_scream_started=false
+	capture_blink_started=false
 	var env: Environment = world.get_child(0).environment
 	env.background_mode = Environment.BG_COLOR
 	env.background_color = Color.BLACK
@@ -1276,17 +1265,22 @@ func capture() -> void:
 	hum.volume_db = -40
 	scare_head.visible = true
 	scare_head.scare = 0
+	scare_head.capture_pose=true
+	scare_head.capture_jaw=0
+	scare_head.capture_age=0
+	scare_head.blink_time=-1
+	scare_head.face_material.set_shader_parameter("blink",0)
 	scare_camera.current = true
 	scare_camera.rotation = Vector3.ZERO
 	scare_head.position = Vector3(0,-40,-3.5)
 	sound("capture",-15)
 	progression.cry.stop()
 	progression.voice.stop()
-	capture_ghost.stream=sounds.sakiko_humming
-	capture_ghost.pitch_scale=.82
+	capture_ghost.stream=load("res://assets/audio/sakiko_capture_breath.wav")
+	capture_ghost.pitch_scale=1.0
 	capture_ghost.volume_db=-15
-	capture_ghost.play()
-	film.material.set_shader_parameter("trauma",.8)
+	capture_ghost.stop()
+	film.material.set_shader_parameter("trauma",0)
 
 func death_screen() -> void:
 	mode = "dead"
@@ -1306,39 +1300,57 @@ func _physics_process(delta: float) -> void:
 	if exit_open and player.position.x< -.75 and player.position.y<1 and absf(player.position.z-12)<1.0:
 		victory()
 		return
-	if not progression.hunt_enabled or progression.story_puzzles.shelf_moving: return
+	if not progression.hunt_enabled: return
+	if progression.encounters_controller.retreating:
+		if sees_player():
+			progression.encounters_controller.retreating=false
+			path.clear()
+		else: return
 	grace -= delta
 	state_time += delta
 	repath -= delta
 	enemy.pursuing = ai_state=="chase"
-	var sees := grace<=0 and sees_player()
+	var visible_now := grace<=0 and sees_player()
+	var notice_duration:=.15 if enemy.position.distance_to(player.camera.global_position)<3 else 1.0
+	visual_notice=clampf(visual_notice+(delta/notice_duration if visible_now else -delta*2),0,1)
+	var sees := visible_now and (ai_state=="chase" or visual_notice>=1)
+	if sees: lost_sight=0
+	elif ai_state in ["chase","investigate","search"]: lost_sight+=delta
+	if lost_sight>=9:
+		lost_sight=0
+		progression.encounters_controller.disengage()
+		return
 	if sees:
 		last_seen = player.position+Vector3(0,1.5,0)
 		if ai_state!="chase":
 			ai_state = "chase"
+			progression.story_puzzles.flags.detected_once=true
 			progression.spotted()
 		state_time = 0
 	elif ai_state=="chase" and state_time>1.1:
 		ai_state = "investigate"
 		state_time = 0
 		navigate(last_seen)
-	if ai_state=="chase" and repath<=0:
+	if ai_state in ["presence","middle_approach"] and path.is_empty():
+		ai_state="roam"
+		progression.encounters_controller.pressure_cooldown=12
+	if ai_state in ["chase","approach"] and repath<=0:
 		navigate(last_seen)
 		repath = .45
-	if ai_state=="roam" and (path.is_empty() or state_time>22):
+	if ai_state in ["roam","withdraw"] and (path.is_empty() or state_time>22):
+		ai_state="roam"
+		# The director rests; she remains physical and can still see/hear nearby players.
+		if progression.encounters_controller.pressure_cooldown>0: return
 		var points: Array=layout.PATROL
-		if progression.encounters_controller.pressure_cooldown>0:
-			points=points.filter(func(point): return point.distance_to(player.position+Vector3(0,1.5,0))>12)
 		navigate(points[randi()%points.size()])
 		state_time = 0
-	if ai_state=="investigate" and (path.is_empty() or state_time>24):
+	if ai_state in ["investigate","approach"] and (path.is_empty() or state_time>8):
 		ai_state = "search"
 		state_time = 0
 	if ai_state=="search":
 		enemy.rotate_y(delta*.6)
-		if state_time>4.5:
-			ai_state = "roam"
-			path.clear()
+		if state_time>7:
+			progression.encounters_controller.disengage()
 	else:
 		if not path.is_empty():
 			waypoint = path[0]
@@ -1348,19 +1360,21 @@ func _physics_process(delta: float) -> void:
 				var direction := offset.normalized()
 				var speed := Tuning.CHASE_SPEED if ai_state=="chase" else 1.45
 				if ai_state=="investigate": speed = 2.2
+				if ai_state=="approach" or progression.encounters_controller.approach_time>0: speed = 1.45
 				enemy.velocity = enemy.velocity.move_toward(direction*speed,delta*12)
 				var yaw := atan2(-direction.x,-direction.z)
 				enemy.rotation.y = lerp_angle(enemy.rotation.y,yaw,delta*5)
-				enemy.move_and_slide()
-	for d in doors:
-		if absf(enemy.position.y-d.origin.y-1.5)<1.0 and Vector2(enemy.position.x-d.origin.x,enemy.position.z-d.origin.z).length()<2.8: toggle_door(d,true)
+				var waiting:=false
+				for d in doors:
+					if absf(enemy.position.y-d.origin.y-1.5)<1.0 and Vector2(enemy.position.x-d.origin.x,enemy.position.z-d.origin.z).length()<2.0 and (d.busy or not d.open) and absf(d.node.to_local(waypoint).x)<1.0 and d.node.to_local(enemy.position).z*d.node.to_local(waypoint).z<=.03:
+						waiting=true
+						if not d.busy: toggle_door(d,true)
+				if not waiting: enemy.move_and_slide()
 	if enemy.position.distance_to(previous_enemy)<delta*.12 and not path.is_empty(): stuck_time += delta
 	else: stuck_time = 0
 	previous_enemy = enemy.position
 	if stuck_time>2:
-		# Recover by replanning; only snap a few centimetres to the nearest valid cell.
-		var nearest := nav.get_point_position(nav.get_closest_point(enemy.position))
-		if enemy.position.distance_to(nearest)<1.0: enemy.position = nearest
+		# Recover by replanning; never move through a real closed door.
 		navigate(target)
 		stuck_time = 0
 	if grace<=0 and enemy.position.distance_to(player.position+Vector3(0,1.4,0))<1.25 and clear_line(enemy.position,player.position+Vector3(0,1.4,0)): capture()
@@ -1370,15 +1384,17 @@ func _process(delta: float) -> void:
 	if mode=="menu": update_menu_indicator()
 	if music:
 		music.volume_db = lerpf(music.volume_db,-18.0 if mode=="menu" else -65.0,minf(1,delta*1.8))
-		var story_quiet: bool = mode in ["ending","credits"] or (mode=="intro" and progression.intro_time<129)
+		var story_quiet: bool = mode in ["ending","credits","capture"] or (mode=="intro" and progression.intro_time<129)
 		ambient.volume_db = -80 if story_quiet else lerpf(ambient.volume_db,0.0 if mode=="playing" else -22.0,minf(1,delta*2))
-		hum.volume_db = -80 if story_quiet else lerpf(hum.volume_db,-23.0,minf(1,delta*2))
+		hum.volume_db = -80 # Building ambience carries the quiet sections.
 	var dialogue_active: bool=progression and (progression.story_puzzles.recording.playing or (mode=="intro" and expansion.time<125))
 	if dialogue_active:
 		ambient.volume_db-=minf(4,delta*12)
 		music.volume_db-=minf(4,delta*12)
+	if mode=="playing" and progression.cry.playing:
+		ambient.volume_db=minf(ambient.volume_db,-8.0)
 	if mode=="playing" and ai_state=="chase" and enemy.visible:
-		if not breath.playing: breath.play()
+		pass # Detection cry already supplies the discrete creature vocal.
 	else: breath.stop()
 	if film: film.material.set_shader_parameter("reduced",settings.reduced)
 	if mode=="menu":
@@ -1388,6 +1404,12 @@ func _process(delta: float) -> void:
 		if mode!="intro": lights[2].light_energy = float(lights[2].get_meta("night_energy",.055))*(1.0 if sin(clock*1.7)>-.95 else .16)
 	if mode=="playing":
 		hud.text = progression.objective()
+		if hud.text!=objective_text:
+			objective_text=hud.text
+			objective_age=0
+		objective_age+=delta
+		hud.modulate.a=lerpf(1.0,.40,smoothstep(7,10,objective_age))
+		if progression.encounters_controller.reveal_time>=0 and not progression.encounters_controller.reveal_finished: hud.modulate.a=0
 		var it := interactable()
 		prompt.text = ""
 		if not it.is_empty():
@@ -1397,122 +1419,125 @@ func _process(delta: float) -> void:
 				"exit": prompt.text = "E  -  Escape" if exit_open else "E  -  Try entrance"
 				"evidence","portrait": prompt.text = "E — Inspect"
 				"container": prompt.text = "E — Open"
-				_: prompt.text = "E — Interact"
+				_: prompt.text = str(it.get("label","E — Interact"))
 		message_time -= delta
 		message.modulate.a = clampf(message_time,0,1)
 	if mode=="capture":
-		capture_time += delta
-		var t := capture_time
-		if t>=.35 and not capture_scream_started:
+		capture_time+=delta
+		var t:=capture_time
+		scare_head.capture_age=t
+		if t>=.3 and t<.3+delta: capture_ghost.play()
+		if t>=.48 and not capture_blink_started:
+			capture_blink_started=true
+			scare_head.blink(.32)
+		if t>=1.2 and not capture_scream_started:
 			capture_scream_started=true
 			capture_ghost.stop()
-			capture_ghost.stream=sounds.sakiko_scream
-			capture_ghost.volume_db=-9
+			capture_ghost.stream=sounds.capture_shriek
+			capture_ghost.pitch_scale=1.0
+			capture_ghost.volume_db=-2
 			capture_ghost.play()
-		if t>.90 and t<1.08: capture_ghost.volume_db=lerpf(-9,-60,(t-.90)/.18)
-		if t>=1.08: capture_ghost.stop()
-		var lunge := smoothstep(.40,.80,t)
-		scare_head.position.z = lerpf(-3.5,-2.08,lunge)
-		scare_head.scare = clampf((t-.35)*4.8,0,1.35)
-		scare_head.rotation.z = -.07+sin(t*53)*.014*exp(-t*4)
-		# Stop outside the mouth and cut before the camera crosses the face.
-		var swallow := smoothstep(.65,1.18,t)
-		scare_camera.position = Vector3(0,lerpf(-40,-40.63,swallow),lerpf(0,-.55,swallow))
-		scare_camera.fov = lerpf(72,86,swallow)
-		scare_camera.look_at(Vector3(0,lerpf(-40.05,-40.63,smoothstep(.40,.80,t)),-2.6))
+		var lunge:=smoothstep(1.2,2.4,t)
+		scare_head.position.z=lerpf(-3.5,-2.08,lunge)
+		scare_head.capture_jaw=.32*smoothstep(1.2,2.4,t)
+		scare_head.scare=smoothstep(1.2,2.0,t)
+		scare_head.rotation.z=lerpf(0,-.055,smoothstep(.3,1.2,t))
+		var swallow:=smoothstep(2.4,3.08,t)
+		scare_camera.position=Vector3(0,lerpf(-40,-41.0,swallow),lerpf(0,-.52,swallow))
+		scare_camera.fov=lerpf(72,82,swallow)
+		scare_camera.look_at(Vector3(0,lerpf(-40.05,-41.0,smoothstep(1.2,2.9,t)),-2.6))
 		if settings.shake and not settings.reduced:
-			scare_camera.rotation.z = sin(t*61)*.022*exp(-t*5)
-			scare_camera.position.x = sin(t*83)*.018*exp(-t*6)
-		curtain.modulate.a = clampf((t-1.10)/.12,0,1)
-		if t>=1.22 and not pain_triggered:
-			pain_triggered = true
-			sound("player_pain",-8)
-		if t>1.85: death_screen()
+			var jolt:=maxf(0,1-absf(t-2.52)/.11)
+			scare_camera.rotation.z=jolt*.035
+		curtain.modulate.a=smoothstep(2.92,3.12,t)
+		if t>3.2: capture_ghost.volume_db=lerpf(-2,-60,smoothstep(3.2,3.85,t))
+		if t>=3.9:
+			capture_ghost.stop()
+			death_screen()
 
-const SAFE_CHECKPOINTS: Dictionary={"key1":Vector3(27.7,0,6.9),"key2":Vector3(10,4.2,29.8),"tape":Vector3(44,4.2,5.5),"key3":Vector3(43.6,0,3.4),"key4":Vector3(26,4.2,29.2)}
+const SAFE_CHECKPOINTS: Dictionary={"start":Vector3(15.46,0,2.7),"CP1":Vector3(29,0,6.3),"CP2":Vector3(10,4.2,25),"CP3":Vector3(46,4.2,25),"CP4":Vector3(44,0,5.5),"CP5":Vector3(27,0,5.5),"CP6":Vector3(45,4.2,32),"MIDDLE_SHUTTER":Vector3(13.0,4.2,9.5),"MIDDLE_FAR":Vector3(46,4.2,10)}
+
+func load_saved_checkpoint() -> void:
+	if not checkpoint_state.is_empty(): return
+	var path: String="user://checkpoint-flow-v5.save"
+	if not FileAccess.file_exists(path): path="user://checkpoint-flow-v4.save"
+	if not FileAccess.file_exists(path): return
+	var saved:=FileAccess.open(path,FileAccess.READ)
+	if not saved: return
+	var data: Variant=saved.get_var(false)
+	saved.close()
+	if data is Dictionary and data.get("version",0)==4:
+		DirAccess.copy_absolute(ProjectSettings.globalize_path(path),ProjectSettings.globalize_path("user://checkpoint.pre-middle-v4-%d.save" % int(Time.get_unix_time_from_system())))
+		data=migrate_middle_save(data)
+	if not data is Dictionary or data.get("version",0)!=5: return
+	if not SAFE_CHECKPOINTS.has(data.get("id","")) or not data.get("flow") is Dictionary: return
+	if not data.get("doors") is Array or data.doors.size()!=doors.size(): return
+	if not data.get("encounters") is Dictionary or not data.get("locks") is Array: return
+	checkpoint_state=data
+	if path.ends_with("v4.save"): persist_voice_flags()
+
+func migrate_middle_save(old: Dictionary) -> Dictionary:
+	var data: Dictionary=old.duplicate(true)
+	var flags: Dictionary=data.flow.flags
+	var has_key: bool=flags.get("key",false)
+	var tape_done: bool=flags.get("tape_done",false)
+	flags.middle_section_active=tape_done
+	flags.shutter_progress=1.0 if has_key else 0.0
+	flags.shutter_open=has_key
+	flags.east_landing_unbolted=has_key
+	flags.south_shortcut_released=has_key
+	if has_key:
+		data.flow.stage=8
+		data.id="CP6"
+		data.position=SAFE_CHECKPOINTS.CP6
+	elif flags.get("escape_done",false):
+		data.flow.stage=6
+		data.id="CP5"
+		data.position=SAFE_CHECKPOINTS.CP5
+	if data.doors.size()==doors.size()-1: data.doors.append({"open":false})
+	data.version=5
+	return data
+
+func backup_legacy_save() -> void:
+	if not FileAccess.file_exists("user://checkpoint.save"): return
+	var backup_path: String=ProjectSettings.globalize_path("user://checkpoint.pre-flow-%d.save" % int(Time.get_unix_time_from_system()))
+	DirAccess.copy_absolute(ProjectSettings.globalize_path("user://checkpoint.save"),backup_path)
+	# Keep the original as well. New runs use a separate versioned filename.
 
 func save_checkpoint(id: String) -> void:
 	checkpoint_id=id
 	checkpoint=SAFE_CHECKPOINTS.get(id,layout.NIGHT)
-	var p: Node=progression.story_puzzles
-	var container_states: Dictionary={}
-	for name in p.containers: container_states[name]=p.containers[name].open
 	var door_states: Array=[]
-	for d in doors: door_states.append({"open":d.open,"locked":d.locked})
-	var key_states: Array=[]
-	for key in keys: key_states.append(key.get_meta("collected",false))
-	checkpoint_state={"version":2,"id":id,"position":checkpoint,"containers":container_states,"doors":door_states,"keys":key_states,"utility":p.utility_inventory.duplicate(true),"utility_taken":p.utility_taken.duplicate(true),"service":p.service_taken,"solved":p.solved.duplicate(),"evidence":progression.evidence.collected.duplicate(),"shelf":p.opened,"brake":p.brake,"power":p.power,"played":p.played,"inserted":p.inserted,"tape_done":p.tape_done,"locks":hardware.released.duplicate(),"exit_open":exit_open,"encounters":progression.encounters_controller.snapshot(),"hunt":progression.hunt_enabled,"discovered":progression.discovered,"voice":player_voice.snapshot()}
-	var save:=FileAccess.open("user://checkpoint.save",FileAccess.WRITE)
-	if save: save.store_var(checkpoint_state); save.close()
+	for d in doors: door_states.append({"open":d.open})
+	checkpoint_state={"version":5,"id":id,"position":checkpoint,"flow":progression.story_puzzles.snapshot(),"doors":door_states,"locks":hardware.released.duplicate(),"exit_open":exit_open,"encounters":progression.encounters_controller.snapshot(),"voice":player_voice.snapshot()}
+	var saved:=FileAccess.open("user://checkpoint-flow-v5.save",FileAccess.WRITE)
+	if saved: saved.store_var(checkpoint_state); saved.close()
 
 func return_to_checkpoint() -> void:
-	stop_movement_audio()
-	if checkpoint_state.is_empty() and FileAccess.file_exists("user://checkpoint.save"):
-		var saved:=FileAccess.open("user://checkpoint.save",FileAccess.READ)
-		checkpoint_state=saved.get_var()
-	if checkpoint_state.is_empty(): return
+	progression.story_puzzles.stop_crank()
+	if checkpoint_state.is_empty() or checkpoint_state.get("version",0)!=5: return
 	var data: Dictionary=checkpoint_state.duplicate(true)
-	var p: Node=progression.story_puzzles
-	for tw in p.tweens:
-		if tw and tw.is_valid(): tw.kill()
-	p.tweens.clear()
-	p.recording.stop()
-	p.recording_time=-1
-	p.utility_inventory=data.utility.duplicate(true)
-	p.utility_taken=data.utility_taken.duplicate(true)
-	p.service_taken=data.service
-	p.service_key.visible=not data.service and data.containers.service_drawer
-	p.rehearsal_taken=p.utility_taken.get("rehearsal_U08",false)
-	p.power=data.power
-	p.played=data.played
-	p.inserted=data.inserted
-	p.tape_done=data.tape_done
-	p.brake=data.brake
-	p.opened=data.shelf
-	p.shelf_moving=false
-	p.shelf.position=p.shelf_origin+Vector3(-1.9 if p.opened else 0,0,0)
-	p.release_lever.rotation.z=.6 if p.brake else 0.0
-	p.power_lever.rotation.z=0.0 if p.power else .5
-	p.evidence_models.maintenance.visible=p.opened
-	for name in p.containers:
-		var c: Dictionary=p.containers[name]
-		c.open=data.containers[name]
-		c.busy=false
-		c.hinge.position=c.origin
-		c.hinge.rotation=Vector3.ZERO
-		if c.open:
-			if c.kind=="drawer": c.hinge.position.z-=.6
-			elif c.kind=="cabinet": c.hinge.rotation.y=PI*.63
-			else: c.hinge.rotation.x=PI*.65
-		for content in c.contents: content.visible=c.open
-	for name in p.utility_nodes:
-		if p.utility_taken.get(name,false): p.utility_nodes[name].hide()
-	p.solved.assign(data.solved)
-	progression.evidence.collected.assign(data.evidence)
-	collected=0
-	for i in range(4):
-		keys[i].set_meta("collected",data.keys[i])
-		keys[i].visible=not data.keys[i] and p.solved[i]
-		if data.keys[i]: collected+=1
+	stop_movement_audio()
+	capture_ghost.stop()
+	for d in doors:
+		if d.has("tween") and d.tween: d.tween.kill()
+		d.busy=false
+	progression.story_puzzles.restore(data.flow)
 	for i in range(doors.size()):
 		var d: Dictionary=doors[i]
 		if d.has("tween") and d.tween: d.tween.kill()
 		d.busy=false
 		d.open=data.doors[i].open
-		d.locked=data.doors[i].locked
 		for n in range(2): d.panels[n].position.x=d.slide_direction*1.55 if d.open else (-.5 if n==0 else .5)
 	hardware.reset()
 	hardware.released.assign(data.locks)
-	for i in range(4): hardware.locks[i].lock.visible=not hardware.released[i]
+	hardware.locks[0].lock.visible=not hardware.released[0]
 	exit_open=data.exit_open
 	for i in range(exit_panels.size()): exit_panels[i].position=progression.exit_origins[i]+Vector3(0,0,(-1.3 if i==0 else 1.3) if exit_open else 0)
 	progression.encounters_controller.restore(data.encounters)
-	progression.hunt_enabled=data.hunt
-	progression.discovered=data.discovered
+	player_voice.restore(data.get("voice",{}))
 	checkpoint=data.position
 	checkpoint_id=data.id
-	player_voice.restore(data.get("voice",{}))
-	mode="playing"
 	player.reset()
 	player.position=checkpoint
 	player.rotation=Vector3.ZERO
@@ -1521,20 +1546,23 @@ func return_to_checkpoint() -> void:
 	player.camera.current=true
 	player.lamp.show()
 	player.velocity=Vector3.ZERO
-	# Opposite-floor anchor is occluded by a slab and connected to real stairs.
-	enemy.position=Vector3(46,1.5,26) if checkpoint.y>2 else Vector3(10,5.7,10)
+	enemy.position=Vector3(51.4,1.5,17.8) if checkpoint_id=="CP4" else Vector3(13,1.5,7)
+	if progression.story_puzzles.stage>=7: enemy.position=Vector3(10,5.7,19)
 	enemy.velocity=Vector3.ZERO
-	enemy.visible=data.hunt
+	enemy.visible=progression.story_puzzles.flags.get("escape_done",false)
 	enemy.pursuing=false
 	enemy.detection=0
 	scare_head.hide()
+	scare_head.capture_pose=false
 	path.clear()
 	ai_state="roam"
 	state_time=0
+	lost_sight=0
+	visual_notice=0
 	stuck_time=0
-	grace=8
+	grace=0
 	repath=0
-	progression.scream_cooldown=8
+	progression.scream_cooldown=0
 	progression.cry.stop()
 	progression.giggle.stop()
 	progression.voice.stop()
@@ -1544,7 +1572,6 @@ func return_to_checkpoint() -> void:
 	expansion.set_day(false)
 	build_navigation()
 	resume_game()
-	toast("Checkpoint restored. Completed tasks retained.",4)
 
 func watch_doors() -> void:
 	for d in doors:
@@ -1557,7 +1584,7 @@ func watch_doors() -> void:
 			toggle_door(d,true)
 
 func verify_game() -> void:
-	var suite = load("res://tests/corrections_integration.gd").new()
+	var suite = load("res://tests/flow_check.gd").new()
 	await suite.run(self)
 
 func bugfix_check() -> void:
@@ -1631,7 +1658,7 @@ func presentation_audit() -> void:
 func render_audit() -> void:
 	await polish_render_audit()
 
-func quit_game() -> void:
+func quit_game(exit_code:=0) -> void:
 	if mode=="quitting": return
 	mode = "quitting"
 	for p in find_children("*","AudioStreamPlayer",true,false):
@@ -1643,7 +1670,7 @@ func quit_game() -> void:
 	sounds.clear()
 	await get_tree().process_frame
 	await get_tree().process_frame
-	get_tree().quit()
+	get_tree().quit(exit_code)
 
 func interaction_audit() -> void:
 	start_game()

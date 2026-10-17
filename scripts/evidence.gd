@@ -61,6 +61,7 @@ func make_document(id: String) -> Node3D:
 
 func inspect(id: String) -> void:
 	if game.mode!="playing" or not entries.has(id): return
+	if inspection_unsafe(): return
 	if not collected.has(id): collected.append(id)
 	current=id
 	game.world_sound("paper_lift",game.player.camera.global_position,-16)
@@ -71,6 +72,15 @@ func inspect(id: String) -> void:
 	show_entry()
 
 func show_entry() -> void:
+	if current=="recording":
+		game.mode="document"
+		var stack: VBoxContainer=game.panel_stack(entries[current].title,"")
+		var transcript: Label=game.text_label(entries[current].body,23,stack)
+		transcript.add_theme_font_override("font",game.serif)
+		transcript.custom_minimum_size=Vector2(700,280)
+		transcript.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		game.button("CLOSE",close,stack).grab_focus()
+		return
 	preview_generation += 1
 	var generation := preview_generation
 	game.mode="document"
@@ -79,7 +89,7 @@ func show_entry() -> void:
 	var stack: VBoxContainer=game.panel_stack("","Drag to tilt  ·  Scroll to zoom")
 	stack.custom_minimum_size.x=760
 	var container:=TextureRect.new()
-	var preview_height:=clampf(game.get_viewport().get_visible_rect().size.y-210,300,620)
+	var preview_height:=clampf(game.get_viewport().get_visible_rect().size.y-(310 if current=="display" else 210),220,520)
 	container.custom_minimum_size=Vector2(760,preview_height)
 	container.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	container.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -122,10 +132,11 @@ func show_entry() -> void:
 			if event.button_index==MOUSE_BUTTON_WHEEL_UP: zoom=maxf(.65,zoom-.08)
 			if event.button_index==MOUSE_BUTTON_WHEEL_DOWN: zoom=minf(1.35,zoom+.08)
 			update_preview())
-	sleeve_button=game.button("TAKE KEY",func():
-		game.progression.story_puzzles.collect_utility("compartment")
-		refresh_sleeve_action(),stack)
-	refresh_sleeve_action()
+	if current=="display":
+		var caption: Label=game.text_label(data.body,20,stack)
+		caption.add_theme_font_override("font",game.serif)
+		caption.custom_minimum_size.x=700
+		caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	var row:=HBoxContainer.new()
 	row.alignment=BoxContainer.ALIGNMENT_CENTER
 	stack.add_child(row)
@@ -163,6 +174,8 @@ func close() -> void:
 	preview_generation += 1
 	if not journal_open:
 		game.player_voice.document_closed(current,reverse)
+		if current=="original" and game.progression.story_puzzles.stage==2:
+			game.progression.story_puzzles.flags.original=true
 		if current=="display": game.progression.portrait_closed()
 	preview=null
 	preview_view=null
@@ -176,13 +189,24 @@ func reopen(id: String) -> void:
 	journal_open=false
 	show_entry()
 
+func inspection_unsafe() -> bool:
+	if game.progression.hunt_enabled and game.ai_state in ["chase","investigate","search","approach"]:
+		game.toast("I can't stop here.",2)
+		return true
+	return false
+
 func show_journal() -> void:
+	if inspection_unsafe(): return
 	preview_generation += 1
 	preview_view=null
 	game.mode="document"
 	journal_open=true
 	preview=null
-	var stack: VBoxContainer=game.panel_stack("EVIDENCE","Collected notes and photographs")
+	var flow: Node=game.progression.story_puzzles
+	var stack: VBoxContainer=game.panel_stack("JOURNAL",flow.objective())
+	var inventory: String="Entrance key" if flow.flags.get("key",false) else "—"
+	game.text_label("Key  [ "+inventory+" ]",18,stack)
+	if flow.flags.get("cassette",false): game.text_label("Festival cassette"+(" — in AV deck" if flow.flags.get("inserted",false) else ""),18,stack)
 	var scroll:=ScrollContainer.new()
 	scroll.custom_minimum_size=Vector2(680,340)
 	stack.add_child(scroll)
@@ -205,4 +229,4 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func refresh_sleeve_action() -> void:
-	if is_instance_valid(sleeve_button): sleeve_button.visible=current=="display" and reverse and not game.progression.story_puzzles.utility_taken.get("compartment",false)
+	pass

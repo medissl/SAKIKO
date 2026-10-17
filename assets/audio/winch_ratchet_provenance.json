@@ -1,0 +1,17 @@
+{
+  "file": "winch_ratchet.wav",
+  "sources": [
+    {
+      "file": "lock_turn.wav",
+      "sha256": "096f477aee0dd20dc9738cfdba717654828c64843a8afb3749ada934e1f456b4"
+    },
+    {
+      "file": "latch.wav",
+      "sha256": "8463574f7a6e939d701dc668800dd32ac643703347bf8d3655a2baba506e1af5"
+    }
+  ],
+  "license": "CC0-1.0; original sources/creators in recorded_foley.json",
+  "processing": "Natural-pitch recorded lock and shackle contacts, four restrained ratchet pulses per second, mono 24 kHz PCM16, boundary fades, peak 0.65. No oscillator or bitcrushing.",
+  "sha256": "4bbc845e828fe8dbe526f629aa2bfedb13a148e296aa8c9a0e331e1c37992b4e",
+  "perceptual_audition_verified": false
+}

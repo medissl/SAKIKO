@@ -1,5 +1,5 @@
 extends Node
-## Stable puzzle IDs and physical containment for the final two-floor school.
+## Retired four-key implementation, retained recoverably. Runtime uses story_flow.gd.
 var game: Node
 var evidence: Node
 var targets: Array[Dictionary]=[]

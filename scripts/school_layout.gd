@@ -259,7 +259,7 @@ func build_lobby(level: int) -> void:
 		var lintel:=block(Vector3(0,3.02,12),Vector3(.16,.36,2),"wall",root)
 		placement.solid(lintel.global_transform*lintel.get_aabb())
 		for i in [-1,1]: game.exit_panels.append(block(Vector3(-.02,1.4,12+i*.5),Vector3(.10,2.8,.98),"metal",root))
-		for i in range(4): game.entrance_locks.append(game.hardware.padlock(Vector3(.13,.65+i*.35,12),PI/2,root,i))
+		game.entrance_locks.append(game.hardware.padlock(Vector3(.13,1.4,12),PI/2,root,0))
 		plaque("玄関 / EXIT",Vector3(.13,3.0,12),PI/2,root,1.5)
 		var outside:=unit("ExteriorEscapeArea")
 		block(Vector3(-2,-.28,12),Vector3(4,.3,4),"floor",outside)
@@ -280,6 +280,7 @@ func build_stairs(east: bool) -> void:
 		if x==8:
 			for zspan in [[16.0,18.0],[20.0,24.0]]:
 				var wall:=block(Vector3(core_x(x,east),3.7,(zspan[0]+zspan[1])/2),Vector3(.16,7.4,zspan[1]-zspan[0]),"wall",root)
+				game.obstacles.append(wall.global_transform*wall.get_aabb())
 
 			block(Vector3(core_x(x,east),3.7,19),Vector3(.16,1,2),"wall",root)
 		else:
@@ -354,7 +355,7 @@ func build_stairs(east: bool) -> void:
 			paper.size=Vector2(.44,.62)
 			poster.mesh=paper
 			var mat:=StandardMaterial3D.new()
-			mat.albedo_texture=load("res://assets/story/documents/rendered/program.png")
+			mat.albedo_color=Color("a29a80")
 			mat.roughness=1
 			mat.metallic_specular=0
 			poster.material_override=mat
@@ -511,8 +512,8 @@ func build_furniture() -> void:
 		plaque("文化祭 / 1999",Vector3(x,2.05,35.43),PI,exhibition,1.2)
 	var rehearsal: Node3D=room_roots.U08
 	# The student bag rests on an ordinary storage bench, not attached legs.
-	block(Vector3(45.6,.425,34.4),Vector3(1.8,.07,.65),"wood",rehearsal)
-	for x in [44.9,46.3]: block(Vector3(x,.195,34.4),Vector3(.06,.39,.55),"metal",rehearsal)
+	block(Vector3(44.4,.425,33.4),Vector3(1.8,.07,.65),"wood",rehearsal)
+	for x in [43.7,45.1]: block(Vector3(x,.195,33.4),Vector3(.06,.39,.55),"metal",rehearsal)
 	for x in [41.0,47.1]:
 		var outer: float=-1 if x<44 else 1
 		block(Vector3(x+outer*.28,1.1,33.2),Vector3(.04,2.2,3.6),"wood",rehearsal)

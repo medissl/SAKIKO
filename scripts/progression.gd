@@ -53,7 +53,7 @@ func build(g: Node) -> void:
 	evidence = preload("res://scripts/evidence.gd").new()
 	add_child(evidence)
 	evidence.build(game)
-	story_puzzles = preload("res://scripts/festival_puzzles.gd").new()
+	story_puzzles = preload("res://scripts/story_flow.gd").new()
 	add_child(story_puzzles)
 	story_puzzles.build(game,evidence)
 	for p in game.exit_panels: exit_origins.append(p.position)
@@ -158,12 +158,12 @@ func setup_ui() -> void:
 	voice.max_distance = 28
 	game.world.add_child(voice)
 	cry = AudioStreamPlayer3D.new()
-	cry.stream = game.sounds.sakiko_scream
+	cry.stream = game.sounds.chase_shriek
 	cry.bus = "Ghost"
-	cry.unit_size = 8
+	cry.unit_size = 10
 	cry.max_distance = 34
-	cry.pitch_scale = .82
-	cry.volume_db = -7
+	cry.pitch_scale = 1.0
+	cry.volume_db = 0
 	game.enemy.add_child(cry)
 
 func reset() -> void:
@@ -189,8 +189,7 @@ func reset() -> void:
 	finish_intro(false)
 
 func objective() -> String:
-	if discovered or game.collected>0: return "Keys  %d / 4" % game.collected
-	return ""
+	return story_puzzles.objective()
 
 func targeted() -> Dictionary:
 	return story_puzzles.targeted()
@@ -199,7 +198,7 @@ func interact(item: Dictionary) -> void:
 	story_puzzles.interact(item)
 
 func solve(index: int) -> void:
-	story_puzzles.solve(index)
+	pass
 
 func begin_intro() -> void:
 	game.mode = "intro"
@@ -281,8 +280,6 @@ func spotted() -> void:
 	if scream_cooldown<=0:
 		voice.stop()
 		cry.play()
-		game.hum.volume_db=-34
-		game.hum.play()
 		scream_cooldown = Tuning.SCREAM_COOLDOWN
 
 func _process(delta: float) -> void:

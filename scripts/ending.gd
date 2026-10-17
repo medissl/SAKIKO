@@ -208,7 +208,7 @@ func build_credits() -> void:
 		credit_space(46)
 	credit_label("THIRD-PARTY ACKNOWLEDGMENTS",true)
 	credit_space(24)
-	for pair in [["CHARACTER SOURCE MODELS","Innerscene / MakeHuman, CC0"],["SCHOOL DESK AND CHAIR","Ethan Place / Poly Haven, CC0"],["PBR SURFACES","Poly Haven contributors, CC0"],["RECORDED GHOST VOICE","AuraVoice / Nocturnal_Vanguard, CC0"],["MALE PAIN VOCAL","HaelDB, CC0"],["MALE BREATHING","Nox_Sound, CC0"],["MENU MUSIC","brandon75689, CC0"],["UNUSED RIGGED SOURCE MODELS","Quaternius, CC0"],["ENGINE","Godot Engine contributors, MIT"]]:
+	for pair in [["CHARACTER SOURCE MODELS","Innerscene / MakeHuman, CC0"],["SCHOOL DESK AND CHAIR","Ethan Place / Poly Haven, CC0"],["PBR SURFACES","Poly Haven contributors, CC0"],["RECORDED GHOST VOICE","AuraVoice / Nocturnal_Vanguard, CC0"],["HORROR SHRIEKS","AderuMoro / Freesound, CC0"],["MALE BREATHING","Nox_Sound, CC0"],["MENU MUSIC","brandon75689, CC0"],["UNUSED RIGGED SOURCE MODELS","Quaternius, CC0"],["ENGINE","Godot Engine contributors, MIT"]]:
 		credit_label(pair[0],true)
 		credit_label(pair[1],false)
 		credit_space(34)

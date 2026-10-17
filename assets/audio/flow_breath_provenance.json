@@ -1,0 +1,18 @@
+{
+  "title": "Female Breathing Heavily (2)",
+  "author": "OwlStorm / Ashe Kirk",
+  "page": "https://freesound.org/people/OwlStorm/sounds/151215/",
+  "download": "https://cdn.freesound.org/previews/151/151215_140737-hq.mp3",
+  "license": "CC0-1.0",
+  "source_sha256": "2181745f0ca317edb08c99ca687693b99a85339378ff4047f877cdaff9f2b048",
+  "source_range": [
+    0.1,
+    1.0
+  ],
+  "file": "sakiko_capture_breath.wav",
+  "sha256": "073aa7e3579897be6eb4b0e7b0434c42d439d89a636f12f6e4efa3c8dbe43579",
+  "sample_rate": 24000,
+  "duration": 0.9,
+  "processing": "Mono, DC removal, boundary fades, resample, peak 0.72. Natural pitch. No synthesized or male layer.",
+  "physical_listening_verified": false
+}

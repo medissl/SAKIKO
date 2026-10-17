@@ -19,7 +19,7 @@ func candidates() -> Array[Dictionary]:
 			result.append({"type":"key","node":key,"point":key.global_position})
 	var small: Array[Dictionary] = []
 	for item in result:
-		if item.type in ["key","utility","service_key","rehearsal_key","evidence","fragment"]: small.append(item)
+		if item.type in ["key","cassette","exit_key","breaker","bolt","winch","landing_bolt","shortcut_latch","evidence"]: small.append(item)
 	return small
 
 func same_target(a: Dictionary,b: Dictionary) -> bool:
@@ -67,7 +67,7 @@ func _process(_delta: float) -> void:
 		# The prompt already resolved distance, occlusion and aim this frame.
 		# Only its target can receive brackets; avoid a second scene-wide scan.
 		nearby.clear()
-		if not aimed.is_empty() and aimed.type in ["key","utility","service_key","rehearsal_key","evidence","fragment"]:
+		if not aimed.is_empty() and aimed.type in ["key","cassette","exit_key","breaker","bolt","winch","landing_bolt","shortcut_latch","evidence"]:
 			nearby.append(aimed)
 		for item in nearby:
 			if not same_target(item,aimed): continue

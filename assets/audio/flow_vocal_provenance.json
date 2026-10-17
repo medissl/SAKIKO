@@ -1,0 +1,40 @@
+{
+  "source": {
+    "title": "Horror shrieks woman",
+    "author": "AderuMoro",
+    "page": "https://freesound.org/people/AderuMoro/sounds/320740/",
+    "download": "https://cdn.freesound.org/previews/320/320740_1118942-hq.mp3",
+    "license": "CC0-1.0",
+    "source_sha256": "b15ef1e000b2f2fdc97381ab4c12a659e83c12b1758cb7d9c40c72fe1e2a6fba",
+    "credit": "Horror shrieks woman by AderuMoro, Freesound 320740, CC0. Used with attribution."
+  },
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "processing": "Natural-pitch isolated female shrieks, mono, DC removal, sample-rate conversion, short boundary fades, normalized peak 0.90. No pitch alteration, bitcrushing or male layer. Capture decay controlled in game after blackout.",
+  "clips": [
+    {
+      "file": "sakiko_capture_shriek.wav",
+      "source_range": [
+        0.22,
+        3.35
+      ],
+      "sha256": "5082b95e66f30b653618c65acb4b4298677fb3a3b118099c063bb9f45ebe54af",
+      "duration": 3.13,
+      "sample_rate": 24000,
+      "peak": 0.9,
+      "rms_db": -13.482331280360134
+    },
+    {
+      "file": "sakiko_chase_shriek.wav",
+      "source_range": [
+        4.22,
+        7.94
+      ],
+      "sha256": "417087c068d9e0265f359c68f220929b4fc6ea91db5d0b928f6efbfb67a1a50a",
+      "duration": 3.72,
+      "sample_rate": 24000,
+      "peak": 0.9,
+      "rms_db": -10.537786389181317
+    }
+  ],
+  "physical_listening_verified": false
+}

@@ -36,12 +36,12 @@ Actual in-game captures, with encounters and story reveals kept out of the galle
 | Shift | Sprint |
 | E | Interact |
 | F | Flashlight |
-| J | Evidence journal |
+| J | Journal and current objective |
 | Escape | Pause / close inspection |
 | Drag / mouse wheel | Tilt / zoom inspected objects |
 | E, Space, or Escape during the lesson | Skip to the waking transition |
 
-Collected entrance keys create checkpoints for the current run. Returning to a checkpoint retains evidence and puzzle progress; restarting clears the run. Checkpoints do not persist after closing the game.
+The current source uses one entrance key and a festival cassette. Story discoveries lead the route through the school; J recalls the current objective. The upper-wing crossing includes an interruptible hand-operated shutter and connected classroom routes. Eight task checkpoints retain completed tasks when retrying, including partial shutter effort. Restarting begins a new run. Version 4 flow saves migrate to version 5 with a recoverable backup; older files remain preserved separately.
 
 ## Run from source
 

@@ -1,8 +1,9 @@
 extends RefCounted
 var game: Node
 var locks: Array[Dictionary]=[]
-var released: Array[bool]=[false,false,false,false]
+var released: Array[bool]=[false]
 var busy:=false
+var motion: Tween
 
 func tube(points: PackedVector3Array,radius: float,parent: Node3D) -> MeshInstance3D:
 	var st:=SurfaceTool.new()
@@ -56,34 +57,34 @@ func padlock(point: Vector3,yaw: float,parent: Node3D,index: int) -> Node3D:
 		curve.append(Vector3(cos(a)*.026,.064+sin(a)*.026,0))
 	curve.append(Vector3(.026,.032,0))
 	tube(curve,.006,shackle)
-	game.box(Vector3(.065,-.045,.003),Vector3(.047,.035,.004),"paper",false,lock)
-	var tag: Label3D=game.label3(["I","II","III","IV"][index],Vector3.ZERO,0,.0005,Color("42382d"))
-	tag.reparent(lock,false)
-	tag.position=Vector3(.065,-.045,.006)
 	root.reparent(game.exit_panels[0],true)
 	locks.append({"root":root,"lock":lock,"shackle":shackle,"strap":strap,"origin":lock.position})
 	return root
 
 func reset() -> void:
-	released=[false,false,false,false]
+	if motion and motion.is_valid(): motion.kill()
+	released=[false]
 	busy=false
 	for item in locks:
 		item.lock.show()
 		item.lock.position=item.origin
 		item.shackle.position=Vector3.ZERO
+		item.strap.rotation=Vector3.ZERO
 
 func release(index: int) -> void:
 	if busy or released[index]: return
 	busy=true
 	var item: Dictionary=locks[index]
 	game.world_sound("lock_turn",item.root.global_position,-14)
-	var tw: Tween=game.create_tween()
+	motion=game.create_tween()
+	var tw: Tween=motion
 	tw.tween_property(item.shackle,"position:y",.035,.22)
 	tw.tween_callback(func(): game.world_sound("shackle_release",item.root.global_position,-16))
 	tw.tween_property(item.lock,"position",item.origin+Vector3(.08,-.18,.12),.30)
 	tw.tween_callback(func():
 		released[index]=true
 		item.lock.hide()
+		item.strap.rotation.z=1.3
 		busy=false
 		if not game.checkpoint_state.is_empty():
 			game.checkpoint_state.locks=released.duplicate()

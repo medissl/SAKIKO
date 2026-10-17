@@ -27,3 +27,6 @@ __pycache__/
 /assets/audio/festival_students.wav
 /assets/audio/festival_students.wav.import
 /assets/fonts/NotoSansJP.ttf.import
+
+# Documentation images are not runtime Godot assets.
+docs/screenshots/*.png.import

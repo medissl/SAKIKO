@@ -181,7 +181,7 @@ func dress(layout: Node) -> void:
 		wire.position.z=-.045+i*.015
 		wire.material_override=game.materials.dark
 		reel.add_child(wire)
-	cassette(Vector3(42.3,.85,1.3),rooms.G05)
+	pass # G05 deck belongs to story_flow; no second loose cassette.
 	game.hardware.tube(PackedVector3Array([Vector3(41.8,.90,1.3),Vector3(40.75,.88,1.3),Vector3(40.73,.12,1.3),Vector3(40.3,.12,1.3),Vector3(40.18,.28,1.3),Vector3(40.145,.28,1.3)]),.012,rooms.G05)
 	part(Vector3(40.105,.28,1.3),Vector3(.045,.10,.12),"paper",rooms.G05)
 	part(Vector3(40.145,.28,1.3),Vector3(.04,.035,.035),"dark",rooms.G05)
@@ -193,7 +193,7 @@ func dress(layout: Node) -> void:
 		for i in range(4): cylinder(Vector3(x-.5+i*.06,.846,31.95),.016+i*.006,.002,"chalk" if i%2 else "paper",rooms.G08)
 	trolley(Vector3(31.25,0,29.45),rooms.G08,true)
 	sink(Vector3(37.7,0,35.43),rooms.G08)
-	chart("CULTURE FESTIVAL / F-12",Vector3(29.6,1.8,29.90),PI,rooms.G08,layout,1.7)
+	chart("CULTURE FESTIVAL",Vector3(29.6,1.8,29.90),PI,rooms.G08,layout,1.7)
 	for y in [.65,1.0,1.35,1.7]:
 		part(Vector3(39.5,y,33.3),Vector3(.48,.008,2.3),"paper",rooms.G08)
 	# Scenery shapes, rolled cloth and portrait scraps leave the middle lane open.
@@ -268,7 +268,7 @@ func dress(layout: Node) -> void:
 		pennant.rotation.z=PI
 		rooms.U07.add_child(pennant)
 	# Rehearsal: folded cardigan and absent-scenery dust edges, not debris.
-	game.finishing.model("folded_cardigan",Vector3(44.95,.46,34.4),0,rooms.U08)
+	game.finishing.model("folded_cardigan",Vector3(44.4,.46,33.4),0,rooms.U08)
 	for x in [42.7,46.4]:
 		for z in [30.0,31.1]: part(Vector3(x,.003,z),Vector3(.75,.002,.025),"dark",rooms.U08)
 	chart("FESTIVAL / 1999",Vector3(47.90,1.9,29.8),-PI/2,rooms.U08,layout,.9)
@@ -303,7 +303,7 @@ func chart(text: String,point: Vector3,yaw: float,parent: Node3D,layout: Node,wi
 	for x in [-width*.44,width*.44]:
 		for y in [-.21,.21]: part(Vector3(x,y,-.025),Vector3(.012,.012,.05),"metal",root)
 	layout.text_surface(text,Vector3(0,.13,.012),0,.033,Color("343b36"),root)
-	var body: String={"CLASS DUTY / 日直":"日直 / MON - FRI\n窓・黒板を確認\nLeave the board clean.","手洗い / HAND HYGIENE":"石けん → 指の間 → 流水\nSOAP / FINGERS / RINSE\n清潔なタオル","保健室 / HEALTH RECORD":"健康記録 / DAILY CARE\nReturn clean linen to storage.\nKeep the bedside clear.","返却 / RETURNS":"返却は受付へ / RETURN TO DESK\nKeep the original order.\nDo not refile loose pages.","LAB SAFETY / EYE PROTECTION":"保護眼鏡 / EYE PROTECTION\nWash hands after practical work.\nReturn instruments dry.","WEEKLY TIMETABLE":"職員連絡 / STAFF NOTICES\nMON - FRI / DAILY HANDOVER\nReturn keys to the cabinet.","LITERATURE":"文学 / FICTION\nREADING / RETURNS","F-12 / FESTIVAL TAPES":"文化祭 / EQUIPMENT RETURNS\nStore tapes in their cases.","CULTURE FESTIVAL / F-12":"乾燥棚 / DRYING RACK\n作品は平らに / STORE FLAT","FESTIVAL / 1999":"SCENERY STORAGE / RETURN\nKeep the doorways clear."}.get(text,"掲示 / SCHOOL NOTICE\nReturn borrowed equipment.")
+	var body: String={"CLASS DUTY / 日直":"日直 / MON - FRI\n窓・黒板を確認\nLeave the board clean.","手洗い / HAND HYGIENE":"石けん → 指の間 → 流水\nSOAP / FINGERS / RINSE\n清潔なタオル","保健室 / HEALTH RECORD":"健康記録 / DAILY CARE\nReturn clean linen to storage.\nKeep the bedside clear.","返却 / RETURNS":"返却は受付へ / RETURN TO DESK\nKeep the original order.\nDo not refile loose pages.","LAB SAFETY / EYE PROTECTION":"保護眼鏡 / EYE PROTECTION\nWash hands after practical work.\nReturn instruments dry.","WEEKLY TIMETABLE":"職員連絡 / STAFF NOTICES\nMON - FRI / DAILY HANDOVER\nReturn keys to the cabinet.","LITERATURE":"文学 / FICTION\nREADING / RETURNS","F-12 / FESTIVAL TAPES":"文化祭 / EQUIPMENT RETURNS\nStore tapes in their cases.","CULTURE FESTIVAL":"乾燥棚 / DRYING RACK\n作品は平らに / STORE FLAT","FESTIVAL / 1999":"SCENERY STORAGE / RETURN\nKeep the doorways clear."}.get(text,"掲示 / SCHOOL NOTICE\nReturn borrowed equipment.")
 	if not body.begins_with("掲示 / SCHOOL NOTICE"):
 		layout.text_surface(body,Vector3(0,-.055,.013),0,.025,Color("424b40"),root)
 	var bounds: AABB=root.global_transform*AABB(Vector3(-width/2,-.25,-.01),Vector3(width,.50,.02))
